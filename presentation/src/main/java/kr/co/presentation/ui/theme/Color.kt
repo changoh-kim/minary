@@ -1,4 +1,4 @@
-package kr.co.minary.ui.theme
+package kr.co.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

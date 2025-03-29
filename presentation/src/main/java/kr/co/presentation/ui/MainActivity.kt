@@ -1,4 +1,4 @@
-package kr.co.minary
+package kr.co.presentation.ui
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import kr.co.minary.ui.theme.MinaryTheme
+import kr.co.presentation.ui.theme.MinaryTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
