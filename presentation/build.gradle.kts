@@ -2,6 +2,12 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // ksp
+    alias(libs.plugins.ksp)
+    // hilt
+    alias(libs.plugins.hilt)
+    // serialization
+    alias(libs.plugins.serialization)
 }
 
 android {
@@ -38,6 +44,20 @@ android {
 
 dependencies {
     implementation(project(":domain"))
+
+    // hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+
+    // hilt & navigation
+    implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.navigation.compose)
+
+    // SplashScreen
+    implementation(libs.androidx.core.splashscreen)
+
+    // serialization
+    implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

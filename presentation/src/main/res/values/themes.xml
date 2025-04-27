@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Minary" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Minary.Splash" parent="Theme.SplashScreen">
+        <!-- 앱 로고 설정 -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <!-- 배경 색상 -->
+        <item name="windowSplashScreenBackground">@color/white</item>
+        <!-- 지속 시간 설정 (애니메이션 끝나기 전까지 유지됨) -->
+        <item name="postSplashScreenTheme">@style/Theme.Minary</item>
+    </style>
+</resources>
