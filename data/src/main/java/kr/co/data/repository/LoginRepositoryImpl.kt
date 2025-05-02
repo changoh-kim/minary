@@ -8,7 +8,7 @@ class LoginRepositoryImpl @Inject constructor(
     private val retrofitService: RetrofitService,
 ) : LoginRepository {
 
-    override fun invoke(username: String, password: String): Result<String> {
-        return retrofitService.login(username, password)
+    override suspend fun invoke(id: String, password: String): String {
+        return retrofitService.login(id, password)
     }
 }

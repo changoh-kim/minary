@@ -59,6 +59,10 @@ dependencies {
     // serialization
     implementation(libs.kotlinx.serialization.json)
 
+    // orbit
+    implementation(libs.orbit.viewmodel)
+    implementation(libs.orbit.compose)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

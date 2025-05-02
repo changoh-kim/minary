@@ -20,6 +20,7 @@ jetbrainsKotlinJvm = "2.0.21"
 appcompat = "1.7.0"
 material = "1.12.0"
 navigationCompose = "2.8.9"
+orbit = "6.1.0"
 serialization = "2.1.20"
 
 [libraries]
@@ -47,6 +48,8 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+orbit-compose = { module = "org.orbit-mvi:orbit-compose", version.ref = "orbit" }
+orbit-viewmodel = { module = "org.orbit-mvi:orbit-viewmodel", version.ref = "orbit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
