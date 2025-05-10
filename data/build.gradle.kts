@@ -1,5 +1,3 @@
-import org.gradle.kotlin.dsl.implementation
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -9,6 +7,8 @@ plugins {
     alias(libs.plugins.hilt)
     // serialization
     alias(libs.plugins.serialization)
+    // firebase
+    alias(libs.plugins.firebase)
 }
 
 android {
@@ -53,9 +53,14 @@ dependencies {
     // datastore
     implementation(libs.androidx.datastore.preferences)
 
+    // firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics.ktx)
+    implementation(libs.firebase.auth.ktx)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.material)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

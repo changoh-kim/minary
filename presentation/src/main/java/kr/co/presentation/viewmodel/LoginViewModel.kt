@@ -3,8 +3,8 @@ package kr.co.presentation.viewmodel
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kr.co.domain.exception.AuthException
 import kr.co.domain.usecase.LoginUseCase
-import kr.co.domain.usecase.SetTokenUseCase
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.blockingIntent
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -23,13 +23,13 @@ data class LoginState(
 
 sealed class LoginSideEffect {
     object NavigateToMainScreen : LoginSideEffect() // 로그인 성공 후 메인 화면으로 이동
+    object NavigateToSignupScreen : LoginSideEffect() // 회원가입 화면으로 이동
     data class ShowMsg(val msg: String) : LoginSideEffect() // 오류 메시지 표시
 }
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
-    private val setTokenUseCase: SetTokenUseCase
 ) : ViewModel(), ContainerHost<LoginState, LoginSideEffect> {
 
     override val container = container<LoginState, LoginSideEffect>(LoginState())
@@ -46,31 +46,46 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun onNavigateToSignupScreen() = intent {
+        postSideEffect(LoginSideEffect.NavigateToSignupScreen)
+    }
+
     fun login() = intent {
+        if (state.id.isNullOrBlank()) {
+            postSideEffect(LoginSideEffect.ShowMsg("Id is empty"))
+            return@intent
+        }
+
+        if (state.password.isNullOrBlank()) {
+            postSideEffect(LoginSideEffect.ShowMsg("Password is empty"))
+            return@intent
+        }
+
         reduce {
             state.copy(isLoggingIn = true, loginError = "Unknown error") // 로그인 시도 중, 오류 메시지 초기화
         }
 
-        try {
-//            val token: String = loginUseCase(state.id, state.password)
-            val token: String = "testToken"
-            if (token.isNotBlank()) {
-                // setTokenUseCase(token)
-                postSideEffect(LoginSideEffect.NavigateToMainScreen) // 로그인 성공, 메인 화면으로 이동
-            } else {
-                reduce {
-                    state.copy(
-                        isLoggingIn = false,
-                        loginError = "Invalid credentials"
-                    ) // 로그인 실패, 오류 메시지 업데이트
-                }
-                postSideEffect(LoginSideEffect.ShowMsg("Invalid credentials")) // 오류 메시지 표시
+        val login = loginUseCase(state.id, state.password)
+        login.onSuccess {
+            reduce {
+                state.copy(isLoggingIn = false, loginError = "Unknown error")
             }
-        } catch (e: Exception) {
+
+            postSideEffect(LoginSideEffect.NavigateToMainScreen)
+        }.onFailure { error ->
             reduce {
                 state.copy(isLoggingIn = false, loginError = "Login failed") // 로그인 실패, 오류 메시지 업데이트
             }
-            postSideEffect(LoginSideEffect.ShowMsg("Login failed")) // 오류 메시지 표시
+
+            when (error) {
+                is AuthException.SignInUserIsNullException -> {
+                    postSideEffect(LoginSideEffect.ShowMsg("Login failed"))
+                }
+
+                else -> {
+                    postSideEffect(LoginSideEffect.ShowMsg(error.message.toString()))
+                }
+            }
         }
     }
 }

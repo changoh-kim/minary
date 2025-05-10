@@ -1,12 +1,13 @@
 package kr.co.domain.usecase
 
-import kr.co.domain.repository.SignUpRepository
+import kr.co.domain.model.User
+import kr.co.domain.repository.AuthRepository
 import javax.inject.Inject
 
 class SignUpUseCase @Inject constructor(
-    private val signUpRepository: SignUpRepository,
+    private val authRepository: AuthRepository,
 ) {
-    suspend operator fun invoke(id: String, userName: String,password: String) : Boolean {
-        return signUpRepository(id, userName, password)
+    suspend operator fun invoke(email: String, password: String, userName: String) : Result<User> {
+        return authRepository.createAccount(email, password, userName)
     }
 }

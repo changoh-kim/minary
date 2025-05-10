@@ -1,12 +1,13 @@
 package kr.co.domain.usecase
 
-import kr.co.domain.repository.AuthTokenRepository
+import kr.co.domain.model.User
+import kr.co.domain.repository.AuthRepository
 import javax.inject.Inject
 
 class IsUserLoggedInUseCase @Inject constructor(
-    private val authTokenRepository: AuthTokenRepository
+    private val authRepository: AuthRepository,
 ) {
-    suspend operator fun invoke(): Boolean {
-        return authTokenRepository.getToken().isNotBlank()
+    suspend operator fun invoke(): Result<User> {
+        return authRepository.getCurrentUser()
     }
 }

@@ -53,7 +53,10 @@ fun LoginScreen(
     loginViewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is LoginSideEffect.NavigateToMainScreen -> onNavigateToMainScreen()
-            is LoginSideEffect.ShowMsg -> scope.launch { snackbarHostState.showSnackbar(sideEffect.msg) }
+            is LoginSideEffect.NavigateToSignupScreen -> onNavigateToSignupScreen()
+            is LoginSideEffect.ShowMsg -> scope.launch {
+                snackbarHostState.showSnackbar(sideEffect.msg)
+            }
         }
     }
 
@@ -68,13 +71,14 @@ fun LoginScreen(
         onPasswordChanged = loginViewModel::onPasswordChanged,
         login = loginViewModel::login,
 
-        onNavigateToSignupScreen = onNavigateToSignupScreen
+        onNavigateToSignupScreen = loginViewModel::onNavigateToSignupScreen
     )
 }
 
 @Composable
 private fun LoginScreen(
     snackbarHostState: SnackbarHostState,
+
     id: String,
     password: String,
     isLoggingIn: Boolean,
@@ -82,6 +86,7 @@ private fun LoginScreen(
     onIdChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     login: () -> Unit,
+
     onNavigateToSignupScreen: () -> Unit,
 ) {
     Scaffold(

@@ -1,9 +1,14 @@
 package kr.co.minary
 
 import android.app.Application
-import android.content.Context
-import androidx.lifecycle.ViewModelProvider.NewInstanceFactory.Companion.instance
+import com.google.firebase.FirebaseApp
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class MinaryApplication : Application()
+class MinaryApplication : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+        FirebaseApp.initializeApp(this)
+    }
+}

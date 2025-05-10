@@ -11,4 +11,5 @@ plugins {
     alias(libs.plugins.hilt) apply false
     // serialization
     alias(libs.plugins.serialization) apply false
+    alias(libs.plugins.firebase) apply false
 }
