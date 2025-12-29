@@ -4,45 +4,42 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import kr.co.presentation.ui.navigation.AppRoute.Auth
-import kr.co.presentation.ui.navigation.AppRoute.Login
-import kr.co.presentation.ui.navigation.AppRoute.MainContainer
-import kr.co.presentation.ui.navigation.AppRoute.SignUp
-import kr.co.presentation.ui.navigation.AppRoute.Welcome
-import kr.co.presentation.ui.screen.login.LoginScreen
-import kr.co.presentation.ui.screen.login.SignUpScreen
-import kr.co.presentation.ui.screen.login.WelcomeScreen
+import kr.co.presentation.ui.navigation.route.AuthGraph
+import kr.co.presentation.ui.navigation.route.Login
+import kr.co.presentation.ui.navigation.route.MainGraph
+import kr.co.presentation.ui.navigation.route.SignUp
+import kr.co.presentation.ui.navigation.route.Welcome
+import kr.co.presentation.ui.screen.auth.LoginScreen
+import kr.co.presentation.ui.screen.auth.SignUpScreen
+import kr.co.presentation.ui.screen.auth.WelcomeScreen
 
 
-internal fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
-    navigation(
-        route = Auth.route,
-        startDestination = Welcome.route
-    ) {
-        composable(Welcome.route) {
+internal fun NavGraphBuilder.authNavGraph(
+    navController: NavHostController
+) {
+    navigation<AuthGraph>(startDestination = Welcome) {
+        composable<Welcome> {
             WelcomeScreen(
                 onNavigateToLoginScreen = {
-                    navController.navigate(Login.route)
+                    navController.navigate(Login)
                 }
             )
         }
-
-        composable(Login.route) {
+        composable<Login> {
             LoginScreen(
                 onNavigateToMainScreen = {
-                    navController.navigate(MainContainer.route) {
-                        popUpTo(Welcome.route) {
+                    navController.navigate(MainGraph) {
+                        popUpTo(Welcome) {
                             inclusive = true
                         }
                     }
                 },
                 onNavigateToSignupScreen = {
-                    navController.navigate(SignUp.route)
+                    navController.navigate(SignUp)
                 }
             )
         }
-
-        composable(SignUp.route) {
+        composable<SignUp> {
             SignUpScreen(
                 onNavigateToLoginScreen = {
                     navController.popBackStack()

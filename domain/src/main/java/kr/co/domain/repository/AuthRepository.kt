@@ -1,6 +1,7 @@
 package kr.co.domain.repository
 
-import kr.co.domain.model.User
+import kr.co.domain.model.auth.User
+
 
 interface AuthRepository {
     suspend fun createAccount(email: String, password: String, userName: String): Result<User>

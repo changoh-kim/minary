@@ -27,11 +27,19 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // 코드 앱 최적화.
+            isMinifyEnabled = true
+
+            // 리소스 최적화.
+            isShrinkResources = true
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // 릴리즈 빌드용 debug 사인키
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {

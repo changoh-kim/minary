@@ -12,21 +12,21 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import kr.co.presentation.ui.navigation.AppRoute.Auth
-import kr.co.presentation.ui.navigation.AppRoute.Main
 import kr.co.presentation.ui.navigation.host.RootNaveGraph
+import kr.co.presentation.ui.navigation.route.AuthGraph
+import kr.co.presentation.ui.navigation.route.MainGraph
 import kr.co.presentation.ui.theme.MinaryTheme
-import kr.co.presentation.viewmodel.MainActivitySideEffect
-import kr.co.presentation.viewmodel.MainActivityState
-import kr.co.presentation.viewmodel.MainActivityUiState
-import kr.co.presentation.viewmodel.MainViewModel
+import kr.co.presentation.viewmodel.main.MainActivitySideEffect
+import kr.co.presentation.viewmodel.main.MainActivityUiState
+import kr.co.presentation.viewmodel.main.MainActivityViewModel
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
+
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainActivityViewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -34,13 +34,13 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MinaryTheme {
-                val state: MainActivityState by mainViewModel.collectAsState()
+                val state by mainActivityViewModel.collectAsState()
                 val snackbarHostState = remember { SnackbarHostState() }
                 val scope = rememberCoroutineScope()
 
                 val navController = rememberNavController()
 
-                mainViewModel.collectSideEffect { sideEffect ->
+                mainActivityViewModel.collectSideEffect { sideEffect ->
                     when (sideEffect) {
                         is MainActivitySideEffect.ShowMsg -> scope.launch {
                             snackbarHostState.showSnackbar(
@@ -54,13 +54,13 @@ class MainActivity : ComponentActivity() {
                     is MainActivityUiState.Auth -> {
                         RootNaveGraph(
                             navController = navController,
-                            startDestination = Auth.route
+                            startDestination = AuthGraph
                         )
                     }
                     is MainActivityUiState.Main -> {
                         RootNaveGraph(
                             navController = navController,
-                            startDestination = Main.route
+                            startDestination = MainGraph
                         )
                     }
                     else -> { }

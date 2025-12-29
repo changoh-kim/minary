@@ -8,10 +8,11 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+
 private val Context.dataStore by preferencesDataStore(name = "minary_datastore")
 
 class MinaryDataStore @Inject constructor(
-    private val context: Context
+    private val context: Context,
 ) {
     companion object {
         private val KEY_TOKEN = stringPreferencesKey("token")

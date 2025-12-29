@@ -1,5 +1,6 @@
 package kr.co.domain.exception
 
+
 sealed class AuthException : Throwable() {
     object CreateUserIsNullException : AuthException()
     object SignInUserIsNullException : AuthException()

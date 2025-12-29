@@ -43,6 +43,9 @@ android {
 dependencies {
     implementation(project(":domain"))
 
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.appcompat)
+
     // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
@@ -58,8 +61,12 @@ dependencies {
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.auth.ktx)
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
+    // paging
+    implementation(libs.androidx.paging.runtime)
+    testImplementation(libs.androidx.paging.common)
+
+    // coroutines
+    implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

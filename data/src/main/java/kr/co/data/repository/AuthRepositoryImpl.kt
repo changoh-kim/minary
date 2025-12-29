@@ -1,21 +1,25 @@
 package kr.co.data.repository
 
-
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 import kr.co.domain.exception.AuthException
-import kr.co.domain.model.User
+import kr.co.domain.model.auth.User
 import kr.co.domain.repository.AuthRepository
 import javax.inject.Inject
+
 
 class AuthRepositoryImpl @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) : AuthRepository {
 
     // 회원 가입
-    override suspend fun createAccount(email: String, password: String, userName: String): Result<User> =
+    override suspend fun createAccount(
+        email: String,
+        password: String,
+        userName: String
+    ): Result<User> =
         runCatching {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val user = result.user
