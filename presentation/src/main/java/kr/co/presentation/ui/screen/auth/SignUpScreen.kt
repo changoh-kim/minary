@@ -22,11 +22,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import kr.co.presentation.R
+import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.theme.MinaryTheme
 import kr.co.presentation.viewmodel.auth.SignUpSideEffect
 import kr.co.presentation.viewmodel.auth.SignUpState
@@ -44,11 +48,13 @@ fun SignUpScreen(
     val state: SignUpState by signupViewModel.collectAsState()
     val scope = rememberCoroutineScope()
 
+    val context = LocalContext.current
+
     signupViewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is SignUpSideEffect.NavigateToLoginScreen -> onNavigateToLoginScreen()
             is SignUpSideEffect.ShowMsg -> scope.launch {
-                snackbarHostState.showSnackbar(sideEffect.msg)
+                snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
         }
     }
@@ -106,61 +112,61 @@ private fun SignUpScreen(
         ) {
             Text(
                 modifier = Modifier.padding(top = 36.dp),
-                text = "Create an account",
+                text = stringResource(R.string.create_an_account),
                 style = MaterialTheme.typography.headlineMedium
             )
 
             // Email
             Text(
                 modifier = Modifier.padding(top = 16.dp),
-                text = "Email",
+                text = stringResource(R.string.email),
                 style = MaterialTheme.typography.labelLarge
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = email,
                 onValueChange = onEmailChanged,
-                label = { Text("User Email") },
+                label = { Text(stringResource(R.string.user_email)) },
             )
 
             // User Name
             Text(
                 modifier = Modifier.padding(top = 16.dp),
-                text = "Name",
+                text = stringResource(R.string.name),
                 style = MaterialTheme.typography.labelLarge
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = userName,
                 onValueChange = onUserNameChanged,
-                label = { Text("User Name") }
+                label = { Text(stringResource(R.string.user_name)) }
             )
 
             // Password
             Text(
                 modifier = Modifier.padding(top = 16.dp),
-                text = "Password",
+                text = stringResource(R.string.password),
                 style = MaterialTheme.typography.labelLarge
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = password,
                 onValueChange = onPasswordChanged,
-                label = { Text("User Password") },
+                label = { Text(stringResource(R.string.user_password)) },
                 visualTransformation = PasswordVisualTransformation()
             )
 
             // Confirm Password
             Text(
                 modifier = Modifier.padding(top = 16.dp),
-                text = "Confirm password",
+                text = stringResource(R.string.confirm_password),
                 style = MaterialTheme.typography.labelLarge
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = confirmPassword,
                 onValueChange = onConfirmPasswordChanged,
-                label = { Text("User Confirm Password") },
+                label = { Text(stringResource(R.string.user_confirm_password)) },
                 visualTransformation = PasswordVisualTransformation()
             )
 
@@ -177,7 +183,7 @@ private fun SignUpScreen(
                 onClick = signUp
             ) {
                 Text(
-                    text = "Sign up",
+                    text = stringResource(R.string.sign_up),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
@@ -186,7 +192,7 @@ private fun SignUpScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, locale = "ko")
 @Composable
 private fun SignUpScreenPreview() {
     MinaryTheme {

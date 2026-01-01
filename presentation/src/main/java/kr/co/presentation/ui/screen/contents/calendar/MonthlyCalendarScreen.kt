@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -43,6 +42,7 @@ import kr.co.presentation.R
 import kr.co.presentation.ui.component.calendar.CalendarMonth
 import kr.co.presentation.ui.component.calendar.day.CalendarDay
 import kr.co.presentation.ui.component.calendar.day.OtherMonthDay
+import kr.co.presentation.ui.extension.stringArrayResource
 import kr.co.presentation.ui.navigation.route.Diary
 import kr.co.presentation.ui.preview.CalendarPreviewData
 import kr.co.presentation.ui.theme.MinaryTheme
@@ -192,18 +192,15 @@ fun TopBar(
                 }
         )
 
-        val context = LocalContext.current
-        val months = remember(context.resources.configuration) {
-            context.resources.getStringArray(R.array.months)
-        }
-        val monthStr = months[month - 1]
+        val months = stringArrayResource(R.array.months)
+        val monthText = months[month - 1]
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Absolute.SpaceBetween,
         ) {
             Text(
-                text = monthStr,
+                text = monthText,
                 modifier = Modifier.padding(16.dp)
             )
 
@@ -219,10 +216,7 @@ fun TopBar(
 
 @Composable
 fun Weekday() {
-    val context = LocalContext.current
-    val weekday = remember(context.resources.configuration) {
-        context.resources.getStringArray(R.array.weekdays)
-    }
+    val weekday = stringArrayResource(R.array.weekdays)
 
     Row(
         modifier = Modifier

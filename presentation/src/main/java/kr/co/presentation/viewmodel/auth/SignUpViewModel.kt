@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.domain.exception.AuthException
 import kr.co.domain.usecase.SignUpUseCase
+import kr.co.presentation.R
+import kr.co.presentation.ui.model.UiText
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.blockingIntent
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -25,7 +27,7 @@ data class SignUpState(
 sealed class SignUpSideEffect {
     object NavigateToLoginScreen : SignUpSideEffect()
 
-    data class ShowMsg(val msg: String) : SignUpSideEffect()
+    data class ShowMsg(val uiText: UiText) : SignUpSideEffect()
 }
 
 @HiltViewModel
@@ -53,27 +55,27 @@ class SignUpViewModel @Inject constructor(
 
     fun signUp() = intent {
         if (state.email.isNullOrBlank()) {
-            postSideEffect(SignUpSideEffect.ShowMsg("Email is empty"))
+            postSideEffect(SignUpSideEffect.ShowMsg(UiText.StringResource(R.string.email_is_empty)))
             return@intent
         }
 
         if (state.userName.isNullOrBlank()) {
-            postSideEffect(SignUpSideEffect.ShowMsg("Name is empty"))
+            postSideEffect(SignUpSideEffect.ShowMsg(UiText.StringResource(R.string.name_is_empty)))
             return@intent
         }
 
         if (state.password.isNullOrBlank()) {
-            postSideEffect(SignUpSideEffect.ShowMsg("Password is empty"))
+            postSideEffect(SignUpSideEffect.ShowMsg(UiText.StringResource(R.string.password_is_empty)))
             return@intent
         }
 
         if (state.confirmPassword.isNullOrBlank()) {
-            postSideEffect(SignUpSideEffect.ShowMsg("Confirm password is empty"))
+            postSideEffect(SignUpSideEffect.ShowMsg(UiText.StringResource(R.string.confirm_password_is_empty)))
             return@intent
         }
 
         if (state.password != state.confirmPassword) {
-            postSideEffect(SignUpSideEffect.ShowMsg("Password does not match"))
+            postSideEffect(SignUpSideEffect.ShowMsg(UiText.StringResource(R.string.password_not_match)))
             return@intent
         }
 
@@ -83,11 +85,16 @@ class SignUpViewModel @Inject constructor(
         }.onFailure { error ->
             when (error) {
                 is AuthException.CreateUserIsNullException -> {
-                    postSideEffect(SignUpSideEffect.ShowMsg("Create account failed"))
+                    postSideEffect(SignUpSideEffect.ShowMsg(UiText.StringResource(R.string.account_creation_failed)))
                 }
 
                 else -> {
-                    postSideEffect(SignUpSideEffect.ShowMsg(error.message.toString()))
+                    val uiText = error.message
+                        .takeIf { !it.isNullOrBlank()
+                        }?.let { UiText.DynamicString(it)
+                        }?: UiText.StringResource(R.string.unknown_error)
+
+                    postSideEffect(SignUpSideEffect.ShowMsg(uiText))
                 }
             }
         }

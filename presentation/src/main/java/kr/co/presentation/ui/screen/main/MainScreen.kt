@@ -20,11 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import kr.co.presentation.R
 import kr.co.presentation.ui.navigation.extensions.navigateIfNotCurrent
 import kr.co.presentation.ui.navigation.host.MainNavHost
 import kr.co.presentation.ui.navigation.item.NavigationItem
@@ -46,10 +48,10 @@ fun MainScreen(
 
     val navigationItems = remember {
         listOf(
-            NavigationItem("calendar", CalendarGraph, Icons.Filled.DateRange),
-            NavigationItem("dashboard", DashBoardGraph, Icons.Filled.Star),
-            NavigationItem("store", StoreGraph, Icons.Filled.ShoppingCart),
-            NavigationItem("setting", SettingGraph, Icons.Filled.Settings),
+            NavigationItem(R.string.calendar, CalendarGraph, Icons.Filled.DateRange),
+            NavigationItem(R.string.dashboard, DashBoardGraph, Icons.Filled.Star),
+            NavigationItem(R.string.store, StoreGraph, Icons.Filled.ShoppingCart),
+            NavigationItem(R.string.setting, SettingGraph, Icons.Filled.Settings),
         )
     }
 
@@ -62,8 +64,8 @@ fun MainScreen(
                     val currentDestination = navBackStackEntry?.destination
 
                     NavigationBarItem(
-                        icon = { Icon(item.icon, item.label) },
-                        label = { Text(item.label) },
+                        icon = { Icon(item.icon, stringResource(item.labelResId)) },
+                        label = { Text(stringResource(item.labelResId)) },
                         selected = (
                                 currentDestination?.hierarchy?.any {
                                     it.hasRoute(item.route::class)
@@ -89,12 +91,15 @@ fun MainScreen(
 @Composable
 private fun TopBar() {
     TopAppBar(
-        title = { Text("Minary") },
+        title = { Text(stringResource(R.string.app_name)) },
         actions = {
             IconButton(
                 onClick = {}
             ) {
-                Icon(Icons.Filled.Search, contentDescription = "Search")
+                Icon(
+                    Icons.Filled.Search,
+                    contentDescription = stringResource(R.string.search)
+                )
             }
         }
     )
