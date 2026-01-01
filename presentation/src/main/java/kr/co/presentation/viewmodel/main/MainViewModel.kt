@@ -2,6 +2,7 @@ package kr.co.presentation.viewmodel.main
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kr.co.presentation.ui.model.UiText
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.viewmodel.container
 import javax.annotation.concurrent.Immutable
@@ -14,7 +15,7 @@ data class MainState(
 )
 
 sealed class MainSideEffect {
-    data class ShowMsg(val msg: String) : MainSideEffect()
+    data class ShowMsg(val uiText: UiText) : MainSideEffect()
 }
 
 @HiltViewModel

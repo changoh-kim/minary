@@ -8,10 +8,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.navigation.host.RootNaveGraph
 import kr.co.presentation.ui.navigation.route.AuthGraph
 import kr.co.presentation.ui.navigation.route.MainGraph
@@ -40,12 +42,12 @@ class MainActivity : ComponentActivity() {
 
                 val navController = rememberNavController()
 
+                val context = LocalContext.current
+
                 mainActivityViewModel.collectSideEffect { sideEffect ->
                     when (sideEffect) {
                         is MainActivitySideEffect.ShowMsg -> scope.launch {
-                            snackbarHostState.showSnackbar(
-                                sideEffect.msg
-                            )
+                            snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
                         }
                     }
                 }

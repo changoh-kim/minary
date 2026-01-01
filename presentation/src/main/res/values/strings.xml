@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Minary</string>
     <string-array name="weekdays">
         <item>Sun</item>
         <item>Mon</item>
@@ -27,6 +28,35 @@
     <string name="month_title">%1$d</string>
     <string name="you_cannot_select_a_date_after_today">You cannot select a date after today</string>
     <string name="welcome">Welcome</string>
-    <string name="your_mind_diary">\"Your mind diary\"</string>
-    <string name="login">\"Login\"</string>
+    <string name="your_mind_diary">Your mind diary</string>
+    <string name="login">Login</string>
+    <string name="id">Id</string>
+    <string name="user_id">User Id</string>
+    <string name="password">Password</string>
+    <string name="user_password">User Password</string>
+    <string name="btn_login">Login</string>
+    <string name="do_not_have_an_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign up</string>
+    <string name="create_an_account">Create an account</string>
+    <string name="email">Email</string>
+    <string name="user_email">User Email</string>
+    <string name="name">Name</string>
+    <string name="user_name">User Name</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="user_confirm_password">User Confirm Password</string>
+    <string name="search">Search</string>
+    <string name="calendar">calendar</string>
+    <string name="dashboard">dashboard</string>
+    <string name="store">store</string>
+    <string name="setting">setting</string>
+    <string name="id_is_empty">Id is empty</string>
+    <string name="password_is_empty">Password is empty</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="login_failed">Login failed</string>
+    <string name="email_is_empty">Email is empty</string>
+    <string name="name_is_empty">Name is empty</string>
+    <string name="confirm_password_is_empty">Confirm password is empty</string>
+    <string name="password_not_match">Password does not match</string>
+    <string name="account_creation_failed">Account creation failed</string>
+    <string name="current_user_is_null">Current user is null</string>
 </resources>

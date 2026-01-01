@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Minary</string>
     <string-array name="weekdays">
         <item>일</item>
         <item>월</item>
@@ -27,6 +28,35 @@
     <string name="month_title">%1$d월</string>
     <string name="you_cannot_select_a_date_after_today">오늘 이후에는 날짜를 선택할 수 없습니다</string>
     <string name="welcome">환영합니다.</string>
-    <string name="your_mind_diary">당신의 마음속 다이어리를 작성해보세요.</string>
+    <string name="your_mind_diary">당신의 마음속 다이어리를 작성해보세요</string>
     <string name="login">로그인</string>
+    <string name="id">아이디</string>
+    <string name="user_id">사용자 아이디</string>
+    <string name="password">비밀번호</string>
+    <string name="user_password">사용자 비밀번호</string>
+    <string name="btn_login">로그인</string>
+    <string name="do_not_have_an_account">계정이 없으신가요?</string>
+    <string name="sign_up">회원가입</string>
+    <string name="create_an_account">계정 만들기</string>
+    <string name="email">이메일</string>
+    <string name="user_email">사용자 이메일</string>
+    <string name="name">이름</string>
+    <string name="user_name">사용자 이름</string>
+    <string name="confirm_password">비밀번호 확인</string>
+    <string name="user_confirm_password">사용자 비밀번호 확인</string>
+    <string name="search">검색</string>
+    <string name="calendar">달력</string>
+    <string name="dashboard">대시보드</string>
+    <string name="store">상점</string>
+    <string name="setting">환경설정</string>
+    <string name="id_is_empty">아이디가 비어 있습니다</string>
+    <string name="password_is_empty">패스워드가 비어 있습니다</string>
+    <string name="unknown_error">알 수 없는 오류</string>
+    <string name="login_failed">로그인 실패</string>
+    <string name="email_is_empty">이메일이 비어 있습니다</string>
+    <string name="name_is_empty">이름이 비어 있습니다</string>
+    <string name="confirm_password_is_empty">비밀번호 확인칸이 비어 있습니다</string>
+    <string name="password_not_match">비밀번호가 일치하지 않습니다</string>
+    <string name="account_creation_failed">계정 생성에 실패했습니다</string>
+    <string name="current_user_is_null">없는 사용자입니다</string>
 </resources>

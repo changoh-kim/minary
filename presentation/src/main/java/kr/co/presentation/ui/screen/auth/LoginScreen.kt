@@ -28,11 +28,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import kr.co.presentation.R
+import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.theme.MinaryTheme
 import kr.co.presentation.viewmodel.auth.LoginSideEffect
 import kr.co.presentation.viewmodel.auth.LoginState
@@ -51,12 +55,14 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    val context = LocalContext.current
+
     loginViewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is LoginSideEffect.NavigateToMainScreen -> onNavigateToMainScreen()
             is LoginSideEffect.NavigateToSignupScreen -> onNavigateToSignupScreen()
             is LoginSideEffect.ShowMsg -> scope.launch {
-                snackbarHostState.showSnackbar(sideEffect.msg)
+                snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
         }
     }
@@ -119,7 +125,7 @@ private fun LoginScreen(
             ) {
                 Text(
                     modifier = Modifier.padding(top = 36.dp),
-                    text = "Log in",
+                    text = stringResource(R.string.login),
                     style = MaterialTheme.typography.headlineMedium
                 )
 
@@ -128,14 +134,14 @@ private fun LoginScreen(
                 // Id
                 Text(
                     modifier = Modifier.padding(top = 16.dp),
-                    text = "Id",
+                    text = stringResource(R.string.id),
                     style = MaterialTheme.typography.labelLarge
                 )
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = id,
                     onValueChange = onIdChanged,
-                    label = { Text("User Id") }
+                    label = { Text(stringResource(R.string.user_id)) }
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -143,14 +149,14 @@ private fun LoginScreen(
                 // Password
                 Text(
                     modifier = Modifier.padding(top = 16.dp),
-                    text = "Password",
+                    text = stringResource(R.string.password),
                     style = MaterialTheme.typography.labelLarge
                 )
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = password,
                     onValueChange = onPasswordChanged,
-                    label = { Text("User Password") },
+                    label = { Text(stringResource(R.string.user_password)) },
                     visualTransformation = PasswordVisualTransformation()
                 )
 
@@ -172,7 +178,7 @@ private fun LoginScreen(
                         ),
                         onClick = login
                     ) {
-                        Text(text = "Login")
+                        Text(text = stringResource(R.string.btn_login))
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
@@ -183,8 +189,12 @@ private fun LoginScreen(
                             .padding(bottom = 24.dp)
                             .clickable(onClick = onNavigateToSignupScreen)
                     ) {
-                        Text(text = "Don't have an account?")
-                        Text(text = " Sign up ", color = MaterialTheme.colorScheme.primary)
+                        Text(text = stringResource(R.string.do_not_have_an_account))
+                        Text(
+                            text = stringResource(R.string.sign_up),
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(start = 4.dp)
+                        )
                     }
                 }
             }
@@ -192,7 +202,7 @@ private fun LoginScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, locale = "ko")
 @Composable
 private fun LoginScreenPreview() {
     MinaryTheme {

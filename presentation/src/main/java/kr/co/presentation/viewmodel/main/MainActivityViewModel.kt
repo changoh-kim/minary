@@ -6,6 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.domain.exception.AuthException
 import kr.co.domain.model.auth.User
 import kr.co.domain.usecase.IsUserLoggedInUseCase
+import kr.co.presentation.R
+import kr.co.presentation.ui.model.UiText
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -28,7 +30,7 @@ data class MainActivityState(
 
 @Immutable
 sealed class MainActivitySideEffect {
-    data class ShowMsg(val msg: String) : MainActivitySideEffect() // 오류 메시지 표시
+    data class ShowMsg(val uiText: UiText) : MainActivitySideEffect() // 오류 메시지 표시
 }
 
 @HiltViewModel
@@ -55,10 +57,15 @@ class MainActivityViewModel @Inject constructor(
 
             when(error) {
                 is AuthException.CurrentUserIsNullException -> {
-                    postSideEffect(MainActivitySideEffect.ShowMsg("Current user is null"))
+                    postSideEffect(MainActivitySideEffect.ShowMsg(UiText.StringResource(R.string.current_user_is_null)))
                 }
                 else -> {
-                    postSideEffect(MainActivitySideEffect.ShowMsg(error.message.toString()))
+                    val uiText = error.message
+                        .takeIf { !it.isNullOrBlank() }
+                        ?.let { UiText.DynamicString(it) }
+                        ?: UiText.StringResource(R.string.unknown_error)
+
+                    postSideEffect(MainActivitySideEffect.ShowMsg(uiText))
                 }
             }
         }
