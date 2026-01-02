@@ -1,6 +1,9 @@
 package kr.co.presentation.ui.screen.main
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -19,11 +22,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kr.co.presentation.R
@@ -46,6 +51,23 @@ fun MainScreen(
 ) {
     val navController = rememberNavController()
 
+    MainScreen(
+        navController = navController,
+    ) { innerPadding ->
+        MainNavHost(
+            navController = navController,
+            startDestination = CalendarGraph,
+            modifier = Modifier.padding(innerPadding),
+            onNavigateToDiaryScreen = onNavigateToDiaryScreen
+        )
+    }
+}
+
+@Composable
+private fun MainScreen(
+    navController: NavHostController = rememberNavController(),
+    content: @Composable (PaddingValues) -> Unit = {}
+) {
     val navigationItems = remember {
         listOf(
             NavigationItem(R.string.calendar, CalendarGraph, Icons.Filled.DateRange),
@@ -78,12 +100,7 @@ fun MainScreen(
             }
         }
     ) { innerPadding ->
-        MainNavHost(
-            navController = navController,
-            startDestination = CalendarGraph,
-            modifier = Modifier.padding(innerPadding),
-            onNavigateToDiaryScreen = onNavigateToDiaryScreen
-        )
+        content(innerPadding)
     }
 }
 
@@ -110,7 +127,16 @@ private fun TopBar() {
 private fun MainScreenPreview() {
     MinaryTheme {
         MainScreen(
-            onNavigateToDiaryScreen = {}
-        )
+            navController = rememberNavController()
+        ) { innerPadding ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(stringResource(R.string.preview_mode_main_content_area))
+            }
+        }
     }
 }
