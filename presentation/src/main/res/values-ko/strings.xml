@@ -59,4 +59,5 @@
     <string name="password_not_match">비밀번호가 일치하지 않습니다</string>
     <string name="account_creation_failed">계정 생성에 실패했습니다</string>
     <string name="current_user_is_null">없는 사용자입니다</string>
+    <string name="preview_mode_main_content_area">메인 화면 (미리보기 화면)</string>
 </resources>
