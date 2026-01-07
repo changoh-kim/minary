@@ -34,7 +34,7 @@ internal fun NavGraphBuilder.authNavGraph(
                         }
                     }
                 },
-                onNavigateToSignupScreen = {
+                onNavigateToSignUpScreen = {
                     navController.navigate(SignUp)
                 }
             )

@@ -14,8 +14,13 @@ data class MainState(
     val selectedItem: String = ""
 )
 
-sealed class MainSideEffect {
-    data class ShowMsg(val uiText: UiText) : MainSideEffect()
+@Immutable
+sealed interface MainSideEffect {
+    data class ShowMsg(val uiText: UiText) : MainSideEffect
+}
+
+sealed interface MainIntent {
+
 }
 
 @HiltViewModel

@@ -16,10 +16,11 @@ import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
 
-sealed class MainActivityUiState {
-    object Loading : MainActivityUiState()
-    object Auth : MainActivityUiState()
-    object Main : MainActivityUiState()
+@Immutable
+sealed interface MainActivityUiState {
+    object Loading : MainActivityUiState
+    object Auth : MainActivityUiState
+    object Main : MainActivityUiState
 }
 
 @Immutable
@@ -29,8 +30,12 @@ data class MainActivityState(
 )
 
 @Immutable
-sealed class MainActivitySideEffect {
-    data class ShowMsg(val uiText: UiText) : MainActivitySideEffect() // 오류 메시지 표시
+sealed interface MainActivitySideEffect {
+    data class ShowMsg(val uiText: UiText) : MainActivitySideEffect // 오류 메시지 표시
+}
+
+sealed interface MainActivityIntent {
+
 }
 
 @HiltViewModel
@@ -44,7 +49,7 @@ class MainActivityViewModel @Inject constructor(
         checkLogin()
     }
 
-    fun checkLogin() = intent {
+    private fun checkLogin() = intent {
         val loggedIn = isUserLoggedInUseCase()
         loggedIn.onSuccess { user ->
             reduce {

@@ -1,6 +1,7 @@
 package kr.co.presentation.ui.model
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 
 
 /**
@@ -8,6 +9,7 @@ import androidx.annotation.StringRes
  *
  * 일반 문자열과 Android 리소스 문자열을 동일한 타입으로 ViewModel에서 UI 계층으로 전달하기 위해 사용
  */
+@Immutable
 sealed interface UiText {
     /**
      * 일반 [String] 타입의 문자열을 다룰 때 사용

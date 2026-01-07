@@ -1,6 +1,5 @@
 package kr.co.presentation.ui.screen.auth
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -32,6 +31,7 @@ import kotlinx.coroutines.launch
 import kr.co.presentation.R
 import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.theme.MinaryTheme
+import kr.co.presentation.viewmodel.auth.SignUpIntent
 import kr.co.presentation.viewmodel.auth.SignUpSideEffect
 import kr.co.presentation.viewmodel.auth.SignUpState
 import kr.co.presentation.viewmodel.auth.SignUpViewModel
@@ -42,56 +42,34 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 @Composable
 fun SignUpScreen(
     onNavigateToLoginScreen: () -> Unit,
-    signupViewModel: SignUpViewModel = hiltViewModel()
+    viewModel: SignUpViewModel = hiltViewModel()
 ) {
+    val state: SignUpState by viewModel.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val state: SignUpState by signupViewModel.collectAsState()
-    val scope = rememberCoroutineScope()
-
     val context = LocalContext.current
 
-    signupViewModel.collectSideEffect { sideEffect ->
+    viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is SignUpSideEffect.NavigateToLoginScreen -> onNavigateToLoginScreen()
-            is SignUpSideEffect.ShowMsg -> scope.launch {
+            is SignUpSideEffect.ShowMsg -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
         }
     }
 
     SignUpScreen(
+        state = state,
         snackbarHostState = snackbarHostState,
-
-        email = state.email,
-        userName = state.userName,
-        password = state.password,
-        confirmPassword = state.confirmPassword,
-
-        onEmailChanged = signupViewModel::onEmailChanged,
-        onUserNameChanged = signupViewModel::onUserNameChanged,
-        onPasswordChanged = signupViewModel::onPasswordChanged,
-        onConfirmPasswordChanged = signupViewModel::onConfirmPasswordChanged,
-
-        signUp = signupViewModel::signUp
+        intent = viewModel::handelIntent
     )
 }
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 private fun SignUpScreen(
-    snackbarHostState: SnackbarHostState,
-
-    email: String,
-    userName: String,
-    password: String,
-    confirmPassword: String,
-
-    onEmailChanged: (String) -> Unit,
-    onUserNameChanged: (String) -> Unit,
-    onPasswordChanged: (String) -> Unit,
-    onConfirmPasswordChanged: (String) -> Unit,
-
-    signUp: () -> Unit
+    state: SignUpState = SignUpState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    intent: (SignUpIntent) -> Unit = {},
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -124,8 +102,10 @@ private fun SignUpScreen(
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = email,
-                onValueChange = onEmailChanged,
+                value = state.email,
+                onValueChange = { value ->
+                    intent(SignUpIntent.EmailChanged(value))
+                },
                 label = { Text(stringResource(R.string.user_email)) },
             )
 
@@ -137,8 +117,10 @@ private fun SignUpScreen(
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = userName,
-                onValueChange = onUserNameChanged,
+                value = state.userName,
+                onValueChange = { value ->
+                    intent(SignUpIntent.UserNameChanged(value))
+                },
                 label = { Text(stringResource(R.string.user_name)) }
             )
 
@@ -150,8 +132,10 @@ private fun SignUpScreen(
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = password,
-                onValueChange = onPasswordChanged,
+                value = state.password,
+                onValueChange = { value ->
+                    intent(SignUpIntent.PasswordChanged(value))
+                },
                 label = { Text(stringResource(R.string.user_password)) },
                 visualTransformation = PasswordVisualTransformation()
             )
@@ -164,8 +148,10 @@ private fun SignUpScreen(
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = confirmPassword,
-                onValueChange = onConfirmPasswordChanged,
+                value = state.confirmPassword,
+                onValueChange = { value ->
+                    intent(SignUpIntent.ConfirmPasswordChanged(value))
+                },
                 label = { Text(stringResource(R.string.user_confirm_password)) },
                 visualTransformation = PasswordVisualTransformation()
             )
@@ -180,7 +166,7 @@ private fun SignUpScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                onClick = signUp
+                onClick = { intent(SignUpIntent.SignUpButtonClicked) },
             ) {
                 Text(
                     text = stringResource(R.string.sign_up),
@@ -196,17 +182,6 @@ private fun SignUpScreen(
 @Composable
 private fun SignUpScreenPreview() {
     MinaryTheme {
-        SignUpScreen(
-            snackbarHostState = remember { SnackbarHostState() },
-            email = "",
-            userName = "",
-            password = "",
-            confirmPassword = "",
-            onEmailChanged = {},
-            onUserNameChanged = {},
-            onPasswordChanged = {},
-            onConfirmPasswordChanged = {},
-            signUp = {}
-        )
+        SignUpScreen()
     }
 }

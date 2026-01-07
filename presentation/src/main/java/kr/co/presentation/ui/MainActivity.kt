@@ -28,7 +28,7 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val mainActivityViewModel: MainActivityViewModel by viewModels()
+    private val viewModel: MainActivityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -36,17 +36,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MinaryTheme {
-                val state by mainActivityViewModel.collectAsState()
-                val snackbarHostState = remember { SnackbarHostState() }
-                val scope = rememberCoroutineScope()
-
+                val state by viewModel.collectAsState()
                 val navController = rememberNavController()
-
+                val coroutineScope = rememberCoroutineScope()
+                val snackbarHostState = remember { SnackbarHostState() }
                 val context = LocalContext.current
 
-                mainActivityViewModel.collectSideEffect { sideEffect ->
+                viewModel.collectSideEffect { sideEffect ->
                     when (sideEffect) {
-                        is MainActivitySideEffect.ShowMsg -> scope.launch {
+                        is MainActivitySideEffect.ShowMsg -> coroutineScope.launch {
                             snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
                         }
                     }

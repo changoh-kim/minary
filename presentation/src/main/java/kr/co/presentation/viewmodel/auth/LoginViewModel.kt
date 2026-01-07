@@ -25,10 +25,17 @@ data class LoginState(
 )
 
 @Immutable
-sealed class LoginSideEffect {
-    object NavigateToMainScreen : LoginSideEffect()
-    object NavigateToSignupScreen : LoginSideEffect()
-    data class ShowMsg(val uiText: UiText) : LoginSideEffect() // 오류 메시지 표시
+sealed interface LoginSideEffect {
+    object NavigateToMainScreen : LoginSideEffect
+    object NavigateToSignUpScreen : LoginSideEffect
+    data class ShowMsg(val uiText: UiText) : LoginSideEffect
+}
+
+sealed interface LoginIntent {
+    data class IdChanged(val newId: String) : LoginIntent
+    data class PasswordChanged(val newPassword: String) : LoginIntent
+    object LoginButtonClicked : LoginIntent
+    object SignUpButtonClicked : LoginIntent
 }
 
 @HiltViewModel
@@ -38,23 +45,24 @@ class LoginViewModel @Inject constructor(
 
     override val container = container<LoginState, LoginSideEffect>(LoginState())
 
-    fun onIdChanged(newValue: String) = blockingIntent {
-        reduce {
-            state.copy(id = newValue)
+    fun handleIntent(intent: LoginIntent) {
+        when (intent) {
+            is LoginIntent.IdChanged -> updateId(intent.newId)
+            is LoginIntent.PasswordChanged -> updatePassword(intent.newPassword)
+            is LoginIntent.LoginButtonClicked -> login()
+            is LoginIntent.SignUpButtonClicked -> navigateToSignUpScreen()
         }
     }
 
-    fun onPasswordChanged(newValue: String) = blockingIntent {
-        reduce {
-            state.copy(password = newValue)
-        }
+    private fun updateId(newId: String) = blockingIntent {
+        reduce { state.copy(id = newId) }
     }
 
-    fun onNavigateToSignupScreen() = intent {
-        postSideEffect(LoginSideEffect.NavigateToSignupScreen)
+    private fun updatePassword(newPassword: String) = blockingIntent {
+        reduce { state.copy(password = newPassword) }
     }
 
-    fun login() = intent {
+    private fun login() = intent {
         if (state.id.isNullOrBlank()) {
             postSideEffect(LoginSideEffect.ShowMsg(UiText.StringResource(R.string.id_is_empty)))
             return@intent
@@ -107,5 +115,9 @@ class LoginViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun navigateToSignUpScreen() = intent {
+        postSideEffect(LoginSideEffect.NavigateToSignUpScreen)
     }
 }

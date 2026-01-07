@@ -13,7 +13,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kr.co.domain.model.calendar.CalendarItem
+import kr.co.domain.model.calendar.MonthData
+import kr.co.domain.model.calendar.isAfterCurrentMonth
 import kr.co.domain.usecase.GetCalendarYearUseCase
+import kr.co.presentation.R
+import kr.co.presentation.ui.model.UiText
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -33,17 +37,13 @@ data class YearlyCalendarState(
 sealed interface YearlyCalendarSideEffect {
     data class NavigateToMonthlyCalendar(val year: Int, val month: Int) : YearlyCalendarSideEffect
     object ScrollToToday : YearlyCalendarSideEffect
-    data class ShowMsg(val msg: String) : YearlyCalendarSideEffect
+    data class ShowMsg(val uiText: UiText) : YearlyCalendarSideEffect
 }
 
-@Immutable
 sealed interface YearlyCalendarIntent {
-    // state
     data class UpdateCalendar(val year: Int) : YearlyCalendarIntent
-    // side-effect
-    data class OnMonthViewCLick(val year: Int, val month: Int) : YearlyCalendarIntent
-    object ScrollToToday : YearlyCalendarIntent
-    data class ShowMsg(val msg: String) : YearlyCalendarIntent
+    object TodayButtonClicked : YearlyCalendarIntent
+    data class MonthButtonClicked(val year: Int, val month: Int) : YearlyCalendarIntent
 }
 
 @HiltViewModel
@@ -63,30 +63,39 @@ class YearlyCalendarViewModel @Inject constructor(
             getCalendarYearUseCase(targetYear)
         }.cachedIn(viewModelScope)
 
-    fun handleIntent(intent: YearlyCalendarIntent) = intent {
+    fun handleIntent(intent: YearlyCalendarIntent) {
         when (intent) {
-            // state
             is YearlyCalendarIntent.UpdateCalendar -> updateCalendar(intent.year)
-            // side-effect
-            is YearlyCalendarIntent.OnMonthViewCLick -> navigateToMonthlyCalendar(intent.year, intent.month)
-            is YearlyCalendarIntent.ScrollToToday -> scrollToToday()
-            is YearlyCalendarIntent.ShowMsg -> showMsg(intent.msg)
+            is YearlyCalendarIntent.TodayButtonClicked -> scrollToToday()
+            is YearlyCalendarIntent.MonthButtonClicked -> navigateToMonthlyCalendar(intent.year, intent.month)
         }
     }
 
     private fun updateCalendar(year: Int) = intent {
-        reduce { state.copy(targetYear = year, refreshKey = System.currentTimeMillis()) }
-    }
-
-    private fun navigateToMonthlyCalendar(year: Int, month: Int) = intent {
-        postSideEffect(YearlyCalendarSideEffect.NavigateToMonthlyCalendar(year, month))
+        reduce {
+            state.copy(
+                targetYear = year,
+                refreshKey = System.currentTimeMillis()
+            )
+        }
     }
 
     private fun scrollToToday() = intent {
+        reduce {
+            state.copy(
+                targetYear = Year.now().value,
+                refreshKey = System.currentTimeMillis()
+            )
+        }
         postSideEffect(YearlyCalendarSideEffect.ScrollToToday)
     }
 
-    private fun showMsg(msg: String) = intent {
-        postSideEffect(YearlyCalendarSideEffect.ShowMsg(msg))
+    private fun navigateToMonthlyCalendar(year: Int, month: Int) = intent {
+        val target = MonthData(year, month)
+        if (target.isAfterCurrentMonth()) {
+            postSideEffect(YearlyCalendarSideEffect.ShowMsg(UiText.StringResource(R.string.you_cannot_select_a_date_after_today)))
+        } else {
+            postSideEffect(YearlyCalendarSideEffect.NavigateToMonthlyCalendar(year, month))
+        }
     }
 }

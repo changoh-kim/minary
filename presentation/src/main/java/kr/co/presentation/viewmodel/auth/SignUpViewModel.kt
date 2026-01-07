@@ -24,10 +24,18 @@ data class SignUpState(
     val confirmPassword: String = ""
 )
 
-sealed class SignUpSideEffect {
-    object NavigateToLoginScreen : SignUpSideEffect()
+@Immutable
+sealed interface SignUpSideEffect {
+    object NavigateToLoginScreen : SignUpSideEffect
+    data class ShowMsg(val uiText: UiText) : SignUpSideEffect
+}
 
-    data class ShowMsg(val uiText: UiText) : SignUpSideEffect()
+sealed interface SignUpIntent {
+    data class EmailChanged(val newEmail: String) : SignUpIntent
+    data class UserNameChanged(val newUserName: String) : SignUpIntent
+    data class PasswordChanged(val newPassword: String) : SignUpIntent
+    data class ConfirmPasswordChanged(val newConfirmPassword: String) : SignUpIntent
+    object SignUpButtonClicked : SignUpIntent
 }
 
 @HiltViewModel
@@ -37,23 +45,33 @@ class SignUpViewModel @Inject constructor(
 
     override val container = container<SignUpState, SignUpSideEffect>(SignUpState())
 
-    fun onEmailChanged(id: String) = blockingIntent {
-        reduce { state.copy(email = id) }
+    fun handelIntent(intent: SignUpIntent) {
+        when (intent) {
+            is SignUpIntent.EmailChanged -> updateEmail(intent.newEmail)
+            is SignUpIntent.UserNameChanged -> updateUserName(intent.newUserName)
+            is SignUpIntent.PasswordChanged -> updatePassword(intent.newPassword)
+            is SignUpIntent.ConfirmPasswordChanged -> updateConfirmPassword(intent.newConfirmPassword)
+            is SignUpIntent.SignUpButtonClicked -> signUp()
+        }
     }
 
-    fun onUserNameChanged(userName: String) = blockingIntent {
-        reduce { state.copy(userName = userName) }
+    private fun updateEmail(newEmail: String) = blockingIntent {
+        reduce { state.copy(email = newEmail) }
     }
 
-    fun onPasswordChanged(password: String) = blockingIntent {
-        reduce { state.copy(password = password) }
+    private fun updateUserName(newUserName: String) = blockingIntent {
+        reduce { state.copy(userName = newUserName) }
     }
 
-    fun onConfirmPasswordChanged(confirmPassword: String) = blockingIntent {
-        reduce { state.copy(confirmPassword = confirmPassword) }
+    private fun updatePassword(newPassword: String) = blockingIntent {
+        reduce { state.copy(password = newPassword) }
     }
 
-    fun signUp() = intent {
+    private fun updateConfirmPassword(newConfirmPassword: String) = blockingIntent {
+        reduce { state.copy(confirmPassword = newConfirmPassword) }
+    }
+
+    private fun signUp() = intent {
         if (state.email.isNullOrBlank()) {
             postSideEffect(SignUpSideEffect.ShowMsg(UiText.StringResource(R.string.email_is_empty)))
             return@intent
@@ -90,9 +108,11 @@ class SignUpViewModel @Inject constructor(
 
                 else -> {
                     val uiText = error.message
-                        .takeIf { !it.isNullOrBlank()
-                        }?.let { UiText.DynamicString(it)
-                        }?: UiText.StringResource(R.string.unknown_error)
+                        .takeIf {
+                            !it.isNullOrBlank()
+                        }?.let {
+                            UiText.DynamicString(it)
+                        } ?: UiText.StringResource(R.string.unknown_error)
 
                     postSideEffect(SignUpSideEffect.ShowMsg(uiText))
                 }
