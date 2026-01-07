@@ -1,7 +1,7 @@
 package kr.co.presentation.ui.extension
 
 import android.content.Context
-import androidx.annotation.StringRes
+import androidx.annotation.ArrayRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
@@ -16,7 +16,7 @@ import kr.co.presentation.ui.model.UiText
  * @return 리소스에 해당하는 [Array<String]
  */
 @Composable
-fun stringArrayResource(@StringRes resId: Int): Array<String> {
+fun stringArrayResource(@ArrayRes resId: Int): Array<String> {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     return remember(resId, configuration) {
