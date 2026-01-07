@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -48,16 +49,17 @@ import kr.co.domain.model.calendar.MonthData
 import kr.co.domain.model.calendar.YearData
 import kr.co.domain.model.calendar.date.CalendarDateData
 import kr.co.domain.model.calendar.date.InactiveDateData
-import kr.co.domain.model.calendar.isAfterCurrentMonth
 import kr.co.domain.model.calendar.isCurrentMonth
 import kr.co.presentation.R
 import kr.co.presentation.ui.component.calendar.CalendarMonth
 import kr.co.presentation.ui.component.calendar.day.CalendarDay
+import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.preview.CalendarPreviewData
 import kr.co.presentation.ui.theme.MinaryTheme
 import kr.co.presentation.viewmodel.calendar.YearlyCalendarIntent
 import kr.co.presentation.viewmodel.calendar.YearlyCalendarSideEffect
 import kr.co.presentation.viewmodel.calendar.YearlyCalendarViewModel
+import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.Year
 import java.time.YearMonth
@@ -65,18 +67,17 @@ import java.time.YearMonth
 
 @Composable
 fun YearlyCalendarScreen(
-    yearlyCalendarViewModel: YearlyCalendarViewModel = hiltViewModel(),
+    viewModel: YearlyCalendarViewModel = hiltViewModel(),
     year: Int = Year.now().value,
     onNavigateToMonthlyCalendar: (Int, Int) -> Unit
 ) {
-    val pagingItems = yearlyCalendarViewModel.yearPages.collectAsLazyPagingItems()
+    val state by viewModel.collectAsState()
+    val pagingItems = viewModel.yearPages.collectAsLazyPagingItems()
     val gridState = rememberLazyGridState()
-
-    LaunchedEffect(year) {
-        yearlyCalendarViewModel.handleIntent(YearlyCalendarIntent.UpdateCalendar(year))
-    }
-
-    val focusedYear by remember {
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val currentVisibleYear by remember {
         derivedStateOf {
             val visibleItems = gridState.layoutInfo.visibleItemsInfo
             if (visibleItems.isEmpty()) return@derivedStateOf year
@@ -93,10 +94,11 @@ fun YearlyCalendarScreen(
         }
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(year) {
+        viewModel.handleIntent(YearlyCalendarIntent.UpdateCalendar(year))
+    }
 
-    yearlyCalendarViewModel.collectSideEffect { sideEffect ->
+    viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is YearlyCalendarSideEffect.NavigateToMonthlyCalendar -> {
                 onNavigateToMonthlyCalendar(sideEffect.year, sideEffect.month)
@@ -107,31 +109,17 @@ fun YearlyCalendarScreen(
             }
 
             is YearlyCalendarSideEffect.ShowMsg -> coroutineScope.launch {
-                snackbarHostState.showSnackbar(sideEffect.msg)
+                snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
         }
     }
 
-    val errorMessage = stringResource(R.string.you_cannot_select_a_date_after_today)
-
     YearlyCalendarScreen(
-        year = focusedYear,
+        year = currentVisibleYear,
         pagingItems = pagingItems,
         gridState = gridState,
         snackbarHostState = snackbarHostState,
-        onMonthClick = { monthData ->
-            if (monthData.isAfterCurrentMonth()) {
-                yearlyCalendarViewModel.handleIntent(YearlyCalendarIntent.ShowMsg(errorMessage))
-            } else {
-                yearlyCalendarViewModel.handleIntent(
-                    YearlyCalendarIntent.OnMonthViewCLick(monthData.year, monthData.month)
-                )
-            }
-        },
-        onTodayClick = {
-            yearlyCalendarViewModel.handleIntent(YearlyCalendarIntent.UpdateCalendar(Year.now().value))
-            yearlyCalendarViewModel.handleIntent(YearlyCalendarIntent.ScrollToToday)
-        },
+        intent = viewModel::handleIntent
     )
 }
 
@@ -141,8 +129,7 @@ private fun YearlyCalendarScreen(
     pagingItems: LazyPagingItems<CalendarItem>,
     gridState: LazyGridState = rememberLazyGridState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onMonthClick: (MonthData) -> Unit = {},
-    onTodayClick: () -> Unit = {}
+    intent: (YearlyCalendarIntent) -> Unit = {},
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -150,7 +137,7 @@ private fun YearlyCalendarScreen(
             TopBar(
                 modifier = Modifier.fillMaxWidth(),
                 year = year,
-                onTodayClick = onTodayClick
+                onTodayClick = { intent(YearlyCalendarIntent.TodayButtonClicked) }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -165,14 +152,16 @@ private fun YearlyCalendarScreen(
                 modifier = Modifier.fillMaxSize(),
                 gridState = gridState,
                 pagingItems = pagingItems,
-                onMonthClick = onMonthClick
+                onMonthClick = { monthData ->
+                    intent(YearlyCalendarIntent.MonthButtonClicked(monthData.year, monthData.month))
+                }
             )
         }
     }
 }
 
 @Composable
-fun TopBar(
+private fun TopBar(
     modifier: Modifier = Modifier,
     year: Int = YearMonth.now().year,
     onTodayClick: () -> Unit = {},
@@ -203,7 +192,7 @@ fun TopBar(
 }
 
 @Composable
-fun CalendarGrid(
+private fun CalendarGrid(
     modifier: Modifier = Modifier,
     pagingItems: LazyPagingItems<CalendarItem>,
     gridState: LazyGridState = rememberLazyGridState(),
@@ -242,7 +231,7 @@ fun CalendarGrid(
 }
 
 @Composable
-fun YearHeaderItem(year: Int) {
+private fun YearHeaderItem(year: Int) {
     val isCurrentYear = Year.now().value == year
 
     Box(
@@ -261,7 +250,7 @@ fun YearHeaderItem(year: Int) {
 }
 
 @Composable
-fun CalendarMonthItem(
+private fun CalendarMonthItem(
     monthData: MonthData,
     onMonthClick: (MonthData) -> Unit = {},
 ) {
@@ -285,8 +274,8 @@ fun CalendarMonthItem(
                     modifier = Modifier.weight(1f),
                     dateData = dateData,
                     isIconVisible = false
-                ) { dateData ->
-                    onMonthClick(MonthData(year = dateData.year, month = dateData.month))
+                ) { diary ->
+                    onMonthClick(MonthData(year = diary.year, month = diary.month))
                 }
             }
 

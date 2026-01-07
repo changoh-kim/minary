@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kr.co.domain.model.calendar.MonthData
 import kr.co.domain.usecase.GetCalendarMonthUseCase
+import kr.co.presentation.ui.model.UiText
 import kr.co.presentation.ui.navigation.route.Diary
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -35,18 +36,14 @@ sealed interface MonthlyCalendarSideEffect {
     data class NavigateToYearlyCalendar(val year: Int) : MonthlyCalendarSideEffect
     data class NavigateToDailyCalendar(val diary: Diary) : MonthlyCalendarSideEffect
     object ScrollToToday : MonthlyCalendarSideEffect
-    data class ShowMsg(val msg: String) : MonthlyCalendarSideEffect
+    data class ShowMsg(val uiText: UiText) : MonthlyCalendarSideEffect
 }
 
-@Immutable
 sealed interface MonthlyCalendarIntent {
-    // state
     data class UpdateCalendar(val year: Int, val month: Int) : MonthlyCalendarIntent
-    // side-effect
-    data class NavigateToYearlyCalendar(val year: Int) : MonthlyCalendarIntent
-    data class NavigateToDailyCalendar(val diary: Diary) : MonthlyCalendarIntent
-    object ScrollToToday : MonthlyCalendarIntent
-    data class ShowMsg(val msg: String) : MonthlyCalendarIntent
+    object TodayButtonClicked : MonthlyCalendarIntent
+    data class YearButtonClicked(val year: Int) : MonthlyCalendarIntent
+    data class DayButtonClicked(val diary: Diary) : MonthlyCalendarIntent
 }
 
 @HiltViewModel
@@ -66,15 +63,12 @@ class MonthlyCalendarViewModel @Inject constructor(
             getCalendarMonthUseCase(targetYearMonth)
         }.cachedIn(viewModelScope)
 
-    fun handleIntent(intent: MonthlyCalendarIntent) = intent {
+    fun handleIntent(intent: MonthlyCalendarIntent) {
         when (intent) {
-            // state
             is MonthlyCalendarIntent.UpdateCalendar -> updateCalendar(intent.year, intent.month)
-            // side-effect
-            is MonthlyCalendarIntent.NavigateToYearlyCalendar -> navigateToYearlyCalendar(intent.year)
-            is MonthlyCalendarIntent.NavigateToDailyCalendar -> navigateToDailyCalendar(intent.diary)
-            is MonthlyCalendarIntent.ScrollToToday -> scrollToToday()
-            is MonthlyCalendarIntent.ShowMsg -> showMsg(intent.msg)
+            is MonthlyCalendarIntent.TodayButtonClicked -> scrollToToday()
+            is MonthlyCalendarIntent.YearButtonClicked -> navigateToYearlyCalendar(intent.year)
+            is MonthlyCalendarIntent.DayButtonClicked -> navigateToDailyCalendar(intent.diary)
         }
     }
 
@@ -87,19 +81,22 @@ class MonthlyCalendarViewModel @Inject constructor(
         }
     }
 
+    private fun scrollToToday() = intent {
+        val today = YearMonth.now()
+        reduce {
+            state.copy(
+                targetYearMonth = YearMonth.of(today.year, today.monthValue),
+                refreshKey = System.currentTimeMillis()
+            )
+        }
+        postSideEffect(MonthlyCalendarSideEffect.ScrollToToday)
+    }
+
     private fun navigateToYearlyCalendar(year: Int) = intent {
         postSideEffect(MonthlyCalendarSideEffect.NavigateToYearlyCalendar(year))
     }
 
     private fun navigateToDailyCalendar(diary: Diary) = intent {
         postSideEffect(MonthlyCalendarSideEffect.NavigateToDailyCalendar(diary))
-    }
-
-    private fun scrollToToday() = intent {
-        postSideEffect(MonthlyCalendarSideEffect.ScrollToToday)
-    }
-
-    private fun showMsg(msg: String) = intent {
-        postSideEffect(MonthlyCalendarSideEffect.ShowMsg(msg))
     }
 }

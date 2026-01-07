@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,6 +43,7 @@ import kr.co.presentation.R
 import kr.co.presentation.ui.component.calendar.CalendarMonth
 import kr.co.presentation.ui.component.calendar.day.CalendarDay
 import kr.co.presentation.ui.component.calendar.day.OtherMonthDay
+import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.extension.stringArrayResource
 import kr.co.presentation.ui.navigation.route.Diary
 import kr.co.presentation.ui.preview.CalendarPreviewData
@@ -49,31 +51,29 @@ import kr.co.presentation.ui.theme.MinaryTheme
 import kr.co.presentation.viewmodel.calendar.MonthlyCalendarIntent
 import kr.co.presentation.viewmodel.calendar.MonthlyCalendarSideEffect
 import kr.co.presentation.viewmodel.calendar.MonthlyCalendarViewModel
+import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.YearMonth
 
 
 @Composable
 fun MonthlyCalendarScreen(
-    monthlyCalendarViewModel: MonthlyCalendarViewModel = hiltViewModel(),
+    viewModel: MonthlyCalendarViewModel = hiltViewModel(),
     year: Int = YearMonth.now().year,
     month: Int = YearMonth.now().monthValue,
     onNavigateToDiaryScreen: (Diary) -> Unit,
     onNavigateToYearlyCalendar: (Int) -> Unit = {},
 ) {
-    val pagingItems = monthlyCalendarViewModel.monthPages.collectAsLazyPagingItems()
-    // val state by monthlyCalendarViewModel.collectAsState()
-
+    val state by viewModel.collectAsState()
+    val pagingItems = viewModel.monthPages.collectAsLazyPagingItems()
     val pagerState = rememberPagerState(
         initialPage = 0,
-        pageCount = { pagingItems.itemCount },
+        pageCount = { pagingItems.itemCount }
     )
-
-    LaunchedEffect(year, month) {
-        monthlyCalendarViewModel.handleIntent(MonthlyCalendarIntent.UpdateCalendar(year, month))
-    }
-
-    val selectedYearMonth by remember {
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val currentVisibleYearMonth by remember {
         derivedStateOf {
             if (pagingItems.itemCount > 0 && pagerState.currentPage < pagingItems.itemCount) {
                 pagingItems.peek(pagerState.currentPage)?.createYearMonth() ?: YearMonth.now()
@@ -83,10 +83,11 @@ fun MonthlyCalendarScreen(
         }
     }
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(year, month) {
+        viewModel.handleIntent(MonthlyCalendarIntent.UpdateCalendar(year, month))
+    }
 
-    monthlyCalendarViewModel.collectSideEffect { sideEffect ->
+    viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is MonthlyCalendarSideEffect.NavigateToYearlyCalendar -> {
                 onNavigateToYearlyCalendar(sideEffect.year)
@@ -103,51 +104,30 @@ fun MonthlyCalendarScreen(
             }
 
             is MonthlyCalendarSideEffect.ShowMsg -> coroutineScope.launch {
-                snackbarHostState.showSnackbar(sideEffect.msg)
+                snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
         }
     }
 
     MonthlyCalendarScreen(
-        yearMonth = selectedYearMonth,
+        yearMonth = currentVisibleYearMonth,
         snackbarHostState = snackbarHostState,
-        pagerState = pagerState,
         pagingItems = pagingItems,
-        onYearClick = { year ->
-            monthlyCalendarViewModel.handleIntent(
-                MonthlyCalendarIntent.NavigateToYearlyCalendar(year)
-            )
-        },
-        onDayClick = { diary ->
-            monthlyCalendarViewModel.handleIntent(
-                MonthlyCalendarIntent.NavigateToDailyCalendar(diary)
-            )
-        },
-        onTodayClick = {
-            val today = YearMonth.now()
-            monthlyCalendarViewModel.handleIntent(
-                MonthlyCalendarIntent.UpdateCalendar(
-                    today.year,
-                    today.monthValue
-                )
-            )
-            monthlyCalendarViewModel.handleIntent(MonthlyCalendarIntent.ScrollToToday)
-        },
+        pagerState = pagerState,
+        intent = viewModel::handleIntent
     )
 }
 
 @Composable
 private fun MonthlyCalendarScreen(
     yearMonth: YearMonth,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     pagingItems: LazyPagingItems<MonthData>,
     pagerState: PagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { pagingItems.itemCount },
     ),
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onYearClick: (Int) -> Unit = {},
-    onDayClick: (Diary) -> Unit = {},
-    onTodayClick: () -> Unit = {},
+    intent: (MonthlyCalendarIntent) -> Unit = {},
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -155,8 +135,12 @@ private fun MonthlyCalendarScreen(
             TopBar(
                 year = yearMonth.year,
                 month = yearMonth.monthValue,
-                onYearClick = onYearClick,
-                onTodayClick = onTodayClick,
+                onYearClick = { year ->
+                    intent(MonthlyCalendarIntent.YearButtonClicked(year))
+                },
+                onTodayClick = {
+                    intent(MonthlyCalendarIntent.TodayButtonClicked)
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -169,14 +153,16 @@ private fun MonthlyCalendarScreen(
             CalendarPager(
                 pagerState = pagerState,
                 pagingItems = pagingItems,
-                onDayClick = onDayClick
+                onDayClick = { diary ->
+                    intent(MonthlyCalendarIntent.DayButtonClicked(diary))
+                }
             )
         }
     }
 }
 
 @Composable
-fun TopBar(
+private fun TopBar(
     year: Int,
     month: Int,
     onYearClick: (Int) -> Unit = {},
@@ -187,9 +173,7 @@ fun TopBar(
             text = "$year",
             modifier = Modifier
                 .padding(16.dp)
-                .clickable {
-                    onYearClick(year)
-                }
+                .clickable { onYearClick(year) }
         )
 
         val months = stringArrayResource(R.array.months)
@@ -215,7 +199,7 @@ fun TopBar(
 }
 
 @Composable
-fun Weekday() {
+private fun Weekday() {
     val weekday = stringArrayResource(R.array.weekdays)
 
     Row(
@@ -238,7 +222,7 @@ fun Weekday() {
 }
 
 @Composable
-fun CalendarPager(
+private fun CalendarPager(
     pagerState: PagerState,
     pagingItems: LazyPagingItems<MonthData>,
     onDayClick: (Diary) -> Unit = {},

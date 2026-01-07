@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import kr.co.presentation.R
 import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.theme.MinaryTheme
+import kr.co.presentation.viewmodel.auth.LoginIntent
 import kr.co.presentation.viewmodel.auth.LoginSideEffect
 import kr.co.presentation.viewmodel.auth.LoginState
 import kr.co.presentation.viewmodel.auth.LoginViewModel
@@ -48,53 +49,36 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 @Composable
 fun LoginScreen(
     onNavigateToMainScreen: () -> Unit,
-    onNavigateToSignupScreen: () -> Unit,
-    loginViewModel: LoginViewModel = hiltViewModel(),
+    onNavigateToSignUpScreen: () -> Unit,
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
-    val state: LoginState by loginViewModel.collectAsState()
+    val state: LoginState by viewModel.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-
     val context = LocalContext.current
 
-    loginViewModel.collectSideEffect { sideEffect ->
+    viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
             is LoginSideEffect.NavigateToMainScreen -> onNavigateToMainScreen()
-            is LoginSideEffect.NavigateToSignupScreen -> onNavigateToSignupScreen()
-            is LoginSideEffect.ShowMsg -> scope.launch {
+            is LoginSideEffect.NavigateToSignUpScreen -> onNavigateToSignUpScreen()
+            is LoginSideEffect.ShowMsg -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
         }
     }
 
     LoginScreen(
+        state = state,
         snackbarHostState = snackbarHostState,
-
-        id = state.id,
-        password = state.password,
-        isLoggingIn = state.isLoggingIn,
-
-        onIdChanged = loginViewModel::onIdChanged,
-        onPasswordChanged = loginViewModel::onPasswordChanged,
-        login = loginViewModel::login,
-
-        onNavigateToSignupScreen = loginViewModel::onNavigateToSignupScreen
+        intent = viewModel::handleIntent
     )
 }
 
 @Composable
 private fun LoginScreen(
-    snackbarHostState: SnackbarHostState,
-
-    id: String,
-    password: String,
-    isLoggingIn: Boolean,
-
-    onIdChanged: (String) -> Unit,
-    onPasswordChanged: (String) -> Unit,
-    login: () -> Unit,
-
-    onNavigateToSignupScreen: () -> Unit,
+    state: LoginState = LoginState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    intent: (LoginIntent) -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -139,8 +123,8 @@ private fun LoginScreen(
                 )
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = id,
-                    onValueChange = onIdChanged,
+                    value = state.id,
+                    onValueChange = { value -> intent(LoginIntent.IdChanged(value)) },
                     label = { Text(stringResource(R.string.user_id)) }
                 )
 
@@ -154,15 +138,15 @@ private fun LoginScreen(
                 )
                 OutlinedTextField(
                     modifier = Modifier.fillMaxWidth(),
-                    value = password,
-                    onValueChange = onPasswordChanged,
+                    value = state.password,
+                    onValueChange = { value -> intent(LoginIntent.PasswordChanged(value)) },
                     label = { Text(stringResource(R.string.user_password)) },
                     visualTransformation = PasswordVisualTransformation()
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                if (isLoggingIn) {
+                if (state.isLoggingIn) {
                     CircularProgressIndicator()
                 } else {
                     Button(
@@ -176,7 +160,7 @@ private fun LoginScreen(
                             containerColor = MaterialTheme.colorScheme.primary,
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         ),
-                        onClick = login
+                        onClick = { intent(LoginIntent.LoginButtonClicked) }
                     ) {
                         Text(text = stringResource(R.string.btn_login))
                     }
@@ -187,7 +171,7 @@ private fun LoginScreen(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .padding(bottom = 24.dp)
-                            .clickable(onClick = onNavigateToSignupScreen)
+                            .clickable(onClick = { intent(LoginIntent.SignUpButtonClicked) })
                     ) {
                         Text(text = stringResource(R.string.do_not_have_an_account))
                         Text(
@@ -206,15 +190,6 @@ private fun LoginScreen(
 @Composable
 private fun LoginScreenPreview() {
     MinaryTheme {
-        LoginScreen(
-            snackbarHostState = remember { SnackbarHostState() },
-            id = "",
-            password = "",
-            isLoggingIn = false,
-            onIdChanged = {},
-            onPasswordChanged = {},
-            login = {},
-            onNavigateToSignupScreen = {}
-        )
+        LoginScreen()
     }
 }
