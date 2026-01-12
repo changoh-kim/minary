@@ -7,7 +7,9 @@ import kr.co.domain.exception.AuthException
 import kr.co.domain.model.auth.User
 import kr.co.domain.usecase.IsUserLoggedInUseCase
 import kr.co.presentation.R
-import kr.co.presentation.ui.model.UiText
+import kr.co.presentation.mapper.UserMapper.toUiUser
+import kr.co.presentation.ui.model.common.UiUser
+import kr.co.presentation.ui.model.common.UiText
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -26,7 +28,7 @@ sealed interface MainActivityUiState {
 @Immutable
 data class MainActivityState(
     val uiState: MainActivityUiState? = MainActivityUiState.Loading,
-    val loginUser: User? = null
+    val loginUser: UiUser? = UiUser()
 )
 
 @Immutable
@@ -52,8 +54,9 @@ class MainActivityViewModel @Inject constructor(
     private fun checkLogin() = intent {
         val loggedIn = isUserLoggedInUseCase()
         loggedIn.onSuccess { user ->
+
             reduce {
-                state.copy(loginUser = user, uiState = MainActivityUiState.Main)
+                state.copy(loginUser = user.toUiUser(), uiState = MainActivityUiState.Main)
             }
         }.onFailure { error ->
             reduce {

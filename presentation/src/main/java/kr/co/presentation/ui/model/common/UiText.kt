@@ -1,8 +1,7 @@
-package kr.co.presentation.ui.model
+package kr.co.presentation.ui.model.common
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
-
 
 /**
  * UI에 표시할 텍스트 데이터를 캡슐화하는 Sealed Interface
@@ -15,6 +14,7 @@ sealed interface UiText {
      * 일반 [String] 타입의 문자열을 다룰 때 사용
      * @property value 표시할 문자열 값
      */
+    @Immutable
     data class DynamicString(val value: String) : UiText
 
     /**
@@ -22,6 +22,7 @@ sealed interface UiText {
      * @property resId 문자열 리소스 ID
      * @property args 리소스에 전달할 가변 인자
      */
+    @Immutable
     class StringResource(
         @param:StringRes val resId: Int,
         vararg val args: Any

@@ -7,17 +7,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import kr.co.presentation.ui.navigation.route.CalendarGraph
-import kr.co.presentation.ui.navigation.route.Diary
 import kr.co.presentation.ui.navigation.route.MonthlyCalendar
 import kr.co.presentation.ui.navigation.route.YearlyCalender
 import kr.co.presentation.ui.screen.contents.calendar.MonthlyCalendarScreen
 import kr.co.presentation.ui.screen.contents.calendar.YearlyCalendarScreen
+import java.time.LocalDate
+import java.time.Year
 import java.time.YearMonth
 
 
 internal fun NavGraphBuilder.calenderNavGraph(
     navController: NavHostController,
-    onNavigateToDiaryScreen: (Diary) -> Unit,
+    onNavigateToDiaryScreen: (LocalDate) -> Unit,
 ) {
     val currentYearMonth = YearMonth.now()
     val currentYear = currentYearMonth.year
@@ -28,10 +29,9 @@ internal fun NavGraphBuilder.calenderNavGraph(
         composable<MonthlyCalendar> { backStackEntry ->
             val monthCalender: MonthlyCalendar = backStackEntry.toRoute()
             MonthlyCalendarScreen(
-                year = monthCalender.year,
-                month = monthCalender.month,
-                onNavigateToDiaryScreen = { diary ->
-                    onNavigateToDiaryScreen(diary)
+                yearMonth = YearMonth.of(monthCalender.year, monthCalender.month),
+                onNavigateToDiaryScreen = { date ->
+                    onNavigateToDiaryScreen(date)
                 },
                 onNavigateToYearlyCalendar = { year ->
                     navController.navigate(YearlyCalender(year)) {
@@ -45,9 +45,9 @@ internal fun NavGraphBuilder.calenderNavGraph(
         composable<YearlyCalender> { backStackEntry ->
             val yearlyCalender: YearlyCalender = backStackEntry.toRoute()
             YearlyCalendarScreen(
-                year = yearlyCalender.year,
-                onNavigateToMonthlyCalendar = { year, month ->
-                    navController.navigate(MonthlyCalendar(year, month)) {
+                year = Year.of(yearlyCalender.year),
+                onNavigateToMonthlyCalendar = { yearMonth ->
+                    navController.navigate(MonthlyCalendar(yearMonth.year, yearMonth.monthValue)) {
                         popUpTo(navController.graph.findStartDestination().id) {
                             inclusive = true
                         }

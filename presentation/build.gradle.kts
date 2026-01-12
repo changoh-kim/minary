@@ -42,6 +42,17 @@ android {
     }
 }
 
+composeCompiler {
+    // 안정성 보고서가 작성될 디렉토리 설정
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+    metricsDestination = layout.buildDirectory.dir("compose_compiler")
+
+    // 안정성 구성 파일 등록
+    stabilityConfigurationFiles.add(
+        rootProject.layout.projectDirectory.file("stability_config.conf")
+    )
+}
+
 dependencies {
     implementation(project(":domain"))
 
@@ -80,6 +91,9 @@ dependencies {
 
     // coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+    // immutable
+    implementation(libs.kotlinx.collections.immutable)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

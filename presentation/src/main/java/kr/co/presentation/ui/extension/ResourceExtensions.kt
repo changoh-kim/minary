@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import kr.co.presentation.ui.model.UiText
+import kr.co.presentation.ui.model.common.UiText
 
 
 /**

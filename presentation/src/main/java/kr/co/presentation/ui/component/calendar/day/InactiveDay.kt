@@ -13,14 +13,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import kr.co.presentation.ui.model.calendar.day.InactiveDayItem
 import kr.co.presentation.ui.theme.MinaryTheme
-import java.time.LocalDate
 
 
 @Composable
-fun OtherMonthDay(
+fun InactiveDay(
     modifier: Modifier = Modifier,
-    date: String,
+    dayItem: InactiveDayItem,
 ) {
     Column(
         modifier = modifier
@@ -31,7 +31,7 @@ fun OtherMonthDay(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = date,
+            text = "${dayItem.date.dayOfMonth}",
             style = MaterialTheme.typography.labelSmall,
             color = Color.LightGray,
             fontWeight = FontWeight.Normal,
@@ -41,8 +41,8 @@ fun OtherMonthDay(
 
 @Preview(showBackground = true)
 @Composable
-private fun OtherMonthDayPreview() {
+private fun InactiveDayPreview() {
     MinaryTheme {
-        OtherMonthDay(date = LocalDate.now().dayOfMonth.toString())
+        InactiveDay(dayItem = InactiveDayItem())
     }
 }
