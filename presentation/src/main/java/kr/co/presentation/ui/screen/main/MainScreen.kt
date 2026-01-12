@@ -37,16 +37,16 @@ import kr.co.presentation.ui.navigation.host.MainNavHost
 import kr.co.presentation.ui.navigation.item.NavigationItem
 import kr.co.presentation.ui.navigation.route.CalendarGraph
 import kr.co.presentation.ui.navigation.route.DashBoardGraph
-import kr.co.presentation.ui.navigation.route.Diary
 import kr.co.presentation.ui.navigation.route.SettingGraph
 import kr.co.presentation.ui.navigation.route.StoreGraph
 import kr.co.presentation.ui.theme.MinaryTheme
+import java.time.LocalDate
 
 
 @SuppressLint("RestrictedApi")
 @Composable
 fun MainScreen(
-    onNavigateToDiaryScreen: (Diary) -> Unit,
+    onNavigateToDiaryScreen: (LocalDate) -> Unit,
     // mainViewModel: MainViewModel = hiltViewModel()
 ) {
     val navController = rememberNavController()

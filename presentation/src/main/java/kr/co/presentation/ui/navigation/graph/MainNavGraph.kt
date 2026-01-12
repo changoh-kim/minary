@@ -10,6 +10,7 @@ import kr.co.presentation.ui.navigation.route.Main
 import kr.co.presentation.ui.navigation.route.MainGraph
 import kr.co.presentation.ui.screen.diary.DiaryScreen
 import kr.co.presentation.ui.screen.main.MainScreen
+import java.time.LocalDate
 
 
 internal fun NavGraphBuilder.mainNavGraph(
@@ -18,17 +19,15 @@ internal fun NavGraphBuilder.mainNavGraph(
     navigation<MainGraph>(startDestination = Main) {
         composable<Main> {
             MainScreen(
-                onNavigateToDiaryScreen = { diary ->
-                    navController.navigate(diary)
+                onNavigateToDiaryScreen = { date ->
+                    navController.navigate(Diary(date.year, date.monthValue, date.dayOfMonth))
                 }
             )
         }
         composable<Diary> { backStackEntry ->
             val diary: Diary = backStackEntry.toRoute()
             DiaryScreen(
-                year = diary.year,
-                month = diary.month,
-                date = diary.date,
+                date = LocalDate.of(diary.year, diary.month, diary.date),
                 onNavigateToMainScreen = {
                     navController.popBackStack()
                 }

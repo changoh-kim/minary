@@ -3,20 +3,27 @@ package kr.co.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kr.co.data.mapper.CalendarDataMapper.toMonthData
+import kr.co.data.mapper.CalendarDataMapper.toYearMonthData
+import kr.co.data.source.CalendarLocalDataSource
 import kr.co.data.source.CalendarMonthPagingSource
 import kr.co.data.source.CalendarYearPagingSource
-import kr.co.domain.model.calendar.CalendarItem
-import kr.co.domain.model.calendar.MonthData
+import kr.co.domain.model.calendar.yearmonth.MonthData
+import kr.co.domain.model.calendar.yearmonth.YearMonthData
 import kr.co.domain.repository.CalendarRepository
+import java.time.Year
 import java.time.YearMonth
 import javax.inject.Inject
 
 
 class CalendarRepositoryImpl @Inject constructor(
+    private val calendarLocalDataSource: CalendarLocalDataSource,
 ) : CalendarRepository {
 
-    override fun getYearlyPages(targetYear: Int): Flow<PagingData<CalendarItem>> {
+    override fun getYearlyPages(targetYear: Year): Flow<PagingData<YearMonthData>> {
         return Pager(
             config = PagingConfig(
                 /**
@@ -34,9 +41,13 @@ class CalendarRepositoryImpl @Inject constructor(
             ),
             initialKey = targetYear,
             pagingSourceFactory = {
-                CalendarYearPagingSource()
+                CalendarYearPagingSource(calendarLocalDataSource)
             }
-        ).flow
+        ).flow.map { pagingData ->
+            pagingData.map { yearMonthDTO ->
+                yearMonthDTO.toYearMonthData()
+            }
+        }
     }
 
     override fun getMonthlyPages(targetYearMonth: YearMonth): Flow<PagingData<MonthData>> {
@@ -57,8 +68,12 @@ class CalendarRepositoryImpl @Inject constructor(
             ),
             initialKey = targetYearMonth,
             pagingSourceFactory = {
-                CalendarMonthPagingSource()
+                CalendarMonthPagingSource(calendarLocalDataSource)
             }
-        ).flow
+        ).flow.map { pagingData ->
+            pagingData.map { monthDTO ->
+                monthDTO.toMonthData()
+            }
+        }
     }
 }

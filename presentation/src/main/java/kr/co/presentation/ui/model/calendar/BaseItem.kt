@@ -1,14 +1,18 @@
-package kr.co.domain.model.calendar
+package kr.co.presentation.ui.model.calendar
+
+import androidx.compose.runtime.Immutable
 
 
-sealed interface CalendarItem {
+@Immutable
+interface BaseItem {
+
+    @Immutable
     sealed interface ContentType {
         data object YEAR : ContentType
         data object MONTH : ContentType
+        data object DATE : ContentType
     }
 
     val key: String
     val contentType: ContentType
-
-    val year: Int
 }

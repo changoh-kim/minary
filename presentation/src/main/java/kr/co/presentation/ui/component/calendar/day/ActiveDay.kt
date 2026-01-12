@@ -15,22 +15,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import kr.co.domain.model.calendar.date.CalendarDateData
-import kr.co.domain.model.calendar.date.isAfterToday
-import kr.co.domain.model.calendar.date.isToday
-import kr.co.presentation.ui.navigation.route.Diary
+import kr.co.presentation.ui.extension.isAfterToday
+import kr.co.presentation.ui.extension.isToday
+import kr.co.presentation.ui.model.calendar.day.ActiveDayItem
 import kr.co.presentation.ui.theme.MinaryTheme
 import java.time.LocalDate
 
 
 @Composable
-fun CalendarDay(
+fun ActiveDay(
     modifier: Modifier = Modifier,
-    dateData: CalendarDateData,
+    dayItem: ActiveDayItem,
     isIconVisible: Boolean = false,
-    onClick: ((Diary) -> Unit)? = null
+    onClick: ((LocalDate) -> Unit)? = null
 ) {
-    val isToday = dateData.isToday()
+    val isToday = dayItem.isToday()
 
     val shape = if (isToday) CircleShape else MaterialTheme.shapes.small
     val color = if (isToday) Color.LightGray else Color.Transparent
@@ -43,7 +42,7 @@ fun CalendarDay(
             .aspectRatio(1f)
             .clickable(
                 enabled = (onClick != null),
-                onClick = { onClick?.invoke(Diary(dateData.year, dateData.month, dateData.date)) }
+                onClick = { onClick?.invoke(dayItem.date) }
             )
             .clip(shape)
             .background(color),
@@ -51,15 +50,15 @@ fun CalendarDay(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = dateData.date.toString(),
+            text = "${dayItem.date.dayOfMonth}",
             style = MaterialTheme.typography.labelSmall,
             color = textColor,
             fontWeight = fontWeight,
         )
 
         if (isIconVisible) {
-            dateData.icon?.let {
-                if (!dateData.isAfterToday())
+            dayItem.icon?.let {
+                if (!dayItem.isAfterToday())
                     Text(text = it)
             }
         }
@@ -68,34 +67,11 @@ fun CalendarDay(
 
 @Preview(showBackground = true)
 @Composable
-private fun CalendarDayPreview() {
-    val today = LocalDate.now()
+private fun ActiveDayPreview() {
     MinaryTheme {
-        CalendarDay(
-            dateData = CalendarDateData(
-                year = today.year,
-                month = today.monthValue,
-                date = today.dayOfMonth,
-                icon = "\uD83D\uDE02"
-            ),
+        ActiveDay(
+            dayItem = ActiveDayItem(),
             isIconVisible = true,
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CalendarDayPreview2() {
-    val nextDay = LocalDate.now().plusDays(1)
-    MinaryTheme {
-        CalendarDay(
-            dateData = CalendarDateData(
-                year = nextDay.year,
-                month = nextDay.monthValue,
-                date = nextDay.dayOfMonth,
-                icon = "\uD83D\uDE02"
-            ),
-            isIconVisible = false,
         )
     }
 }
