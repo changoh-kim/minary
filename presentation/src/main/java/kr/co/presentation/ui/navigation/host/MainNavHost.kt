@@ -10,6 +10,7 @@ import kr.co.presentation.ui.navigation.graph.dashBoardNavGraph
 import kr.co.presentation.ui.navigation.graph.settingNavGraph
 import kr.co.presentation.ui.navigation.graph.storeNavGraph
 import kr.co.presentation.ui.navigation.route.AppRoute
+import kr.co.presentation.viewmodel.main.MainIntent
 import java.time.LocalDate
 
 
@@ -18,10 +19,10 @@ fun MainNavHost(
     navController: NavHostController = rememberNavController(),
     startDestination: AppRoute,
     modifier: Modifier,
-    onNavigateToDiaryScreen: (LocalDate) -> Unit,
+    intent: (MainIntent) -> Unit = {},
 ) {
     NavHost(navController, startDestination, modifier) {
-        calenderNavGraph(navController, onNavigateToDiaryScreen)
+        calenderNavGraph(navController, intent)
         dashBoardNavGraph(navController)
         storeNavGraph(navController)
         settingNavGraph(navController)

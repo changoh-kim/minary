@@ -40,7 +40,6 @@ object CalendarItemMapper {
         return when (this) {
             is ActiveDayData -> ActiveDayItem(
                 date = date,
-                icon = icon,
             )
 
             is InactiveDayData -> InactiveDayItem(

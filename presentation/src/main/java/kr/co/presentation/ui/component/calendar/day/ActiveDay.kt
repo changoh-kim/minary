@@ -3,8 +3,12 @@ package kr.co.presentation.ui.component.calendar.day
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,9 +19,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import kr.co.presentation.ui.extension.isAfterToday
+import androidx.compose.ui.unit.dp
+import kr.co.domain.model.emotion.Emotion
 import kr.co.presentation.ui.extension.isToday
 import kr.co.presentation.ui.model.calendar.day.ActiveDayItem
+import kr.co.presentation.ui.extension.color
+import kr.co.presentation.ui.model.common.UiDiary
 import kr.co.presentation.ui.theme.MinaryTheme
 import java.time.LocalDate
 
@@ -26,8 +33,9 @@ import java.time.LocalDate
 fun ActiveDay(
     modifier: Modifier = Modifier,
     dayItem: ActiveDayItem,
+    diary: UiDiary? = null,
     isIconVisible: Boolean = false,
-    onClick: ((LocalDate) -> Unit)? = null
+    onClick: ((ActiveDayItem) -> Unit)? = null
 ) {
     val isToday = dayItem.isToday()
 
@@ -42,7 +50,7 @@ fun ActiveDay(
             .aspectRatio(1f)
             .clickable(
                 enabled = (onClick != null),
-                onClick = { onClick?.invoke(dayItem.date) }
+                onClick = { onClick?.invoke(dayItem) }
             )
             .clip(shape)
             .background(color),
@@ -57,9 +65,16 @@ fun ActiveDay(
         )
 
         if (isIconVisible) {
-            dayItem.icon?.let {
-                if (!dayItem.isAfterToday())
-                    Text(text = it)
+            if (diary != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(diary.emotion.color, CircleShape)
+                )
+            } else {
+                Spacer(modifier = Modifier.padding(6.dp).size(6.dp))
             }
         }
     }
@@ -70,7 +85,12 @@ fun ActiveDay(
 private fun ActiveDayPreview() {
     MinaryTheme {
         ActiveDay(
-            dayItem = ActiveDayItem(),
+            dayItem = ActiveDayItem(
+                date = LocalDate.now(),
+            ),
+            diary = UiDiary(
+                emotion = Emotion.TRIUMPH,
+            ),
             isIconVisible = true,
         )
     }

@@ -1,4 +1,4 @@
-package kr.co.domain.usecase
+package kr.co.domain.usecase.calendar
 
 import kr.co.domain.repository.CalendarRepository
 import java.time.YearMonth

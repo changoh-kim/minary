@@ -2,14 +2,13 @@ package kr.co.minary.di
 
 import android.app.Application
 import android.content.Context
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kr.co.data.di.GeminiApiKey
+import kr.co.minary.BuildConfig
 import javax.inject.Singleton
 
 
@@ -20,4 +19,14 @@ abstract class AppModule {
     @Singleton
     @Binds
     abstract fun bindContext(application: Application): Context
+
+    companion object {
+
+        @Provides
+        @Singleton
+        @GeminiApiKey
+        fun provideGeminiApiKey(): String {
+            return BuildConfig.GEMINI_API_KEY
+        }
+    }
 }

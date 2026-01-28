@@ -11,8 +11,9 @@ import java.time.Year
 import java.time.YearMonth
 import javax.inject.Inject
 
+
 /**
- * 캘린더 관련 데이터 생성을 담당하는 클래스입니다.
+ * 캘린더 데이터 생성을 담당하는 클래스입니다.
  * Dagger를 통해 의존성 주입으로 관리됩니다.
  */
 class CalendarLocalDataSource @Inject constructor(
@@ -38,7 +39,7 @@ class CalendarLocalDataSource @Inject constructor(
      * @param year 대상 연도.
      * @return 연도 및 월별 데이터 리스트.
      */
-    fun createCalendarOf(year: Year): List<YearMonthDTO> {
+    fun createYearMonths(year: Year): List<YearMonthDTO> {
         val result = ArrayList<YearMonthDTO>(COUNT_OF_CALENDAR_ITEM)
         val quarterStartMonths =
             intArrayOf(
@@ -84,42 +85,39 @@ class CalendarLocalDataSource @Inject constructor(
         val monthDays = ArrayList<DayDTO>(COUNT_OF_ALL_DAYS)
 
         // 이전 달 날짜 계산
+        val firstDay = yearMonth.atDay(1)
         // firstDayOfWeek : yearMonth의 1일이 무슨 요일인지 정수로 반환받음 -> 월(1) ~ 일(7)
-        val firstDayOfWeek = yearMonth.atDay(1).dayOfWeek.value
+        val firstDayOfWeek = firstDay.dayOfWeek.value
         // precedingDaysCount -> 일(0) ~ 토(6)
         val precedingDaysCount = if (firstDayOfWeek == 7) 0 else firstDayOfWeek
         if (precedingDaysCount > 0) {
             val previousMonth = yearMonth.minusMonths(1)
             val prevMonthLength = previousMonth.lengthOfMonth()
             val startDay = prevMonthLength - precedingDaysCount + 1
-            for (date in startDay..prevMonthLength) {
+            for (dayOfMonth in startDay..prevMonthLength) {
+                val date = LocalDate.of(previousMonth.year, previousMonth.monthValue, dayOfMonth)
                 monthDays.add(
-                    InactiveDayDTO(
-                        date = LocalDate.of(previousMonth.year, previousMonth.monthValue, date),
-                    )
+                    InactiveDayDTO(date)
                 )
             }
         }
 
         // 현재 달 날짜 계산
         val lengthOfMonth = yearMonth.lengthOfMonth()
-        for (date in 1..lengthOfMonth) {
+        for (dayOfMonth in 1..lengthOfMonth) {
+            val date = LocalDate.of(yearMonth.year, yearMonth.monthValue, dayOfMonth)
             monthDays.add(
-                ActiveDayDTO(
-                    date = LocalDate.of(yearMonth.year, yearMonth.monthValue, date),
-                    icon = "😂",
-                )
+                ActiveDayDTO(date)
             )
         }
 
         // 다음 달 날짜 계산 (남은 공간 채우기)
         val nextMonth = yearMonth.plusMonths(1)
         val remaining = COUNT_OF_ALL_DAYS - monthDays.size
-        for (date in 1..remaining) {
+        for (dayOfMonth in 1..remaining) {
+            val date = LocalDate.of(nextMonth.year, nextMonth.monthValue, dayOfMonth)
             monthDays.add(
-                InactiveDayDTO(
-                    date = LocalDate.of(nextMonth.year, nextMonth.monthValue, date),
-                )
+                InactiveDayDTO(date)
             )
         }
 

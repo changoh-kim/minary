@@ -2,12 +2,15 @@ package kr.co.presentation.ui.preview
 
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kr.co.domain.model.emotion.Emotion
+import kr.co.presentation.ui.extension.isAfterToday
 import kr.co.presentation.ui.model.calendar.day.ActiveDayItem
 import kr.co.presentation.ui.model.calendar.day.DayItem
 import kr.co.presentation.ui.model.calendar.day.InactiveDayItem
 import kr.co.presentation.ui.model.calendar.yearmonth.MonthItem
 import kr.co.presentation.ui.model.calendar.yearmonth.YearItem
 import kr.co.presentation.ui.model.calendar.yearmonth.YearMonthItem
+import kr.co.presentation.ui.screen.diary.EmotionIcon
 import java.time.LocalDate
 import java.time.Year
 import java.time.YearMonth
@@ -101,34 +104,30 @@ object CalendarPreviewDataFactory {
             val previousMonth = yearMonth.minusMonths(1)
             val prevMonthLength = previousMonth.lengthOfMonth()
             val startDay = prevMonthLength - precedingDaysCount + 1
-            for (date in startDay..prevMonthLength) {
+            for (dayOfMonth in startDay..prevMonthLength) {
+                val date = LocalDate.of(previousMonth.year, previousMonth.monthValue, dayOfMonth)
                 monthDays.add(
-                    InactiveDayItem(
-                        date = LocalDate.of(previousMonth.year, previousMonth.monthValue, date),
-                    )
+                    InactiveDayItem(date)
                 )
             }
         }
 
         // 현재 달 날짜 계산
         val lengthOfMonth = yearMonth.lengthOfMonth()
-        for (date in 1..lengthOfMonth) {
+        for (dayOfMonth in 1..lengthOfMonth) {
+            val date = LocalDate.of(yearMonth.year, yearMonth.monthValue, dayOfMonth)
             monthDays.add(
-                ActiveDayItem(
-                    date = LocalDate.of(yearMonth.year, yearMonth.monthValue, date),
-                    icon = "😂",
-                )
+                ActiveDayItem(date)
             )
         }
 
         // 다음 달 날짜 계산 (남은 공간 채우기)
         val nextMonth = yearMonth.plusMonths(1)
         val remaining = COUNT_OF_ALL_DAYS - monthDays.size
-        for (date in 1..remaining) {
+        for (dayOfMonth in 1..remaining) {
+            val date = LocalDate.of(nextMonth.year, nextMonth.monthValue, dayOfMonth)
             monthDays.add(
-                InactiveDayItem(
-                    date = LocalDate.of(nextMonth.year, nextMonth.monthValue, date),
-                )
+                InactiveDayItem(date)
             )
         }
 

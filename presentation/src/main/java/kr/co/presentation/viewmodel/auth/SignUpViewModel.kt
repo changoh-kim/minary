@@ -3,7 +3,7 @@ package kr.co.presentation.viewmodel.auth
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.domain.exception.AuthException
-import kr.co.domain.usecase.SignUpUseCase
+import kr.co.domain.usecase.auth.SignUpUseCase
 import kr.co.presentation.R
 import kr.co.presentation.ui.model.common.UiText
 import org.orbitmvi.orbit.ContainerHost

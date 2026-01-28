@@ -17,21 +17,28 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 import kr.co.presentation.R
+import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.navigation.extensions.navigateIfNotCurrent
 import kr.co.presentation.ui.navigation.host.MainNavHost
 import kr.co.presentation.ui.navigation.item.NavigationItem
@@ -40,6 +47,11 @@ import kr.co.presentation.ui.navigation.route.DashBoardGraph
 import kr.co.presentation.ui.navigation.route.SettingGraph
 import kr.co.presentation.ui.navigation.route.StoreGraph
 import kr.co.presentation.ui.theme.MinaryTheme
+import kr.co.presentation.viewmodel.main.MainSideEffect
+import kr.co.presentation.viewmodel.main.MainState
+import kr.co.presentation.viewmodel.main.MainViewModel
+import org.orbitmvi.orbit.compose.collectAsState
+import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.LocalDate
 
 
@@ -47,24 +59,41 @@ import java.time.LocalDate
 @Composable
 fun MainScreen(
     onNavigateToDiaryScreen: (LocalDate) -> Unit,
-    // mainViewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel()
 ) {
+    val state: MainState by viewModel.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     val navController = rememberNavController()
 
+    viewModel.collectSideEffect { sideEffect ->
+        when (sideEffect) {
+            is MainSideEffect.NavigateToDiaryScreen -> {
+                onNavigateToDiaryScreen(sideEffect.date)
+            }
+            is MainSideEffect.ShowMsg -> coroutineScope.launch {
+                snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
+            }
+        }
+    }
+
     MainScreen(
+        snackbarHostState = snackbarHostState,
         navController = navController,
     ) { innerPadding ->
         MainNavHost(
             navController = navController,
             startDestination = CalendarGraph,
             modifier = Modifier.padding(innerPadding),
-            onNavigateToDiaryScreen = onNavigateToDiaryScreen
+            viewModel::handleIntent,
         )
     }
 }
 
 @Composable
 private fun MainScreen(
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     navController: NavHostController = rememberNavController(),
     content: @Composable (PaddingValues) -> Unit = {}
 ) {
@@ -79,6 +108,7 @@ private fun MainScreen(
 
     Scaffold(
         topBar = { TopBar() },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             BottomAppBar {
                 navigationItems.forEach { item ->

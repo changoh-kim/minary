@@ -3,7 +3,10 @@ package kr.co.presentation.ui.component.calendar.day
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import kr.co.presentation.ui.model.calendar.day.InactiveDayItem
 import kr.co.presentation.ui.theme.MinaryTheme
 
@@ -36,6 +40,8 @@ fun InactiveDay(
             color = Color.LightGray,
             fontWeight = FontWeight.Normal,
         )
+
+        Spacer(modifier = Modifier.padding(6.dp).size(6.dp))
     }
 }
 

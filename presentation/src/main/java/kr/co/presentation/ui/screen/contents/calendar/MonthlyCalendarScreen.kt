@@ -18,10 +18,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,9 +33,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.distinctUntilChanged
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kr.co.presentation.R
 import kr.co.presentation.ui.component.calendar.CalendarMonth
@@ -44,6 +49,7 @@ import kr.co.presentation.ui.extension.stringArrayResource
 import kr.co.presentation.ui.model.calendar.day.ActiveDayItem
 import kr.co.presentation.ui.model.calendar.day.InactiveDayItem
 import kr.co.presentation.ui.model.calendar.yearmonth.MonthItem
+import kr.co.presentation.ui.model.common.UiDiary
 import kr.co.presentation.ui.preview.CalendarPreviewDataFactory
 import kr.co.presentation.ui.theme.MinaryTheme
 import kr.co.presentation.viewmodel.calendar.MonthlyCalendarIntent
@@ -58,12 +64,12 @@ import java.time.YearMonth
 @Composable
 fun MonthlyCalendarScreen(
     viewModel: MonthlyCalendarViewModel = hiltViewModel(),
-    yearMonth: YearMonth = YearMonth.now(),
     onNavigateToDiaryScreen: (LocalDate) -> Unit,
     onNavigateToYearlyCalendar: (Int) -> Unit = {},
 ) {
     val state by viewModel.collectAsState()
     val pagingItems = viewModel.monthPages.collectAsLazyPagingItems()
+    val diariesMap by viewModel.diariesMap.collectAsState(emptyMap())
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { pagingItems.itemCount }
@@ -71,18 +77,18 @@ fun MonthlyCalendarScreen(
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
-    val currentVisibleYearMonth by remember {
-        derivedStateOf {
-            if (pagingItems.itemCount > 0 && pagerState.currentPage < pagingItems.itemCount) {
-                pagingItems.peek(pagerState.currentPage)?.yearMonth ?: YearMonth.now()
-            } else {
-                yearMonth
-            }
-        }
-    }
 
-    LaunchedEffect(yearMonth) {
-        viewModel.handleIntent(MonthlyCalendarIntent.UpdateCalendar(yearMonth))
+    LaunchedEffect(pagerState, pagingItems.itemCount) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect { page ->
+                if (page < pagingItems.itemCount) {
+                    val yearMonth = pagingItems.peek(page)?.yearMonth
+                    yearMonth?.let {
+                        viewModel.handleIntent(MonthlyCalendarIntent.VisibleMonthChanged(it))
+                    }
+                }
+            }
     }
 
     viewModel.collectSideEffect { sideEffect ->
@@ -91,7 +97,7 @@ fun MonthlyCalendarScreen(
                 onNavigateToYearlyCalendar(sideEffect.year)
             }
 
-            is MonthlyCalendarSideEffect.NavigateToDailyCalendar -> {
+            is MonthlyCalendarSideEffect.NavigateToDiaryScreen -> {
                 onNavigateToDiaryScreen(sideEffect.date)
             }
 
@@ -108,10 +114,11 @@ fun MonthlyCalendarScreen(
     }
 
     MonthlyCalendarScreen(
-        yearMonth = currentVisibleYearMonth,
+        yearMonth = state.visibleYearMonth,
         snackbarHostState = snackbarHostState,
         pagingItems = pagingItems,
         pagerState = pagerState,
+        diariesMap = diariesMap,
         intent = viewModel::handleIntent
     )
 }
@@ -125,6 +132,7 @@ private fun MonthlyCalendarScreen(
         initialPage = 0,
         pageCount = { pagingItems.itemCount },
     ),
+    diariesMap: Map<LocalDate, UiDiary> = emptyMap(),
     intent: (MonthlyCalendarIntent) -> Unit = {},
 ) {
     Scaffold(
@@ -150,8 +158,9 @@ private fun MonthlyCalendarScreen(
             CalendarPager(
                 pagerState = pagerState,
                 pagingItems = pagingItems,
-                onDayClick = { date ->
-                    intent(MonthlyCalendarIntent.DayButtonClicked(date))
+                diariesMap = diariesMap,
+                onDayClick = { dayItem ->
+                    intent(MonthlyCalendarIntent.DayClicked(dayItem))
                 }
             )
         }
@@ -221,7 +230,8 @@ private fun Weekday() {
 private fun CalendarPager(
     pagerState: PagerState,
     pagingItems: LazyPagingItems<MonthItem>,
-    onDayClick: (LocalDate) -> Unit = {},
+    diariesMap: Map<LocalDate, UiDiary>,
+    onDayClick: (ActiveDayItem) -> Unit = {},
 ) {
     HorizontalPager(
         state = pagerState,
@@ -247,8 +257,9 @@ private fun CalendarPager(
                         ActiveDay(
                             modifier = Modifier.weight(1f),
                             dayItem,
+                            diary = diariesMap[dayItem.date],
                             isIconVisible = true
-                        ) { date -> onDayClick(date) }
+                        ) { day -> onDayClick(day) }
                     }
 
                     is InactiveDayItem -> {

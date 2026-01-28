@@ -9,51 +9,19 @@ import java.time.YearMonth
 
 
 // java class extensions
-fun Year.isCurrentYear(): Boolean {
-    return this == Year.now()
-}
-
-fun Year.isAfterCurrentYear(): Boolean {
-    return this.isAfter(Year.now())
-}
-
-fun YearMonth.isCurrentYearMonth(): Boolean {
-    return this == YearMonth.now()
-}
-
-fun YearMonth.isAfterCurrentYearMonth(): Boolean {
-    return this.isAfter(YearMonth.now())
-}
-
-fun LocalDate.isToday(): Boolean {
-    return this == LocalDate.now()
-}
-
-fun LocalDate.isAfterToday(): Boolean {
-    return this.isAfter(LocalDate.now())
-}
+fun Year.isCurrentYear(): Boolean = this == Year.now()
+fun Year.isAfterCurrentYear(): Boolean = this.isAfter(Year.now())
+fun YearMonth.isCurrentYearMonth(): Boolean = this == YearMonth.now()
+fun YearMonth.isAfterCurrentYearMonth(): Boolean = this.isAfter(YearMonth.now())
+fun LocalDate.isToday(): Boolean = this == LocalDate.now()
+fun LocalDate.isAfterToday(): Boolean = this.isAfter(LocalDate.now())
 
 // minary class extensions
-fun YearItem.isCurrentYear(): Boolean {
-    return year == Year.now()
-}
-
-fun YearItem.isAfterCurrentYear(): Boolean {
-    return year.isAfter(Year.now())
-}
-
-fun MonthItem.isCurrentMonth(): Boolean {
-    return yearMonth == YearMonth.now()
-}
-
-fun MonthItem.isAfterCurrentYearMonth(): Boolean {
-    return yearMonth.isAfter(YearMonth.now())
-}
-
-fun DayItem.isToday(): Boolean {
-    return date == LocalDate.now()
-}
-
-fun DayItem.isAfterToday(): Boolean {
-    return date.isAfter(LocalDate.now())
-}
+fun YearItem.isCurrentYear(): Boolean = year == Year.now()
+fun YearItem.isAfterCurrentYear(): Boolean = year.isAfter(Year.now())
+fun MonthItem.isCurrentMonth(): Boolean = yearMonth == YearMonth.now()
+fun MonthItem.isAfterCurrentYearMonth(): Boolean = yearMonth.isAfter(YearMonth.now())
+fun DayItem.isToday(): Boolean = date == LocalDate.now()
+fun DayItem.isAfterToday(): Boolean = date.isAfter(LocalDate.now())
+fun DayItem.toYear(): Year = Year.of(date.year)
+fun DayItem.toYearMonth(): YearMonth = YearMonth.of(date.year, date.monthValue)
