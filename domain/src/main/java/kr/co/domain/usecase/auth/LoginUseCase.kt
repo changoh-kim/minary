@@ -1,4 +1,4 @@
-package kr.co.domain.usecase
+package kr.co.domain.usecase.auth
 
 import kr.co.domain.model.auth.User
 import kr.co.domain.repository.AuthRepository

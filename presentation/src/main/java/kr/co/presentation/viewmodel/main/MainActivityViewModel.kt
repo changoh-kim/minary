@@ -4,12 +4,12 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.domain.exception.AuthException
-import kr.co.domain.model.auth.User
-import kr.co.domain.usecase.IsUserLoggedInUseCase
+import kr.co.domain.usecase.auth.IsUserLoggedInUseCase
+import kr.co.domain.usecase.diary.SyncDiaryUseCase
 import kr.co.presentation.R
 import kr.co.presentation.mapper.UserMapper.toUiUser
-import kr.co.presentation.ui.model.common.UiUser
 import kr.co.presentation.ui.model.common.UiText
+import kr.co.presentation.ui.model.common.UiUser
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -42,7 +42,8 @@ sealed interface MainActivityIntent {
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val isUserLoggedInUseCase: IsUserLoggedInUseCase
+    private val isUserLoggedInUseCase: IsUserLoggedInUseCase,
+    private val syncDiaryUseCase: SyncDiaryUseCase,
 ) : ViewModel(), ContainerHost<MainActivityState, MainActivitySideEffect> {
 
     override val container = container<MainActivityState, MainActivitySideEffect>(MainActivityState())
@@ -58,6 +59,8 @@ class MainActivityViewModel @Inject constructor(
             reduce {
                 state.copy(loginUser = user.toUiUser(), uiState = MainActivityUiState.Main)
             }
+
+            syncDiaryUseCase()
         }.onFailure { error ->
             reduce {
                 state.copy(loginUser = null, uiState = MainActivityUiState.Auth)

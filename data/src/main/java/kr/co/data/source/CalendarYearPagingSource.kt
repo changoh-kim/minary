@@ -40,7 +40,7 @@ class CalendarYearPagingSource(
                 if (firstYear == null) firstYear = year
                 lastYear = year
 
-                gridItems.addAll(calendarLocalDataSource.createCalendarOf(year))
+                gridItems.addAll(calendarLocalDataSource.createYearMonths(year))
             }
 
             if (gridItems.isEmpty()) {

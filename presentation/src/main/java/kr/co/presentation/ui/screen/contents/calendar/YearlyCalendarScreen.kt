@@ -26,6 +26,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,11 +39,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.distinctUntilChanged
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kr.co.presentation.R
 import kr.co.presentation.ui.component.calendar.CalendarMonth
@@ -50,6 +53,7 @@ import kr.co.presentation.ui.component.calendar.day.ActiveDay
 import kr.co.presentation.ui.extension.getString
 import kr.co.presentation.ui.extension.isCurrentMonth
 import kr.co.presentation.ui.extension.isCurrentYear
+import kr.co.presentation.ui.extension.toYearMonth
 import kr.co.presentation.ui.model.calendar.day.ActiveDayItem
 import kr.co.presentation.ui.model.calendar.day.InactiveDayItem
 import kr.co.presentation.ui.model.calendar.yearmonth.MonthItem
@@ -70,7 +74,6 @@ import java.time.YearMonth
 @Composable
 fun YearlyCalendarScreen(
     viewModel: YearlyCalendarViewModel = hiltViewModel(),
-    year: Year = Year.now(),
     onNavigateToMonthlyCalendar: (YearMonth) -> Unit
 ) {
     val state by viewModel.collectAsState()
@@ -82,22 +85,33 @@ fun YearlyCalendarScreen(
     val currentVisibleYear by remember {
         derivedStateOf {
             val visibleItems = gridState.layoutInfo.visibleItemsInfo
-            if (visibleItems.isEmpty()) return@derivedStateOf year
+            if (visibleItems.isEmpty() || pagingItems.itemCount == 0) {
+                return@derivedStateOf state.visibleYear
+            }
 
-            val viewportCenter = gridState.layoutInfo.viewportEndOffset / 2
+            //val viewportCenter = gridState.layoutInfo.viewportEndOffset / 2
+            val viewportCenter = (gridState.layoutInfo.viewportStartOffset + gridState.layoutInfo.viewportEndOffset) / 2
 
             val centralItem = visibleItems.minByOrNull {
-                val itemCenter = (it.offset.y + it.size.height / 2)
+                val itemCenter = it.offset.y + it.size.height / 2
                 kotlin.math.abs(itemCenter - viewportCenter)
             }
 
-            val dataIndex = centralItem?.index ?: 0
-            pagingItems.peek(dataIndex)?.getYear() ?: year
+            centralItem?.index?.let {
+                pagingItems.peek(it)?.getYear()
+            } ?: state.visibleYear
         }
     }
 
-    LaunchedEffect(year) {
-        viewModel.handleIntent(YearlyCalendarIntent.UpdateCalendar(year))
+    LaunchedEffect(gridState, pagingItems.itemCount) {
+        snapshotFlow { gridState.isScrollInProgress }
+            .distinctUntilChanged()
+            .collect { isScrolling ->
+                // 스크롤이 멈췄을 때만
+                if (!isScrolling) {
+                    viewModel.handleIntent(YearlyCalendarIntent.VisibleYearChanged(currentVisibleYear))
+                }
+            }
     }
 
     viewModel.collectSideEffect { sideEffect ->
@@ -115,6 +129,7 @@ fun YearlyCalendarScreen(
             }
         }
     }
+
     YearlyCalendarScreen(
         year = currentVisibleYear,
         pagingItems = pagingItems,
@@ -271,9 +286,8 @@ private fun MonthCalendarItem(
                     modifier = Modifier.weight(1f),
                     dayItem = dayItem,
                     isIconVisible = false
-                ) { date ->
-                    onMonthClick(YearMonth.of(date.year, date.month))
-                    /*onMonthClick(YearMonthItem.MonthItem(year = diary.year, yearMonth = diary.month))*/
+                ) { day ->
+                    onMonthClick(day.toYearMonth())
                 }
             }
 

@@ -5,11 +5,9 @@ import kr.co.presentation.ui.model.common.UiUser
 
 
 object UserMapper {
-    fun User.toUiUser(): UiUser {
-        return UiUser(
-            name = this.name,
-            email = this.email,
-            photoUrl = this.photoUrl,
-        )
-    }
+    fun User.toUiUser() = UiUser(
+        name = this.name,
+        email = this.email,
+        photoUrl = this.photoUrl,
+    )
 }

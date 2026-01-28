@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
@@ -13,10 +14,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kr.co.domain.usecase.GetCalendarMonthUseCase
+import kr.co.domain.usecase.calendar.GetCalendarMonthUseCase
+import kr.co.domain.usecase.diary.GetDiariesUseCase
 import kr.co.presentation.mapper.CalendarItemMapper.toMonthItem
+import kr.co.presentation.mapper.UiDiaryMapper.toUiDiary
+import kr.co.presentation.ui.model.calendar.day.ActiveDayItem
 import kr.co.presentation.ui.model.calendar.yearmonth.MonthItem
+import kr.co.presentation.ui.model.common.UiDiary
 import kr.co.presentation.ui.model.common.UiText
+import kr.co.presentation.ui.navigation.route.MonthlyCalendar
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -29,72 +35,131 @@ import javax.inject.Inject
 
 @Immutable
 data class MonthlyCalendarState(
-    val targetYearMonth: YearMonth = YearMonth.now(),
+    val initYearMonth: YearMonth = YearMonth.now(),
     val refreshKey: Long = 0L,
+    val visibleYearMonth: YearMonth = YearMonth.now(),
 )
 
 @Immutable
 sealed interface MonthlyCalendarSideEffect {
     data class NavigateToYearlyCalendar(val year: Int) : MonthlyCalendarSideEffect
-    data class NavigateToDailyCalendar(val date: LocalDate) : MonthlyCalendarSideEffect
+    data class NavigateToDiaryScreen(val date: LocalDate) : MonthlyCalendarSideEffect
     object ScrollToToday : MonthlyCalendarSideEffect
     data class ShowMsg(val uiText: UiText) : MonthlyCalendarSideEffect
 }
 
 sealed interface MonthlyCalendarIntent {
-    data class UpdateCalendar(val targetYearMonth: YearMonth) : MonthlyCalendarIntent
+    data class VisibleMonthChanged(val visibleYearMonth: YearMonth) : MonthlyCalendarIntent
     object TodayButtonClicked : MonthlyCalendarIntent
     data class YearButtonClicked(val year: Int) : MonthlyCalendarIntent
-    data class DayButtonClicked(val date: LocalDate) : MonthlyCalendarIntent
+    data class DayClicked(val dayItem: ActiveDayItem) : MonthlyCalendarIntent
 }
 
 @HiltViewModel
 class MonthlyCalendarViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getCalendarMonthUseCase: GetCalendarMonthUseCase,
+    private val getDiariesUseCase: GetDiariesUseCase,
 ) : ViewModel(), ContainerHost<MonthlyCalendarState, MonthlyCalendarSideEffect> {
+
+    companion object {
+        private const val KEY_INIT_YEAR = "initYear"
+        private const val KEY_INIT_MONTH = "initMonth"
+        private const val KEY_REFRESH_KEY = "refreshKey"
+
+        private const val KEY_VISIBLE_YEAR = "visibleYear"
+        private const val KEY_VISIBLE_MONTH = "visibleMonth"
+    }
 
     override val container =
         container<MonthlyCalendarState, MonthlyCalendarSideEffect>(MonthlyCalendarState())
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val monthPages: Flow<PagingData<MonthItem>> = container.stateFlow
-        .map { state -> (state.targetYearMonth to state.refreshKey) }
+        .map { state -> (state.initYearMonth to state.refreshKey) }
         .distinctUntilChanged()
         .flatMapLatest { (targetYearMonth, refreshKey) ->
-            getCalendarMonthUseCase(targetYearMonth).map { pagingData ->
-                pagingData.map { monthData ->
-                    monthData.toMonthItem()
-                }
+            getCalendarMonthUseCase(targetYearMonth)
+        }.map { pagingData ->
+            pagingData.map { monthData ->
+                monthData.toMonthItem()
             }
         }.cachedIn(viewModelScope)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val diariesMap: Flow<Map<LocalDate, UiDiary>> = container.stateFlow
+        .map { it.visibleYearMonth }
+        .distinctUntilChanged()
+        .flatMapLatest { yearMonth ->
+            getDiariesUseCase(
+                centerMonth = yearMonth,
+                monthRange = 1
+            )
+        }.map { diaryList ->
+            diaryList.associate { diaryData ->
+                diaryData.date to diaryData.toUiDiary()
+            }
+        }
+
+    init {
+        initializeState()
+    }
+
+    private fun initializeState() = intent {
+        val monthCalender = savedStateHandle.toRoute<MonthlyCalendar>()
+
+        val initYear = savedStateHandle.get<Int>(KEY_INIT_YEAR) ?: monthCalender.year
+        val initMonth = savedStateHandle.get<Int>(KEY_INIT_MONTH) ?: monthCalender.month
+        val refreshKey = savedStateHandle.get<Long>(KEY_REFRESH_KEY) ?: System.currentTimeMillis()
+        val visibleYear = savedStateHandle.get<Int>(KEY_VISIBLE_YEAR) ?: monthCalender.year
+        val visibleMonth = savedStateHandle.get<Int>(KEY_VISIBLE_MONTH) ?: monthCalender.month
+
+        reduce {
+            state.copy(
+                initYearMonth = YearMonth.of(initYear, initMonth),
+                refreshKey = refreshKey,
+                visibleYearMonth = YearMonth.of(visibleYear, visibleMonth)
+            )
+        }
+
+        savedStateHandle[KEY_INIT_YEAR] = initYear
+        savedStateHandle[KEY_INIT_MONTH] = initMonth
+        savedStateHandle[KEY_REFRESH_KEY] = refreshKey
+        savedStateHandle[KEY_VISIBLE_YEAR] = visibleYear
+        savedStateHandle[KEY_VISIBLE_MONTH] = visibleMonth
+    }
+
     fun handleIntent(intent: MonthlyCalendarIntent) {
         when (intent) {
-            is MonthlyCalendarIntent.UpdateCalendar -> updateCalendar(intent.targetYearMonth)
+            is MonthlyCalendarIntent.VisibleMonthChanged -> updateVisibleMonth(intent.visibleYearMonth)
             is MonthlyCalendarIntent.TodayButtonClicked -> scrollToToday()
             is MonthlyCalendarIntent.YearButtonClicked -> navigateToYearlyCalendar(intent.year)
-            is MonthlyCalendarIntent.DayButtonClicked -> navigateToDailyCalendar(intent.date)
+            is MonthlyCalendarIntent.DayClicked -> navigateToDiaryScreen(intent.dayItem.date)
         }
     }
 
-    private fun updateCalendar(targetYearMonth: YearMonth) = intent {
-        reduce {
-            state.copy(
-                targetYearMonth = targetYearMonth,
-                refreshKey = System.currentTimeMillis()
-            )
-        }
+    private fun updateVisibleMonth(visibleYearMonth: YearMonth) = intent {
+        reduce { state.copy(visibleYearMonth = visibleYearMonth) }
+
+        savedStateHandle[KEY_VISIBLE_YEAR] = visibleYearMonth.year
+        savedStateHandle[KEY_VISIBLE_MONTH] = visibleYearMonth.monthValue
     }
 
     private fun scrollToToday() = intent {
-        val today = YearMonth.now()
+        val currentYearMonth = YearMonth.now()
+        val refreshKey = System.currentTimeMillis()
+
         reduce {
             state.copy(
-                targetYearMonth = YearMonth.of(today.year, today.monthValue),
-                refreshKey = System.currentTimeMillis()
+                initYearMonth = currentYearMonth,
+                refreshKey = refreshKey
             )
         }
+
+        savedStateHandle[KEY_INIT_YEAR] = currentYearMonth.year
+        savedStateHandle[KEY_INIT_MONTH] = currentYearMonth.monthValue
+        savedStateHandle[KEY_REFRESH_KEY] = refreshKey
+
         postSideEffect(MonthlyCalendarSideEffect.ScrollToToday)
     }
 
@@ -102,7 +167,7 @@ class MonthlyCalendarViewModel @Inject constructor(
         postSideEffect(MonthlyCalendarSideEffect.NavigateToYearlyCalendar(year))
     }
 
-    private fun navigateToDailyCalendar(date: LocalDate) = intent {
-        postSideEffect(MonthlyCalendarSideEffect.NavigateToDailyCalendar(date))
+    private fun navigateToDiaryScreen(date: LocalDate) = intent {
+        postSideEffect(MonthlyCalendarSideEffect.NavigateToDiaryScreen(date))
     }
 }

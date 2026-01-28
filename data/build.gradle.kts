@@ -49,6 +49,8 @@ dependencies {
     // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
+    implementation(libs.hilt.work)
+    ksp(libs.hilt.compiler)
 
     // serialization
     implementation(libs.kotlinx.serialization.json)
@@ -60,6 +62,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.firestore.ktx)
 
     // paging
     implementation(libs.androidx.paging.runtime)
@@ -67,6 +70,18 @@ dependencies {
 
     // coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+    // room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    testImplementation(libs.androidx.room.testing)
+
+    // generative ai
+    implementation(libs.generative.ai)
+
+    // work
+    implementation(libs.androidx.work.runtime.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

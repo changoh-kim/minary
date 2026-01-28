@@ -4,7 +4,8 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.domain.exception.AuthException
-import kr.co.domain.usecase.LoginUseCase
+import kr.co.domain.usecase.auth.LoginUseCase
+import kr.co.domain.usecase.diary.CheckAndDownloadInitialDiariesUseCase
 import kr.co.presentation.R
 import kr.co.presentation.ui.model.common.UiText
 import org.orbitmvi.orbit.ContainerHost
@@ -41,6 +42,7 @@ sealed interface LoginIntent {
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
+    private val checkAndDownloadInitialDiariesUseCase: CheckAndDownloadInitialDiariesUseCase,
 ) : ViewModel(), ContainerHost<LoginState, LoginSideEffect> {
 
     override val container = container<LoginState, LoginSideEffect>(LoginState())
@@ -83,6 +85,8 @@ class LoginViewModel @Inject constructor(
 
         val login = loginUseCase(state.id, state.password)
         login.onSuccess {
+            checkAndDownloadInitialDiariesUseCase()
+
             reduce {
                 state.copy(
                     isLoggingIn = false,

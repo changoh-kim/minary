@@ -12,4 +12,6 @@ plugins {
     // serialization
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.firebase) apply false
+    // secrets
+    alias(libs.plugins.secrets) apply false
 }
