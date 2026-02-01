@@ -121,12 +121,6 @@ class MonthlyCalendarViewModel @Inject constructor(
                 visibleYearMonth = YearMonth.of(visibleYear, visibleMonth)
             )
         }
-
-        savedStateHandle[KEY_INIT_YEAR] = initYear
-        savedStateHandle[KEY_INIT_MONTH] = initMonth
-        savedStateHandle[KEY_REFRESH_KEY] = refreshKey
-        savedStateHandle[KEY_VISIBLE_YEAR] = visibleYear
-        savedStateHandle[KEY_VISIBLE_MONTH] = visibleMonth
     }
 
     fun handleIntent(intent: MonthlyCalendarIntent) {

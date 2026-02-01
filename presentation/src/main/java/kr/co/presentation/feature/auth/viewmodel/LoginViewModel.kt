@@ -1,13 +1,16 @@
 package kr.co.presentation.feature.auth.viewmodel
 
 import androidx.compose.runtime.Immutable
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.domain.feature.auth.exception.AuthException
 import kr.co.domain.feature.auth.usecase.LoginUseCase
 import kr.co.domain.feature.diary.usecase.CheckAndDownloadInitialDiariesUseCase
 import kr.co.presentation.R
 import kr.co.presentation.common.model.UiText
+import kr.co.presentation.feature.auth.navigation.LoginRoute
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.blockingIntent
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -41,11 +44,30 @@ sealed interface LoginIntent {
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val loginUseCase: LoginUseCase,
     private val checkAndDownloadInitialDiariesUseCase: CheckAndDownloadInitialDiariesUseCase,
 ) : ViewModel(), ContainerHost<LoginUiState, LoginSideEffect> {
 
+    companion object {
+        private const val KEY_ID = "user_id"
+        private const val KEY_PASSWORD = "user_password"
+    }
+
     override val container = container<LoginUiState, LoginSideEffect>(LoginUiState())
+
+    init {
+        initializeState()
+    }
+
+    private fun initializeState() = intent {
+        val route = savedStateHandle.toRoute<LoginRoute>()
+
+        val id = savedStateHandle.get<String>(KEY_ID) ?: ""
+        val password = savedStateHandle.get<String>(KEY_PASSWORD) ?: ""
+
+        reduce { state.copy(id = id, password = password) }
+    }
 
     fun handleIntent(intent: LoginIntent) {
         when (intent) {
@@ -58,10 +80,12 @@ class LoginViewModel @Inject constructor(
 
     private fun updateId(newId: String) = blockingIntent {
         reduce { state.copy(id = newId) }
+        savedStateHandle[KEY_ID] = newId
     }
 
     private fun updatePassword(newPassword: String) = blockingIntent {
         reduce { state.copy(password = newPassword) }
+        savedStateHandle[KEY_ID] = newPassword
     }
 
     private fun login() = intent {

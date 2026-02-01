@@ -108,10 +108,6 @@ class YearlyCalendarViewModel @Inject constructor(
             postSideEffect(YearlyCalendarSideEffect.ScrollToInitialPosition)
             savedStateHandle[KEY_INITIAL_SCROLL_COMPLETED] = true
         }
-
-        savedStateHandle[KEY_INIT_YEAR] = initYear
-        savedStateHandle[KEY_REFRESH_KEY] = refreshKey
-        savedStateHandle[KEY_VISIBLE_YEAR] = visibleYear
     }
 
     fun handleIntent(intent: YearlyCalendarIntent) {

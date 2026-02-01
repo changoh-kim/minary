@@ -13,11 +13,6 @@ import javax.inject.Inject
 
 
 @Immutable
-data class MainUiState(
-    val selectedItem: String = ""
-)
-
-@Immutable
 sealed interface MainSideEffect {
     data class NavigateToDiaryScreen(val date: LocalDate) : MainSideEffect
     data class ShowMsg(val uiText: UiText) : MainSideEffect
@@ -29,10 +24,10 @@ sealed interface MainIntent {
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+) : ViewModel(), ContainerHost<Unit, MainSideEffect> {
+    override val container = container<Unit, MainSideEffect>(Unit)
 
-) : ViewModel(), ContainerHost<MainUiState, MainSideEffect> {
-    override val container =
-        container<MainUiState, MainSideEffect>(MainUiState())
+    companion object {}
 
     fun handleIntent(intent: MainIntent) {
         when (intent) {
