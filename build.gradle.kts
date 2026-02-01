@@ -5,13 +5,10 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.jetbrains.kotlin.jvm) apply false
     alias(libs.plugins.android.library) apply false
-    // ksp
     alias(libs.plugins.ksp) apply false
-    // hilt
     alias(libs.plugins.hilt) apply false
-    // serialization
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.firebase) apply false
-    // secrets
     alias(libs.plugins.secrets) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
 }

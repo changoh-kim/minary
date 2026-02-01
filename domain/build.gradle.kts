@@ -13,10 +13,7 @@ kotlin {
 }
 
 dependencies {
-    // dependencies injection
     implementation(libs.javax.inject)
-    // coroutines
     implementation(libs.kotlinx.coroutines.core)
-    // paging
     implementation(libs.androidx.paging.common)
 }
