@@ -18,10 +18,6 @@ internal class CalendarMonthPreviewDataProvider(
     override val values: Sequence<CalendarMonthPreviewData> = sequenceOf(
         CalendarMonthPreviewData(
             monthItem = monthItem,
-            emotion = null
-        ),
-        CalendarMonthPreviewData(
-            monthItem = monthItem,
             emotion = Emotion.SADNESS
         )
     )

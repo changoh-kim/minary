@@ -43,7 +43,7 @@ import kr.co.presentation.R
 import kr.co.presentation.common.composable.stringArrayResource
 import kr.co.presentation.common.extension.getString
 import kr.co.presentation.feature.calendar.composable.ActiveDay
-import kr.co.presentation.feature.calendar.composable.CalendarMonth
+import kr.co.presentation.feature.calendar.composable.MonthCalendar
 import kr.co.presentation.feature.calendar.composable.InactiveDay
 import kr.co.presentation.feature.calendar.model.CalendarDayItem
 import kr.co.presentation.feature.calendar.model.CalendarMonthItem
@@ -244,7 +244,7 @@ private fun CalendarPager(
     ) { page ->
         val monthItem = pagingItems[page]
         monthItem?.let {
-            CalendarMonth(
+            MonthCalendar(
                 monthItem = monthItem,
                 headerContent = {
                     Weekday()
