@@ -46,11 +46,9 @@ import kr.co.presentation.feature.store.navigation.StoreRoute
 import kr.co.presentation.main.navigation.MainHost
 import kr.co.presentation.main.navigation.MainNavigationItem
 import kr.co.presentation.main.viewmodel.MainSideEffect
-import kr.co.presentation.main.viewmodel.MainUiState
 import kr.co.presentation.main.viewmodel.MainViewModel
 import kr.co.presentation.navigation.extension.navigateIfNotCurrent
 import kr.co.presentation.theme.MinaryTheme
-import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.LocalDate
 import java.time.YearMonth
@@ -62,7 +60,6 @@ fun MainScreen(
     onNavigateToDiaryScreen: (LocalDate) -> Unit,
     viewModel: MainViewModel = hiltViewModel()
 ) {
-    val state: MainUiState by viewModel.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current

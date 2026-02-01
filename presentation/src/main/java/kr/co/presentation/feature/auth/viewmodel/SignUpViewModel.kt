@@ -1,11 +1,14 @@
 package kr.co.presentation.feature.auth.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.domain.feature.auth.exception.AuthException
 import kr.co.domain.feature.auth.usecase.SignUpUseCase
 import kr.co.presentation.R
 import kr.co.presentation.common.model.UiText
+import kr.co.presentation.feature.auth.navigation.SignUpRoute
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.blockingIntent
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -40,10 +43,40 @@ sealed interface SignUpIntent {
 
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val signUpUseCase: SignUpUseCase
 ) : ViewModel(), ContainerHost<SignUpUiState, SignUpSideEffect> {
 
+    companion object {
+        private const val KEY_EMAIL = "email"
+        private const val KEY_USER_NAME = "user_name"
+        private const val KEY_PASSWORD = "password"
+        private const val KEY_CONFIRM_PASSWORD = "confirm_password"
+    }
+
     override val container = container<SignUpUiState, SignUpSideEffect>(SignUpUiState())
+
+    init {
+        initializeState()
+    }
+
+    private fun initializeState() = intent {
+        val route = savedStateHandle.toRoute<SignUpRoute>()
+
+        val email = savedStateHandle.get<String>(KEY_EMAIL) ?: ""
+        val userName = savedStateHandle.get<String>(KEY_USER_NAME) ?: ""
+        val password = savedStateHandle.get<String>(KEY_PASSWORD) ?: ""
+        val confirmPassword = savedStateHandle.get<String>(KEY_CONFIRM_PASSWORD) ?: ""
+
+        reduce {
+            state.copy(
+                email = email,
+                userName = userName,
+                password = password,
+                confirmPassword = confirmPassword
+            )
+        }
+    }
 
     fun handelIntent(intent: SignUpIntent) {
         when (intent) {
@@ -57,18 +90,22 @@ class SignUpViewModel @Inject constructor(
 
     private fun updateEmail(newEmail: String) = blockingIntent {
         reduce { state.copy(email = newEmail) }
+        savedStateHandle[KEY_EMAIL] = newEmail
     }
 
     private fun updateUserName(newUserName: String) = blockingIntent {
         reduce { state.copy(userName = newUserName) }
+        savedStateHandle[KEY_USER_NAME] = newUserName
     }
 
     private fun updatePassword(newPassword: String) = blockingIntent {
         reduce { state.copy(password = newPassword) }
+        savedStateHandle[KEY_PASSWORD] = newPassword
     }
 
     private fun updateConfirmPassword(newConfirmPassword: String) = blockingIntent {
         reduce { state.copy(confirmPassword = newConfirmPassword) }
+        savedStateHandle[KEY_CONFIRM_PASSWORD] = newConfirmPassword
     }
 
     private fun signUp() = intent {

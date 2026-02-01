@@ -36,10 +36,6 @@ sealed interface MainActivitySideEffect {
     data class ShowMsg(val uiText: UiText) : MainActivitySideEffect // 오류 메시지 표시
 }
 
-sealed interface MainActivityIntent {
-
-}
-
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     private val isUserLoggedInUseCase: IsUserLoggedInUseCase,

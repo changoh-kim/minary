@@ -66,7 +66,7 @@ class DiaryViewModel @Inject constructor(
     companion object {
         private const val KEY_SCREEN_MODE = "screen_mode"
         private const val KEY_DIARY_ID = "diary_id"
-        private const val KEY_TITLE = "title"
+        private const val KEY_PASSWORD = "title"
         private const val KEY_CONTENT = "content"
         private const val KEY_EMOTION = "emotion"
     }
@@ -75,12 +75,18 @@ class DiaryViewModel @Inject constructor(
         container<DiaryUiState, DiarySideEffect>(DiaryUiState())
 
     init {
-         initializeState()
+        initializeState()
     }
 
     private fun initializeState() = intent {
         val route = savedStateHandle.toRoute<DiaryRoute>()
         val date = LocalDate.of(route.year, route.month, route.date)
+
+        val screenMode = savedStateHandle.get<DiaryScreenMode>(KEY_SCREEN_MODE) ?: DiaryScreenMode.Edit
+        val diaryId = savedStateHandle.get<Long>(KEY_DIARY_ID) ?: 0L
+        val title = savedStateHandle.get<String>(KEY_PASSWORD) ?: ""
+        val content = savedStateHandle.get<String>(KEY_CONTENT) ?: ""
+        val emotion = savedStateHandle.get<Emotion>(KEY_EMOTION) ?: Emotion.UNKNOWN
 
         getDiaryUseCase(date).onSuccess { diary ->
             val diaryUiModel = diary.toDiaryUiModel()
@@ -93,18 +99,12 @@ class DiaryViewModel @Inject constructor(
             }
             savedStateHandle[KEY_SCREEN_MODE] = screenMode
             savedStateHandle[KEY_DIARY_ID] = diaryUiModel.id
-            savedStateHandle[KEY_TITLE] = diaryUiModel.title
+            savedStateHandle[KEY_PASSWORD] = diaryUiModel.title
             savedStateHandle[KEY_CONTENT] = diaryUiModel.content
             savedStateHandle[KEY_EMOTION] = diaryUiModel.emotion
         }.onFailure { error ->
             when (error) {
                 is DiaryNotFoundException -> {
-                    val screenMode = savedStateHandle.get<DiaryScreenMode>(KEY_SCREEN_MODE) ?: DiaryScreenMode.Edit
-                    val diaryId = savedStateHandle.get<Long>(KEY_DIARY_ID) ?: 0L
-                    val title = savedStateHandle.get<String>(KEY_TITLE) ?: ""
-                    val content = savedStateHandle.get<String>(KEY_CONTENT) ?: ""
-                    val emotion = savedStateHandle.get<Emotion>(KEY_EMOTION) ?: Emotion.UNKNOWN
-
                     reduce {
                         state.copy(
                             screenMode = screenMode,
@@ -136,7 +136,7 @@ class DiaryViewModel @Inject constructor(
 
     private fun updateTitle(newTitle: String) = blockingIntent {
         reduce { state.copy(diaryUiModel = state.diaryUiModel.copy(title = newTitle)) }
-        savedStateHandle[KEY_TITLE] = newTitle
+        savedStateHandle[KEY_PASSWORD] = newTitle
     }
 
     private fun updateContent(newContent: String) = blockingIntent {
@@ -183,7 +183,7 @@ class DiaryViewModel @Inject constructor(
             }
             savedStateHandle[KEY_SCREEN_MODE] = screenMode
             savedStateHandle[KEY_DIARY_ID] = diaryUiModel.id
-            savedStateHandle[KEY_TITLE] = diaryUiModel.title
+            savedStateHandle[KEY_PASSWORD] = diaryUiModel.title
             savedStateHandle[KEY_CONTENT] = diaryUiModel.content
             savedStateHandle[KEY_EMOTION] = diaryUiModel.emotion
         }.onFailure { error ->

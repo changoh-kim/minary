@@ -17,8 +17,8 @@ import kr.co.presentation.common.extension.getString
 import kr.co.presentation.feature.auth.navigation.WelcomeRoute
 import kr.co.presentation.main.navigation.MainRoute
 import kr.co.presentation.main.viewmodel.MainActivitySideEffect
-import kr.co.presentation.main.viewmodel.StartDestination
 import kr.co.presentation.main.viewmodel.MainActivityViewModel
+import kr.co.presentation.main.viewmodel.StartDestination
 import kr.co.presentation.navigation.host.AppNaveGraph
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
