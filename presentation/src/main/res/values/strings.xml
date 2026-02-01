@@ -1,34 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Minary</string>
-    <string-array name="weekdays">
-        <item>Sun</item>
-        <item>Mon</item>
-        <item>Tue</item>
-        <item>Web</item>
-        <item>Thu</item>
-        <item>Fri</item>
-        <item>Sat</item>
-    </string-array>
-    <string-array name="months">
-        <item>Jan</item>
-        <item>Feb</item>
-        <item>Mar</item>
-        <item>Apr</item>
-        <item>May</item>
-        <item>Jun</item>
-        <item>Jul</item>
-        <item>Aug</item>
-        <item>Sep</item>
-        <item>Oct</item>
-        <item>Nov</item>
-        <item>Dec</item>
-    </string-array>
     <string name="today">Today</string>
     <string name="month_title">%1$d</string>
     <string name="you_cannot_select_a_date_after_today">You cannot select a date after today</string>
     <string name="welcome">Welcome</string>
-    <string name="your_mind_diary">Your mind diaryData</string>
+    <string name="your_mind_diary">Your mind diary</string>
     <string name="login">Login</string>
     <string name="id">Id</string>
     <string name="user_id">User Id</string>
@@ -62,44 +39,4 @@
     <string name="preview_mode_main_content_area">Main Content Area (Preview Mode)</string>
     <string name="diary_title_is_empty">diary title is empty</string>
     <string name="diary_content_is_empty">diary content is empty</string>
-
-    <!--    감정-->
-    <!--    1. 긍정 & 활력 (Positive & High Energy)-->
-    <string name="emotion_joy">joy</string>
-    <string name="emotion_excitement">excitement</string>
-    <string name="emotion_triumph">triumph</string>
-    <string name="emotion_amusement">amusement</string>
-    <!--    2. 사랑 & 애정 (Love & Affection)-->
-    <string name="emotion_romance">romance</string>
-    <string name="emotion_adoration">adoration</string>
-    <string name="emotion_sexual_desire">sexual desire</string>
-    <!--    3. 차분함 & 심미 (Calm & Aesthetic)-->
-    <string name="emotion_calmness">calmness</string>
-    <string name="emotion_satisfaction">satisfaction</string>
-    <string name="emotion_aesthetic_appreciation">aesthetic appreciation</string>
-    <string name="emotion_entrancement">entrancement</string>
-    <!--    4. 존경 & 관심 (Respect & Interest)-->
-    <string name="emotion_admiration">admiration</string>
-    <string name="emotion_awe">awe</string>
-    <string name="emotion_interest">interest</string>
-    <!--    5. 슬픔 & 그리움 (Sadness & Longing)-->
-    <string name="emotion_sadness">sadness</string>
-    <string name="emotion_nostalgia">nostalgia</string>
-    <string name="emotion_sympathy">sympathy</string>
-    <string name="emotion_empathetic_pain">empathetic pain</string>
-    <!--    6. 부정 & 경계 (Negative & Alert)-->
-    <string name="emotion_anger">anger</string>
-    <string name="emotion_fear">fear</string>
-    <string name="emotion_horror">horror</string>
-    <string name="emotion_anxiety">anxiety</string>
-    <!--    7. 복합 & 모호 (Complex & Ambiguous)-->
-    <string name="emotion_confusion">confusion</string>
-    <string name="emotion_boredom">boredom</string>
-    <string name="emotion_awkwardness">awkwardness</string>
-    <string name="emotion_disgust">disgust</string>
-    <string name="emotion_envy">envy</string>
-    <!--    8. 욕구 (Desire)-->
-    <string name="emotion_craving">craving</string>
-    <!--    9. 미정 및 기본값 (Undefined / Default)-->
-    <string name="emotion_unknown">unknown</string>
 </resources>

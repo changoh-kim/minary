@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name="kr.co.presentation.ui.MainActivity"
+            android:name="kr.co.presentation.main.screen.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.Minary.Splash">
             <intent-filter>

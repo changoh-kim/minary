@@ -1,13 +1,9 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
-    // ksp
     alias(libs.plugins.ksp)
-    // hilt
     alias(libs.plugins.hilt)
-    // serialization
     alias(libs.plugins.serialization)
-    // firebase
     alias(libs.plugins.firebase)
 }
 

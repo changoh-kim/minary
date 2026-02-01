@@ -1,13 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    // ksp
     alias(libs.plugins.ksp)
-    // hilt
     alias(libs.plugins.hilt)
-    // firebase
     alias(libs.plugins.firebase)
-    // secrets
     alias(libs.plugins.secrets)
 }
 

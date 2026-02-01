@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Preview Diary Titles -->
+    <string name="preview_diary_title_joy">Unexpected Gift</string>
+    <string name="preview_diary_title_excitement">Finally Next Week!</string>
+    <string name="preview_diary_title_triumph">I Did It!</string>
+    <string name="preview_diary_title_amusement">Video I Watched Today</string>
+    <string name="preview_diary_title_romance">Under the Evening Glow</string>
+    <string name="preview_diary_title_adoration">Senior\'s Presentation</string>
+    <string name="preview_diary_title_sexual_desire">After Watching the Movie</string>
+    <string name="preview_diary_title_calmness">Rainy Afternoon</string>
+    <string name="preview_diary_title_satisfaction">Perfect End to the Day</string>
+    <string name="preview_diary_title_aesthetic_appreciation">At the Art Museum</string>
+    <string name="preview_diary_title_entrancement">Stars in the Night Sky</string>
+    <string name="preview_diary_title_admiration">Teacher\'s Lesson</string>
+    <string name="preview_diary_title_awe">Before Great Nature</string>
+    <string name="preview_diary_title_interest">New Hobby</string>
+    <string name="preview_diary_title_sadness">Farewell</string>
+    <string name="preview_diary_title_nostalgia">Old Album</string>
+    <string name="preview_diary_title_sympathy">Friend\'s Story</string>
+    <string name="preview_diary_title_empathetic_pain">Watching a Documentary</string>
+    <string name="preview_diary_title_anger">Unfair Treatment</string>
+    <string name="preview_diary_title_fear">Sound in the Middle of the Night</string>
+    <string name="preview_diary_title_horror">That Alleyway</string>
+    <string name="preview_diary_title_anxiety">Presentation Tomorrow</string>
+    <string name="preview_diary_title_confusion">What is What</string>
+    <string name="preview_diary_title_boredom">Repetitive Daily Life</string>
+    <string name="preview_diary_title_awkwardness">In the Elevator</string>
+    <string name="preview_diary_title_disgust">Restaurant\'s Hygiene</string>
+    <string name="preview_diary_title_envy">Friend\'s Promotion News</string>
+    <string name="preview_diary_title_craving">Please Let Me Pass</string>
+    <string name="preview_diary_title_unknown">May 22, 2024</string>
+
+    <!-- Preview Diary Contents -->
+    <string name="preview_diary_content_joy">When I got home from work, an unexpected package was waiting for me. It was a birthday gift from a close friend. It was a really happy day.</string>
+    <string name="preview_diary_content_excitement">I\'m planning my trip for next week. My heart pounds every time I look at the plane tickets. I want to leave already!</string>
+    <string name="preview_diary_content_triumph">I finally successfully finished the project that had been tormenting me for months. I will never forget the thrill of finishing the final report in front of my team members. I did it.</string>
+    <string name="preview_diary_content_amusement">I laughed for a long time at an animal video a colleague showed me during lunch. It was a really fun time to laugh without thinking.</string>
+    <string name="preview_diary_content_romance">I walked along the riverbank with my lover and watched the sunset. The moment we walked holding hands, it felt romantic as if we were the only two in the world.</string>
+    <string name="preview_diary_content_adoration">I thought my senior was really cool during the company presentation today. I want to emulate that logical and confident appearance. They are like an idol to me.</string>
+    <string name="preview_diary_content_sexual_desire">I was completely captivated by the main character\'s gaze and atmosphere in the movie. Everything about that person felt so attractive that I think it will be hard to fall asleep tonight.</string>
+    <string name="preview_diary_content_calmness">I drank warm tea while watching the rain fall outside the window. Listening to the sound of the rain calmed my complicated mind.</string>
+    <string name="preview_diary_content_satisfaction">I finished all my planned tasks and am listening to my favorite music. It is a satisfying evening without any complaints.</string>
+    <string name="preview_diary_content_aesthetic_appreciation">I found a really beautiful painting at the art museum I visited after a long time. The colors and composition were so perfect that I couldn\'t take my feet off it for a long time.</string>
+    <string name="preview_diary_content_entrancement">The night sky I saw at the campground was truly spectacular. Looking at the stars that seemed to pour down, I felt an ecstatic feeling as if my sense of reality was disappearing.</string>
+    <string name="preview_diary_content_admiration">I heard the story of my teacher who has always walked his own path silently and consistently. I felt a sense of respect for his depth and wisdom.</string>
+    <string name="preview_diary_content_awe">Standing in front of the huge waterfall, I felt overwhelmed by its grandeur. I felt a sense of awe for nature, realizing how small humans are.</string>
+    <string name="preview_diary_content_interest">I heard a friend talk about coding, which they newly started. I became curious about a new world I don\'t know and became interested in learning it.</string>
+    <string name="preview_diary_content_sadness">My beloved pet crossed the rainbow bridge. The empty space feels so big that I keep crying. It\'s so sad.</string>
+    <string name="preview_diary_content_nostalgia">While cleaning the warehouse, I found an old album from my childhood. I miss those days when I used to play with the friends in the pictures.</string>
+    <string name="preview_diary_content_sympathy">I listened to my friend who is going through a hard time. My heart ached because I could fully understand how they felt.</string>
+    <string name="preview_diary_content_empathetic_pain">I watched a documentary about children suffering from war. Their pain felt like my own, and my heart ached as if it were being torn apart.</string>
+    <string name="preview_diary_content_anger">I\'m so angry at a colleague at work who casually takes credit for my efforts and achievements. I feel a surge of anger at the unfair situation.</string>
+    <string name="preview_diary_content_fear">A strange sound came from outside my house when I was alone in the middle of the night. I was scared to death thinking that someone might be there.</string>
+    <string name="preview_diary_content_horror">As I turned the corner of a dark alley, a human figure suddenly popped out and I screamed. I felt extreme horror as if my heart had stopped.</string>
+    <string name="preview_diary_content_anxiety">I have an important presentation tomorrow, and I don\'t know if I can do well. What if I make a mistake? I\'m so anxious and nervous that I can\'t get anything done.</string>
+    <string name="preview_diary_content_confusion">My head is a mess because of my boss\'s conflicting instructions. I\'m so confused because I don\'t know what to do.</string>
+    <string name="preview_diary_content_boredom">Today was the same as yesterday. Time flowing by without any special events feels so boring.</string>
+    <string name="preview_diary_content_awkwardness">I rode the elevator alone with a boss I\'m not very close to. It was so awkward that we just stared at the ceiling because we didn\'t know what to say.</string>
+    <string name="preview_diary_content_disgust">The table at the restaurant I went to for lunch was so dirty. When I found a hair in my food, I felt nauseous and disgusted.</string>
+    <string name="preview_diary_content_envy">I heard that my friend, who joined the company at the same time as me, got promoted before me. I know I should congratulate them, but I can\'t help but feel envious on one side of my heart.</string>
+    <string name="preview_diary_content_craving">The results of the exam I have been preparing for a long time will be released tomorrow. I really want to pass this time. I can\'t sleep and just pray earnestly.</string>
+    <string name="preview_diary_content_unknown">I had kimchi stew for lunch and soybean paste stew for dinner. I completed 3 items on my to-do list today.</string>
+</resources>
