@@ -53,7 +53,8 @@ import kotlinx.coroutines.launch
 import kr.co.presentation.R
 import kr.co.presentation.common.extension.getString
 import kr.co.presentation.feature.calendar.composable.ActiveDay
-import kr.co.presentation.feature.calendar.composable.CalendarMonth
+import kr.co.presentation.feature.calendar.composable.MonthCalendar
+import kr.co.presentation.feature.calendar.composable.MonthCalendarCanvas
 import kr.co.presentation.feature.calendar.extension.isCurrentMonth
 import kr.co.presentation.feature.calendar.extension.isCurrentYear
 import kr.co.presentation.feature.calendar.extension.toYearMonth
@@ -290,42 +291,13 @@ private fun MonthCalendarItem(
     monthItem: CalendarMonthItem,
     onMonthClick: (YearMonth) -> Unit = {},
 ) {
-    CalendarMonth(
+    MonthCalendarCanvas(
+        modifier = Modifier
+            .aspectRatio(1f)
+            .padding(4.dp),
         monthItem = monthItem,
-        headerContent = {
-            val isCurrentMonth = monthItem.isCurrentMonth()
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.month_title, monthItem.yearMonth.monthValue),
-                textAlign = TextAlign.Left,
-                color = if (isCurrentMonth) Color.Red else Color.Black,
-                fontWeight = if (isCurrentMonth) FontWeight.Bold else FontWeight.Normal,
-            )
-        },
-        onClick = onMonthClick,
-    ) { dayItem ->
-        when (dayItem.isCurrentMonth) {
-            true -> {
-                ActiveDay(
-                    modifier = Modifier.weight(1f),
-                    dayItem = dayItem,
-                    isIconVisible = false
-                ) { day ->
-                    onMonthClick(day.toYearMonth())
-                }
-            }
-
-            false -> {
-                Spacer(
-                    Modifier
-                        .weight(1f)
-                        .aspectRatio(1f)
-                        .clip(MaterialTheme.shapes.small)
-                        .background(color = Color.Transparent)
-                )
-            }
-        }
-    }
+        onClick = { onMonthClick(monthItem.yearMonth) }
+    )
 }
 
 @Preview(showBackground = true, locale = "ko")

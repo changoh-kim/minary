@@ -23,7 +23,7 @@ import java.time.YearMonth
 
 
 @Composable
-fun CalendarMonth(
+fun MonthCalendar(
     modifier: Modifier = Modifier,
     monthItem: CalendarMonthItem,
     onClick: ((YearMonth) -> Unit)? = null,
@@ -61,7 +61,7 @@ fun CalendarMonth(
 
 @Preview(showBackground = true, locale = "ko")
 @Composable
-private fun CalendarMonthPreview(
+private fun MonthCalendarPreview(
     @PreviewParameter(CalendarMonthPreviewDataProvider::class) previewData: CalendarMonthPreviewData,
 ) {
     val diary = previewData.emotion?.let {
@@ -69,7 +69,7 @@ private fun CalendarMonthPreview(
     }
 
     MinaryTheme {
-        CalendarMonth(
+        MonthCalendar(
             monthItem = previewData.monthItem,
         ) { dayItem ->
             when (dayItem.isCurrentMonth) {
