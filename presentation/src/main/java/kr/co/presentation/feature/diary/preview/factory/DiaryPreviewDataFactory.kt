@@ -7,21 +7,48 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kr.co.domain.feature.emotion.Emotion
 import kr.co.presentation.R
+import kr.co.presentation.common.state.LoadState
 import kr.co.presentation.feature.diary.model.DiaryUiModel
+import kr.co.presentation.feature.diary.preview.model.DiaryPreviewData
+import kr.co.presentation.feature.diary.viewmodel.DiaryScreenState
 import java.time.LocalDate
 
 
 object DiaryPreviewDataFactory {
 
     @Composable
-    fun createDiary(emotion: Emotion, context: Context = LocalContext.current): DiaryUiModel {
-        val (titleRes, contentRes) = getDiaryStringResources(emotion)
+    fun createDiaryUiState(
+        diaryPreviewData: DiaryPreviewData,
+        context: Context = LocalContext.current
+    ): DiaryScreenState {
+        val (titleResId, contentResId) = getDiaryStringResources(diaryPreviewData.emotion)
+
+        return DiaryScreenState(
+            screenMode = diaryPreviewData.screenMode,
+            diaryLoadState = LoadState.Success(
+                DiaryUiModel(
+                    id = 0L,
+                    date = LocalDate.now(),
+                    title = context.getString(titleResId),
+                    content = context.getString(contentResId),
+                    emotion = diaryPreviewData.emotion
+                )
+            )
+        )
+    }
+
+    @Composable
+    fun createDiaryUiModel(
+        emotion: Emotion,
+        context: Context = LocalContext.current
+    ): DiaryUiModel {
+        val (titleResId, contentResId) = getDiaryStringResources(emotion)
 
         return DiaryUiModel(
             id = 0L,
             date = LocalDate.now(),
-            title = context.getString(titleRes),
-            content = context.getString(contentRes),
+            title = context.getString(titleResId),
+            content = context.getString(contentResId),
             emotion = emotion
         )
     }

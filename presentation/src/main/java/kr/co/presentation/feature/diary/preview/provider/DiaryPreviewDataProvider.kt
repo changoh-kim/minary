@@ -6,10 +6,16 @@ import kr.co.presentation.feature.diary.preview.model.DiaryPreviewData
 import kr.co.presentation.feature.diary.viewmodel.DiaryScreenMode
 
 
-internal class DiaryStatePreviewDataProvider : PreviewParameterProvider<DiaryPreviewData> {
+internal class DiaryPreviewDataProvider : PreviewParameterProvider<DiaryPreviewData> {
 
     override val values: Sequence<DiaryPreviewData> = sequenceOf(
-        DiaryPreviewData(Emotion.EXCITEMENT, DiaryScreenMode.Edit),
-        DiaryPreviewData(Emotion.ENTRANCEMENT, DiaryScreenMode.Preview),
+        DiaryPreviewData(
+            screenMode = DiaryScreenMode.Edit,
+            emotion = Emotion.EXCITEMENT
+        ),
+        DiaryPreviewData(
+            screenMode = DiaryScreenMode.Preview,
+            emotion = Emotion.ENTRANCEMENT
+        ),
     )
 }

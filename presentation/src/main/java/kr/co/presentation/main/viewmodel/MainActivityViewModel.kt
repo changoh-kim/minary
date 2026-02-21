@@ -7,7 +7,9 @@ import kr.co.domain.feature.auth.exception.AuthException
 import kr.co.domain.feature.auth.usecase.IsUserLoggedInUseCase
 import kr.co.domain.feature.diary.usecase.SyncDiaryUseCase
 import kr.co.presentation.R
+import kr.co.presentation.common.extension.safeCall
 import kr.co.presentation.common.model.UiText
+import kr.co.presentation.common.state.LoadState
 import kr.co.presentation.feature.auth.mapper.UserUiModelMapper.toUserUiModel
 import kr.co.presentation.feature.auth.model.UserUiModel
 import org.orbitmvi.orbit.ContainerHost
@@ -19,62 +21,51 @@ import javax.inject.Inject
 
 
 @Immutable
-sealed interface StartDestination {
-    object Splash : StartDestination
-    object Welcome : StartDestination
-    object Main : StartDestination
-}
-
-@Immutable
-data class MainActivityUiState(
-    val startDestination: StartDestination = StartDestination.Splash,
-    val loginUser: UserUiModel? = UserUiModel()
+data class MainActivityState(
+    val loginLoadState: LoadState<UserUiModel> = LoadState.Uninitialized,
 )
 
 @Immutable
 sealed interface MainActivitySideEffect {
-    data class ShowMsg(val uiText: UiText) : MainActivitySideEffect // 오류 메시지 표시
+    data class ShowMsg(val uiText: UiText) : MainActivitySideEffect
 }
 
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
     private val isUserLoggedInUseCase: IsUserLoggedInUseCase,
     private val syncDiaryUseCase: SyncDiaryUseCase,
-) : ViewModel(), ContainerHost<MainActivityUiState, MainActivitySideEffect> {
+) : ViewModel(), ContainerHost<MainActivityState, MainActivitySideEffect> {
 
-    override val container = container<MainActivityUiState, MainActivitySideEffect>(MainActivityUiState())
+    override val container =
+        container<MainActivityState, MainActivitySideEffect>(MainActivityState())
 
     init {
         checkLogin()
     }
 
     private fun checkLogin() = intent {
-        val loggedIn = isUserLoggedInUseCase()
-        loggedIn.onSuccess { user ->
+        safeCall { isUserLoggedInUseCase() }
+            .map { it.toUserUiModel() }
+            .launchAsLoadState { loadState ->
+                reduce { state.copy(loginLoadState = loadState) }
 
-            reduce {
-                state.copy(loginUser = user.toUserUiModel(), startDestination = StartDestination.Main)
-            }
-
-            syncDiaryUseCase()
-        }.onFailure { error ->
-            reduce {
-                state.copy(loginUser = null, startDestination = StartDestination.Welcome)
-            }
-
-            when(error) {
-                is AuthException.CurrentUserIsNullException -> {
-                    postSideEffect(MainActivitySideEffect.ShowMsg(UiText.StringResource(R.string.current_user_is_null)))
+                when (loadState) {
+                    is LoadState.Success -> syncDiaryUseCase()
+                    is LoadState.Error -> loadState.exception?.let { handleLoginError(it) }
+                    else -> {}
                 }
-                else -> {
-                    val uiText = error.message
-                        .takeIf { !it.isNullOrBlank() }
-                        ?.let { UiText.DynamicString(it) }
-                        ?: UiText.StringResource(R.string.unknown_error)
+            }
+    }
 
-                    postSideEffect(MainActivitySideEffect.ShowMsg(uiText))
-                }
+    private fun handleLoginError(error: Throwable) = intent {
+        val message = when (error) {
+            is AuthException.CurrentUserIsNullException -> UiText.StringResource(R.string.current_user_is_null)
+            else -> {
+                error.message
+                    ?.let { UiText.DynamicString(it) }
+                    ?: UiText.StringResource(R.string.unknown_error)
             }
         }
+        postSideEffect(MainActivitySideEffect.ShowMsg(message))
     }
 }

@@ -36,7 +36,12 @@
     <string name="password_not_match">Password does not match</string>
     <string name="account_creation_failed">Account creation failed</string>
     <string name="current_user_is_null">Current user is null</string>
-    <string name="preview_mode_main_content_area">Main Content Area (Preview Mode)</string>
     <string name="diary_title_is_empty">diary title is empty</string>
     <string name="diary_content_is_empty">diary content is empty</string>
+    <string name="diary_saved">Your diary has been saved.</string>
+    <string name="diary_title_hint">Title</string>
+    <string name="diary_content_hint">Content</string>
+    <string name="diary_done_button">Done</string>
+    <string name="diary_edit_button">Edit</string>
+    <string name="diary_delete_button_cd">Delete diary button</string>
 </resources>

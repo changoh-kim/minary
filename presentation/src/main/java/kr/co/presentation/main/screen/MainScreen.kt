@@ -163,7 +163,7 @@ private fun MainContentPreview() {
                     .padding(innerPadding),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.preview_mode_main_content_area))
+                Text(stringResource(R.string.preview_main_content))
             }
         }
     }

@@ -13,13 +13,17 @@ import kr.co.domain.feature.diary.usecase.GetDiaryUseCase
 import kr.co.domain.feature.diary.usecase.UpsertDiaryUseCase
 import kr.co.domain.feature.emotion.Emotion
 import kr.co.presentation.R
+import kr.co.presentation.common.extension.getLocalDate
+import kr.co.presentation.common.extension.getLong
+import kr.co.presentation.common.extension.safeCall
 import kr.co.presentation.common.model.UiText
+import kr.co.presentation.common.state.LoadState
+import kr.co.presentation.common.state.data
 import kr.co.presentation.feature.diary.mapper.DiaryUiModelMapper.toDiary
 import kr.co.presentation.feature.diary.mapper.DiaryUiModelMapper.toDiaryUiModel
 import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.feature.diary.navigation.DiaryRoute
 import org.orbitmvi.orbit.ContainerHost
-import org.orbitmvi.orbit.syntax.simple.blockingIntent
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
@@ -31,14 +35,19 @@ import javax.inject.Inject
 @Immutable
 @Parcelize
 sealed interface DiaryScreenMode : Parcelable {
-    @Parcelize object Edit : DiaryScreenMode
-    @Parcelize object Preview : DiaryScreenMode
+    @Parcelize
+    object Edit : DiaryScreenMode
+
+    @Parcelize
+    object Preview : DiaryScreenMode
 }
 
 @Immutable
-data class DiaryUiState(
-    val screenMode: DiaryScreenMode = DiaryScreenMode.Preview,
-    val diaryUiModel: DiaryUiModel = DiaryUiModel()
+data class DiaryScreenState(
+    val screenMode: DiaryScreenMode = DiaryScreenMode.Edit,
+    val diaryLoadState: LoadState<DiaryUiModel> = LoadState.Uninitialized,
+    val isDoneBtnLoading: Boolean = false,
+    val isDeleteBtnLoading: Boolean = false,
 )
 
 @Immutable
@@ -61,66 +70,96 @@ class DiaryViewModel @Inject constructor(
     private val getDiaryUseCase: GetDiaryUseCase,
     private val deleteDiaryUseCase: DeleteDiaryUseCase,
     private val upsertDiaryUseCase: UpsertDiaryUseCase,
-) : ViewModel(), ContainerHost<DiaryUiState, DiarySideEffect> {
+) : ViewModel(), ContainerHost<DiaryScreenState, DiarySideEffect> {
 
-    companion object {
-        private const val KEY_SCREEN_MODE = "screen_mode"
-        private const val KEY_DIARY_ID = "diary_id"
-        private const val KEY_PASSWORD = "title"
+    private companion object {
+        private const val KEY_ID = "id"
+        private const val KEY_DATE = "date"
+        private const val KEY_TITLE = "title"
         private const val KEY_CONTENT = "content"
         private const val KEY_EMOTION = "emotion"
     }
 
     override val container =
-        container<DiaryUiState, DiarySideEffect>(DiaryUiState())
+        container<DiaryScreenState, DiarySideEffect>(DiaryScreenState())
 
     init {
-        initializeState()
+        loadDiary()
     }
 
-    private fun initializeState() = intent {
+    private fun loadDiary() = intent {
         val route = savedStateHandle.toRoute<DiaryRoute>()
-        val date = LocalDate.of(route.year, route.month, route.date)
+        val targetDate = LocalDate.of(route.year, route.month, route.date)
 
-        val screenMode = savedStateHandle.get<DiaryScreenMode>(KEY_SCREEN_MODE) ?: DiaryScreenMode.Edit
-        val diaryId = savedStateHandle.get<Long>(KEY_DIARY_ID) ?: 0L
-        val title = savedStateHandle.get<String>(KEY_PASSWORD) ?: ""
-        val content = savedStateHandle.get<String>(KEY_CONTENT) ?: ""
-        val emotion = savedStateHandle.get<Emotion>(KEY_EMOTION) ?: Emotion.UNKNOWN
+        val saveStateDiaryId = savedStateHandle.getLong(KEY_ID, 0L)
+        val saveStateDiaryDate = savedStateHandle.getLocalDate(KEY_DATE, targetDate)
+        val saveStateDiaryTitle = savedStateHandle[KEY_TITLE] ?: ""
+        val saveStateDiaryContent = savedStateHandle[KEY_CONTENT] ?: ""
+        val saveStateDiaryEmotion = savedStateHandle[KEY_EMOTION] ?: Emotion.UNKNOWN
 
-        getDiaryUseCase(date).onSuccess { diary ->
-            val diaryUiModel = diary.toDiaryUiModel()
-            val screenMode = DiaryScreenMode.Preview
-            reduce {
-                state.copy(
-                    screenMode = screenMode,
-                    diaryUiModel = diaryUiModel,
+        if (saveStateDiaryTitle.isNotBlank() || saveStateDiaryContent.isNotBlank()) {
+            // 작성중인 일기 내용이 있었다면
+            setEditState(
+                DiaryUiModel(
+                    id = saveStateDiaryId,
+                    date = saveStateDiaryDate,
+                    title = saveStateDiaryTitle,
+                    content = saveStateDiaryContent,
+                    emotion = saveStateDiaryEmotion,
                 )
-            }
-            savedStateHandle[KEY_SCREEN_MODE] = screenMode
-            savedStateHandle[KEY_DIARY_ID] = diaryUiModel.id
-            savedStateHandle[KEY_PASSWORD] = diaryUiModel.title
-            savedStateHandle[KEY_CONTENT] = diaryUiModel.content
-            savedStateHandle[KEY_EMOTION] = diaryUiModel.emotion
-        }.onFailure { error ->
-            when (error) {
-                is DiaryNotFoundException -> {
-                    reduce {
-                        state.copy(
-                            screenMode = screenMode,
-                            diaryUiModel = DiaryUiModel(
-                                id = diaryId,
-                                date = date,
-                                title = title,
-                                content = content,
-                                emotion = emotion,
-                            )
-                        )
+            )
+        } else {
+            // 작성중인 일기 내용이 없다면, DB에서 가져오기 실행
+            safeCall { getDiaryUseCase(targetDate) }
+                .map { it.toDiaryUiModel() }
+                .launchAsLoadState { loadState ->
+                    when (loadState) {
+                        is LoadState.Success -> {
+                            setPreviewState(loadState.data)
+                            saveDiaryToSavedState(loadState.data)
+                        }
+
+                        is LoadState.Error -> {
+                            when (loadState.exception) {
+                                is DiaryNotFoundException -> setNewDiaryState(targetDate)
+                                else -> {
+                                    loadState.exception?.let { handleDiaryError(it) }
+                                    postSideEffect(DiarySideEffect.NavigateToMainScreen)
+                                }
+                            }
+                        }
+
+                        is LoadState.Loading -> reduce { state.copy(diaryLoadState = loadState) }
+                        else -> {}
                     }
                 }
+        }
+    }
 
-                else -> postSideEffect(DiarySideEffect.ShowMsg(handleErrorMsg(error)))
-            }
+    private fun setPreviewState(diaryUiModel: DiaryUiModel) = intent {
+        reduce {
+            state.copy(
+                screenMode = DiaryScreenMode.Preview,
+                diaryLoadState = LoadState.Success(diaryUiModel)
+            )
+        }
+    }
+
+    private fun setEditState(diaryUiModel: DiaryUiModel) = intent {
+        reduce {
+            state.copy(
+                screenMode = DiaryScreenMode.Edit,
+                diaryLoadState = LoadState.Success(diaryUiModel)
+            )
+        }
+    }
+
+    private fun setNewDiaryState(date: LocalDate) = intent {
+        reduce {
+            state.copy(
+                screenMode = DiaryScreenMode.Edit,
+                diaryLoadState = LoadState.Success(DiaryUiModel(date = date))
+            )
         }
     }
 
@@ -129,72 +168,75 @@ class DiaryViewModel @Inject constructor(
             is DiaryIntent.TitleChanged -> updateTitle(intent.newTitle)
             is DiaryIntent.ContentChanged -> updateContent(intent.newContent)
             is DiaryIntent.DeleteButtonClicked -> deleteDiary()
-            is DiaryIntent.EditButtonClicked -> changeScreenMode(DiaryScreenMode.Edit)
-            is DiaryIntent.DoneButtonClicked -> updateDiary()
+            is DiaryIntent.EditButtonClicked -> setScreenMode(DiaryScreenMode.Edit)
+            is DiaryIntent.DoneButtonClicked -> saveDiary()
         }
     }
 
-    private fun updateTitle(newTitle: String) = blockingIntent {
-        reduce { state.copy(diaryUiModel = state.diaryUiModel.copy(title = newTitle)) }
-        savedStateHandle[KEY_PASSWORD] = newTitle
+    private fun updateTitle(newTitle: String) = intent {
+        val diaryUiModel = state.diaryLoadState.data ?: return@intent
+
+        reduce { state.copy(diaryLoadState = LoadState.Success(diaryUiModel.copy(title = newTitle))) }
+        savedStateHandle[KEY_TITLE] = newTitle
     }
 
-    private fun updateContent(newContent: String) = blockingIntent {
-        reduce { state.copy(diaryUiModel = state.diaryUiModel.copy(content = newContent)) }
+    private fun updateContent(newContent: String) = intent {
+        val diaryUiModel = state.diaryLoadState.data ?: return@intent
+
+        reduce { state.copy(diaryLoadState = LoadState.Success(diaryUiModel.copy(content = newContent))) }
         savedStateHandle[KEY_CONTENT] = newContent
     }
 
     private fun deleteDiary() = intent {
-        deleteDiaryUseCase(
-            state.diaryUiModel.toDiary()
-        ).onSuccess {
-            postSideEffect(DiarySideEffect.NavigateToMainScreen)
-        }.onFailure { error ->
-            postSideEffect(DiarySideEffect.ShowMsg(handleErrorMsg(error)))
-        }
+        val diaryUiModel = state.diaryLoadState.data ?: return@intent
+
+        safeCall { deleteDiaryUseCase(diaryUiModel.toDiary()) }
+            .onLoading { reduce { state.copy(isDeleteBtnLoading = it) } }
+            .onError { handleDiaryError(it) }
+            .launchOnSuccess { postSideEffect(DiarySideEffect.NavigateToMainScreen) }
     }
 
-    private fun changeScreenMode(screenMode: DiaryScreenMode) = intent {
+    private fun setScreenMode(screenMode: DiaryScreenMode) = intent {
         reduce { state.copy(screenMode = screenMode) }
-        savedStateHandle[KEY_SCREEN_MODE] = screenMode
     }
 
-    private fun updateDiary() = intent {
-        if (state.diaryUiModel.title.isNullOrBlank()) {
+    private fun saveDiary() = intent {
+        val diaryUiModel = state.diaryLoadState.data ?: return@intent
+
+        if (diaryUiModel.title.isBlank()) {
             postSideEffect(DiarySideEffect.ShowMsg(UiText.StringResource(R.string.diary_title_is_empty)))
             return@intent
         }
 
-        if (state.diaryUiModel.content.isNullOrBlank()) {
+        if (diaryUiModel.content.isBlank()) {
             postSideEffect(DiarySideEffect.ShowMsg(UiText.StringResource(R.string.diary_content_is_empty)))
             return@intent
         }
 
-        upsertDiaryUseCase(
-            state.diaryUiModel.toDiary()
-        ).onSuccess { diary ->
-            val diaryUiModel = diary.toDiaryUiModel()
-            val screenMode = DiaryScreenMode.Preview
-            reduce {
-                state.copy(
-                    screenMode = screenMode,
-                    diaryUiModel = diaryUiModel
-                )
+        safeCall { upsertDiaryUseCase(diaryUiModel.toDiary()) }
+            .map { it.toDiaryUiModel() }
+            .onLoading { reduce { state.copy(isDoneBtnLoading = it) } }
+            .onError { handleDiaryError(it) }
+            .launchOnSuccess { diaryUiModel ->
+                setPreviewState(diaryUiModel)
+                saveDiaryToSavedState(diaryUiModel)
+                postSideEffect(DiarySideEffect.ShowMsg(UiText.StringResource(R.string.diary_saved)))
             }
-            savedStateHandle[KEY_SCREEN_MODE] = screenMode
-            savedStateHandle[KEY_DIARY_ID] = diaryUiModel.id
-            savedStateHandle[KEY_PASSWORD] = diaryUiModel.title
-            savedStateHandle[KEY_CONTENT] = diaryUiModel.content
-            savedStateHandle[KEY_EMOTION] = diaryUiModel.emotion
-        }.onFailure { error ->
-            postSideEffect(DiarySideEffect.ShowMsg(handleErrorMsg(error)))
-        }
     }
 
-    private fun handleErrorMsg(error: Throwable): UiText {
-        return error.message
-            .takeIf { !it.isNullOrBlank() }
+    private fun saveDiaryToSavedState(diaryUiModel: DiaryUiModel) = intent {
+        savedStateHandle[KEY_ID] = diaryUiModel.id
+        savedStateHandle[KEY_DATE] = diaryUiModel.date.toEpochDay()
+        savedStateHandle[KEY_TITLE] = diaryUiModel.title
+        savedStateHandle[KEY_CONTENT] = diaryUiModel.content
+        savedStateHandle[KEY_EMOTION] = diaryUiModel.emotion
+    }
+
+    private fun handleDiaryError(error: Throwable) = intent {
+        val message = error.message
             ?.let { UiText.DynamicString(it) }
             ?: UiText.StringResource(R.string.unknown_error)
+
+        postSideEffect(DiarySideEffect.ShowMsg(message))
     }
 }
