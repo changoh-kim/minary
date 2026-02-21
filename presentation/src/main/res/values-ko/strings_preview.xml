@@ -61,4 +61,10 @@
     <string name="preview_diary_content_envy">동기인 친구가 나보다 먼저 승진했다는 소식을 들었다. 축하해줘야 하는 걸 알면서도 마음 한편으로는 부러운 마음이 드는 건 어쩔 수 없다.</string>
     <string name="preview_diary_content_craving">오랫동안 준비해온 시험 결과가 내일 나온다. 이번에는 정말 합격하고 싶다. 잠도 안 오고 간절하게 기도만 하게 된다.</string>
     <string name="preview_diary_content_unknown">점심은 김치찌개, 저녁은 된장찌개를 먹었다. 오늘 할 일 목록 3가지를 처리했다.</string>
+
+    <string name="preview_uninitialized_content">초기 화면 (미리보기 화면)</string>
+    <string name="preview_loading_content">로딩 화면 (미리보기 화면)</string>
+    <string name="preview_welcome_content">에러 화면 (미리보기 화면)</string>
+    <string name="preview_retry">다시 시도</string>
+    <string name="preview_main_content">메인 화면 (미리보기 화면)</string>
 </resources>

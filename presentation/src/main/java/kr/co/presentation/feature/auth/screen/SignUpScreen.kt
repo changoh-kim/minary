@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -25,14 +23,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import kr.co.presentation.R
+import kr.co.presentation.common.composable.LoadingButton
 import kr.co.presentation.common.extension.getString
+import kr.co.presentation.feature.auth.preview.provider.SignUpPreviewDataProvider
 import kr.co.presentation.feature.auth.viewmodel.SignUpIntent
 import kr.co.presentation.feature.auth.viewmodel.SignUpSideEffect
-import kr.co.presentation.feature.auth.viewmodel.SignUpUiState
+import kr.co.presentation.feature.auth.viewmodel.SignUpScreenState
 import kr.co.presentation.feature.auth.viewmodel.SignUpViewModel
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
@@ -44,7 +45,7 @@ fun SignUpScreen(
     onNavigateToLoginScreen: () -> Unit,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
-    val state: SignUpUiState by viewModel.collectAsState()
+    val state: SignUpScreenState by viewModel.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -61,13 +62,13 @@ fun SignUpScreen(
     SignUpContent(
         state = state,
         snackbarHostState = snackbarHostState,
-        intent = viewModel::handelIntent
+        intent = viewModel::handleIntent
     )
 }
 
 @Composable
 fun SignUpContent(
-    state: SignUpUiState = SignUpUiState(),
+    state: SignUpScreenState = SignUpScreenState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     intent: (SignUpIntent) -> Unit = {},
 ) {
@@ -117,9 +118,9 @@ fun SignUpContent(
             )
             OutlinedTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = state.userName,
+                value = state.name,
                 onValueChange = { value ->
-                    intent(SignUpIntent.UserNameChanged(value))
+                    intent(SignUpIntent.NameChanged(value))
                 },
                 label = { Text(stringResource(R.string.user_name)) }
             )
@@ -156,32 +157,25 @@ fun SignUpContent(
                 visualTransformation = PasswordVisualTransformation()
             )
 
-            // Sign Up Button
-            Button(
+            // sign up button
+            LoadingButton(
                 modifier = Modifier
-                    .padding(vertical = 24.dp)
-                    .fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ),
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp),
+                text = stringResource(R.string.sign_up),
                 onClick = { intent(SignUpIntent.SignUpButtonClicked) },
-            ) {
-                Text(
-                    text = stringResource(R.string.sign_up),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            }
+                isLoading = state.isSigningUp
+            )
         }
     }
 }
 
 @Preview(showBackground = true, locale = "ko")
 @Composable
-private fun SignUpContentPreview() {
+private fun SignUpContentPreview(
+    @PreviewParameter(SignUpPreviewDataProvider::class) state: SignUpScreenState
+) {
     MinaryTheme {
-        SignUpContent()
+        SignUpContent(state)
     }
 }

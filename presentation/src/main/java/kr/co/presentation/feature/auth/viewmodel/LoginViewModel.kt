@@ -9,10 +9,14 @@ import kr.co.domain.feature.auth.exception.AuthException
 import kr.co.domain.feature.auth.usecase.LoginUseCase
 import kr.co.domain.feature.diary.usecase.CheckAndDownloadInitialDiariesUseCase
 import kr.co.presentation.R
+import kr.co.presentation.common.extension.safeCall
 import kr.co.presentation.common.model.UiText
+import kr.co.presentation.common.state.LoadState
+import kr.co.presentation.feature.auth.mapper.UserUiModelMapper.toUserUiModel
+import kr.co.presentation.feature.auth.model.UserUiModel
 import kr.co.presentation.feature.auth.navigation.LoginRoute
 import org.orbitmvi.orbit.ContainerHost
-import org.orbitmvi.orbit.syntax.simple.blockingIntent
+import org.orbitmvi.orbit.syntax.simple.SimpleSyntax
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
@@ -21,10 +25,10 @@ import javax.inject.Inject
 
 
 @Immutable
-data class LoginUiState(
+data class LoginScreenState(
+    val loginLoadState: LoadState<UserUiModel> = LoadState.Uninitialized,
     val isLoggingIn: Boolean = false,
-    val loginError: UiText? = null,
-    val id: String = "",
+    val email: String = "",
     val password: String = ""
 )
 
@@ -36,7 +40,7 @@ sealed interface LoginSideEffect {
 }
 
 sealed interface LoginIntent {
-    data class IdChanged(val newId: String) : LoginIntent
+    data class EmailChanged(val newEmail: String) : LoginIntent
     data class PasswordChanged(val newPassword: String) : LoginIntent
     object LoginButtonClicked : LoginIntent
     object SignUpButtonClicked : LoginIntent
@@ -47,105 +51,86 @@ class LoginViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val loginUseCase: LoginUseCase,
     private val checkAndDownloadInitialDiariesUseCase: CheckAndDownloadInitialDiariesUseCase,
-) : ViewModel(), ContainerHost<LoginUiState, LoginSideEffect> {
+) : ViewModel(), ContainerHost<LoginScreenState, LoginSideEffect> {
 
-    companion object {
-        private const val KEY_ID = "user_id"
-        private const val KEY_PASSWORD = "user_password"
+    private companion object {
+        private const val KEY_EMAIL = "email"
+        private const val KEY_PASSWORD = "password"
     }
 
-    override val container = container<LoginUiState, LoginSideEffect>(LoginUiState())
+    override val container = container<LoginScreenState, LoginSideEffect>(LoginScreenState())
 
     init {
-        initializeState()
+        initState()
     }
 
-    private fun initializeState() = intent {
+    private fun initState() = intent {
         val route = savedStateHandle.toRoute<LoginRoute>()
 
-        val id = savedStateHandle.get<String>(KEY_ID) ?: ""
-        val password = savedStateHandle.get<String>(KEY_PASSWORD) ?: ""
+        val savedStateEmail = savedStateHandle[KEY_EMAIL] ?: ""
+        val savedStatePassword = savedStateHandle[KEY_PASSWORD] ?: ""
 
-        reduce { state.copy(id = id, password = password) }
+        reduce { state.copy(email = savedStateEmail, password = savedStatePassword) }
     }
 
     fun handleIntent(intent: LoginIntent) {
         when (intent) {
-            is LoginIntent.IdChanged -> updateId(intent.newId)
+            is LoginIntent.EmailChanged -> updateEmail(intent.newEmail)
             is LoginIntent.PasswordChanged -> updatePassword(intent.newPassword)
             is LoginIntent.LoginButtonClicked -> login()
             is LoginIntent.SignUpButtonClicked -> navigateToSignUpScreen()
         }
     }
 
-    private fun updateId(newId: String) = blockingIntent {
-        reduce { state.copy(id = newId) }
-        savedStateHandle[KEY_ID] = newId
+    private fun updateEmail(newEmail: String) = intent {
+        reduce { state.copy(email = newEmail) }
+        savedStateHandle[KEY_EMAIL] = newEmail
     }
 
-    private fun updatePassword(newPassword: String) = blockingIntent {
+    private fun updatePassword(newPassword: String) = intent {
         reduce { state.copy(password = newPassword) }
-        savedStateHandle[KEY_ID] = newPassword
+        savedStateHandle[KEY_EMAIL] = newPassword
     }
 
     private fun login() = intent {
-        if (state.id.isNullOrBlank()) {
-            postSideEffect(LoginSideEffect.ShowMsg(UiText.StringResource(R.string.id_is_empty)))
-            return@intent
-        }
+        if (!validateInput()) return@intent
 
-        if (state.password.isNullOrBlank()) {
-            postSideEffect(LoginSideEffect.ShowMsg(UiText.StringResource(R.string.password_is_empty)))
-            return@intent
-        }
+        safeCall { loginUseCase(state.email, state.password) }
+            .map { it.toUserUiModel() }
+            .onLoading { isLoading -> reduce { state.copy(isLoggingIn = isLoading) } }
+            .onError { handleLoginError(it) }
+            .launchOnSuccess {
+                checkAndDownloadInitialDiariesUseCase()
+                postSideEffect(LoginSideEffect.NavigateToMainScreen)
+            }
+    }
 
-        reduce {
-            // 로그인 시도 중, 오류 메시지 초기화
-            state.copy(
-                isLoggingIn = true,
-                loginError = UiText.StringResource(R.string.unknown_error)
-            )
-        }
-
-        val login = loginUseCase(state.id, state.password)
-        login.onSuccess {
-            checkAndDownloadInitialDiariesUseCase()
-
-            reduce {
-                state.copy(
-                    isLoggingIn = false,
-                    loginError = UiText.StringResource(R.string.unknown_error)
-                )
+    private suspend fun SimpleSyntax<LoginScreenState, LoginSideEffect>.validateInput(): Boolean {
+        return when {
+            state.email.isBlank() -> {
+                postSideEffect(LoginSideEffect.ShowMsg(UiText.StringResource(R.string.id_is_empty)))
+                false
             }
 
-            postSideEffect(LoginSideEffect.NavigateToMainScreen)
-        }.onFailure { error ->
-            reduce {
-                // 로그인 실패, 오류 메시지 업데이트
-                state.copy(
-                    isLoggingIn = false,
-                    loginError = UiText.StringResource(R.string.login_failed)
-                )
+            state.password.isBlank() -> {
+                postSideEffect(LoginSideEffect.ShowMsg(UiText.StringResource(R.string.password_is_empty)))
+                false
             }
 
-            when (error) {
-                is AuthException.SignInUserIsNullException -> {
-                    postSideEffect(LoginSideEffect.ShowMsg(UiText.StringResource(R.string.login_failed)))
-                }
-
-                else -> {
-                    val uiText = error.message
-                        .takeIf { !it.isNullOrBlank() }
-                        ?.let { UiText.DynamicString(it) }
-                        ?: UiText.StringResource(R.string.unknown_error)
-
-                    postSideEffect(LoginSideEffect.ShowMsg(uiText))
-                }
-            }
+            else -> true
         }
     }
 
     private fun navigateToSignUpScreen() = intent {
         postSideEffect(LoginSideEffect.NavigateToSignUpScreen)
+    }
+
+    private fun handleLoginError(error: Throwable) = intent {
+        val message = when (error) {
+            is AuthException.SignInUserIsNullException -> UiText.StringResource(R.string.login_failed)
+            else -> error.message?.let { UiText.DynamicString(it) }
+                ?: UiText.StringResource(R.string.unknown_error)
+        }
+        postSideEffect(LoginSideEffect.ShowMsg(message))
     }
 }

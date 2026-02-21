@@ -61,4 +61,10 @@
     <string name="preview_diary_content_envy">I heard that my friend, who joined the company at the same time as me, got promoted before me. I know I should congratulate them, but I can\'t help but feel envious on one side of my heart.</string>
     <string name="preview_diary_content_craving">The results of the exam I have been preparing for a long time will be released tomorrow. I really want to pass this time. I can\'t sleep and just pray earnestly.</string>
     <string name="preview_diary_content_unknown">I had kimchi stew for lunch and soybean paste stew for dinner. I completed 3 items on my to-do list today.</string>
+
+    <string name="preview_uninitialized_content">Uninitialized Content (Preview)</string>
+    <string name="preview_loading_content">Loading Content (Preview)</string>
+    <string name="preview_welcome_content">Welcome Content (Preview)</string>
+    <string name="preview_retry">retry</string>
+    <string name="preview_main_content">Main Content (Preview)</string>
 </resources>

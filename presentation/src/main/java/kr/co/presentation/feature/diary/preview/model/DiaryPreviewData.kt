@@ -7,6 +7,6 @@ import kr.co.presentation.feature.diary.viewmodel.DiaryScreenMode
 
 @Immutable
 data class DiaryPreviewData(
-    val emotion: Emotion,
-    val screenMode: DiaryScreenMode
+    val screenMode: DiaryScreenMode = DiaryScreenMode.Edit,
+    val emotion: Emotion = Emotion.UNKNOWN,
 )
