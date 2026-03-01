@@ -10,7 +10,7 @@ import kr.co.presentation.feature.calendar.model.CalendarMonthItem
 import java.time.YearMonth
 
 
-internal class MonthlyCalendarPreviewDataProvider(
+internal class CalendarMonthItemPreviewDataProvider(
     calendarGenerator: CalendarGenerator = CalendarGenerator(),
 ) : PreviewParameterProvider<Flow<PagingData<CalendarMonthItem>>> {
 

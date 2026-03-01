@@ -41,7 +41,7 @@
     <string name="diary_saved">Your diary has been saved.</string>
     <string name="diary_title_hint">Title</string>
     <string name="diary_content_hint">Content</string>
-    <string name="diary_done_button">Done</string>
+    <string name="diary_save_button">Save</string>
     <string name="diary_edit_button">Edit</string>
     <string name="diary_delete_button_cd">Delete diary button</string>
 </resources>

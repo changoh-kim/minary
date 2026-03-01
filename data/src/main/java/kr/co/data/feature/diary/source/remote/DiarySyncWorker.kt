@@ -1,6 +1,7 @@
 package kr.co.data.feature.diary.source.remote
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -9,8 +10,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.tasks.await
-import kr.co.data.feature.diary.mapper.DiaryDataMapper.toDiaryEntity
 import kr.co.data.feature.diary.mapper.DiaryDataMapper.toDiaryDto
+import kr.co.data.feature.diary.mapper.DiaryDataMapper.toDiaryEntity
 import kr.co.data.feature.diary.model.DiaryDto
 import kr.co.data.local.dao.DiaryDao
 import kr.co.data.local.entity.DiaryEntity
@@ -30,10 +31,12 @@ class DiarySyncWorker @AssistedInject constructor(
         object LocalDataDelete : SyncResult()
         object LocalDataUpload : SyncResult()
         data class RemoteDataDownload(val remoteDiary: DiaryEntity) : SyncResult()
+        object Skip : SyncResult()
     }
 
     companion object {
-        const val WORK_DIARY_SYNC = "diary_sync_work"
+        const val DIARY_SYNC = "diary_sync"
+        private val TAG = DiarySyncWorker::class.java.simpleName
     }
 
     override suspend fun doWork(): Result {
@@ -75,10 +78,27 @@ class DiarySyncWorker @AssistedInject constructor(
                     // 일기 시간 비교
                     if (remoteDiaryTimestamp > diaryEntity.timestamp) {
                         // 서버의 시간이 최신임으로 -> 서버 일기를 다운로드
-                        val diaryDto = diaryDocSnapshot.toObject(DiaryDto::class.java)!!
-                        val remoteDiary = diaryDto.toDiaryEntity()
-                            .copy(isSynced = true, isDeleted = false)
-                        return@runTransaction SyncResult.RemoteDataDownload(remoteDiary)
+                        try {
+                            val diaryDto = diaryDocSnapshot.toObject(DiaryDto::class.java)
+                            if (diaryDto == null) {
+                                Log.w(
+                                    TAG,
+                                    "Failed to parse Firestore document to DiaryDto. Document ID: ${diaryDocSnapshot.id}"
+                                )
+                                return@runTransaction SyncResult.Skip
+                            }
+                            val remoteDiary = diaryDto
+                                .toDiaryEntity()
+                                .copy(isSynced = true, isDeleted = false)
+                            return@runTransaction SyncResult.RemoteDataDownload(remoteDiary)
+                        } catch (error: IllegalArgumentException) {
+                            Log.w(
+                                TAG,
+                                "Skipping remote diary due to mapping error. Document ID: ${diaryDocSnapshot.id}",
+                                error
+                            )
+                            return@runTransaction SyncResult.Skip
+                        }
                     } else {
                         // 로컬의 시간이 최신이지만
                         if (diaryEntity.isDeleted) {
@@ -106,6 +126,8 @@ class DiarySyncWorker @AssistedInject constructor(
                     is SyncResult.RemoteDataDownload -> {
                         downloadDiaries.add(result.remoteDiary)
                     }
+
+                    is SyncResult.Skip -> {}
                 }
             }
 

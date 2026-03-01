@@ -21,8 +21,7 @@ import kr.co.presentation.feature.calendar.extension.isAfterCurrentYearMonth
 import kr.co.presentation.feature.calendar.mapper.CalendarItemMapper.toCalendarMonthItem
 import kr.co.presentation.feature.calendar.mapper.insertYearSeparators
 import kr.co.presentation.feature.calendar.model.CalendarGridItem
-import kr.co.presentation.feature.calendar.model.CalendarMonthItem
-import kr.co.presentation.feature.calendar.navigation.YearlyCalenderRoute
+import kr.co.presentation.navigation.YearlyCalendarRoute
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -34,7 +33,7 @@ import javax.inject.Inject
 
 
 @Immutable
-data class YearlyCalendarUiState(
+data class YearlyCalendarScreenState(
     val initYear: Year = Year.now(),
     val refreshKey: Long = 0L,
     val visibleYear: Year = Year.now(),
@@ -42,89 +41,106 @@ data class YearlyCalendarUiState(
 
 @Immutable
 sealed interface YearlyCalendarSideEffect {
-    data class NavigateToMonthlyCalendar(val targetYearMonth: YearMonth) : YearlyCalendarSideEffect
-    object ScrollToToday : YearlyCalendarSideEffect
-    data class ShowMsg(val uiText: UiText) : YearlyCalendarSideEffect
     object ScrollToInitialPosition : YearlyCalendarSideEffect
+    data class MonthClicked(val targetYearMonth: YearMonth) : YearlyCalendarSideEffect
+    object ScrollToToday : YearlyCalendarSideEffect
+    data class ShowMessage(val uiText: UiText) : YearlyCalendarSideEffect
 }
 
-sealed interface YearlyCalendarIntent {
-    data class VisibleYearChanged(val visibleYear: Year) : YearlyCalendarIntent
-    object TodayButtonClicked : YearlyCalendarIntent
-    data class MonthButtonClicked(val targetYearMonth: YearMonth) : YearlyCalendarIntent
+sealed interface YearlyCalendarAction {
+    data class VisibleYearChanged(val newVisibleYear: Year) : YearlyCalendarAction
+    data class MonthClicked(val targetYearMonth: YearMonth) : YearlyCalendarAction
+    object TodayClicked : YearlyCalendarAction
 }
 
 @HiltViewModel
 class YearlyCalendarViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val getCalendarYearUseCase: GetCalendarYearUseCase,
-) : ViewModel(), ContainerHost<YearlyCalendarUiState, YearlyCalendarSideEffect> {
+) : ViewModel(), ContainerHost<YearlyCalendarScreenState, YearlyCalendarSideEffect> {
 
-    companion object {
-        private const val KEY_INIT_YEAR = "initYear"
-        private const val KEY_REFRESH_KEY = "refreshKey"
-        private const val KEY_VISIBLE_YEAR = "visibleYear"
+    private companion object {
+        private const val KEY_INIT_YEAR = "init_year"
+        private const val KEY_REFRESH_KEY = "refresh_key"
+        private const val KEY_VISIBLE_YEAR = "visible_year"
         private const val KEY_INITIAL_SCROLL_COMPLETED = "initial_scroll_completed"
     }
 
     override val container =
-        container<YearlyCalendarUiState, YearlyCalendarSideEffect>(YearlyCalendarUiState())
+        container<YearlyCalendarScreenState, YearlyCalendarSideEffect>(YearlyCalendarScreenState())
 
+    /**
+     * 연간 달력 Pager에 표시될 페이지 데이터 Flow입니다.
+     * `stateFlow`를 기반으로 `initYear` 또는 `refreshKey`가 변경될 때마다 새로운 `PagingData`를 생성합니다.
+     *
+     * - **`state.initYear`**: Paging의 시작 기준이 되는 연도입니다.
+     * - **`state.refreshKey`**: `initYear`가 동일하더라도 Paging을 새로고침하고 싶을 때(예: '오늘' 버튼 클릭)
+     *   이 값을 변경하여 `distinctUntilChanged()`를 우회하고 Flow를 강제로 재실행시키는 역할을 합니다.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    val yearPages: Flow<PagingData<CalendarGridItem>> = container.stateFlow
+    val calendarGridItems: Flow<PagingData<CalendarGridItem>> = container.stateFlow
         .map { state -> (state.initYear to state.refreshKey) }
         .distinctUntilChanged()
-        .flatMapLatest { (targetYear, refreshKey) ->
-            getCalendarYearUseCase(targetYear)
+        .flatMapLatest { (initYear, refreshKey) ->
+            getCalendarYearUseCase(initYear)
         }.map { pagingData ->
             pagingData.map { calendarMonth ->
                 calendarMonth.toCalendarMonthItem()
             }
-        }.map { pagingData: PagingData<CalendarMonthItem> ->
+        }.map { pagingData ->
             pagingData.insertYearSeparators()
         }.cachedIn(viewModelScope)
 
     init {
-        initializeState()
+        initState()
     }
 
-    private fun initializeState() = intent {
-        val route = savedStateHandle.toRoute<YearlyCalenderRoute>()
+    private fun initState() = intent {
+        val route = savedStateHandle.toRoute<YearlyCalendarRoute>()
 
-        val initYear = savedStateHandle.get<Int>(KEY_INIT_YEAR) ?: route.year
-        val refreshKey = savedStateHandle.get<Long>(KEY_REFRESH_KEY) ?: System.currentTimeMillis()
-        val visibleYear = savedStateHandle.get<Int>(KEY_VISIBLE_YEAR) ?: route.year
-        val isInitialScrollCompleted = savedStateHandle[KEY_INITIAL_SCROLL_COMPLETED] ?: false
+        val savedInitYear = savedStateHandle[KEY_INIT_YEAR] ?: route.year
+        val savedRefreshKey = savedStateHandle[KEY_REFRESH_KEY] ?: System.currentTimeMillis()
+        val savedVisibleYear = savedStateHandle[KEY_VISIBLE_YEAR] ?: route.year
+        val savedIsInitialScrollCompleted = savedStateHandle[KEY_INITIAL_SCROLL_COMPLETED] ?: false
 
         reduce {
             state.copy(
-                initYear = Year.of(initYear),
-                refreshKey = refreshKey,
-                visibleYear = Year.of(visibleYear)
+                initYear = Year.of(savedInitYear),
+                refreshKey = savedRefreshKey,
+                visibleYear = Year.of(savedVisibleYear)
             )
         }
 
-        if (!isInitialScrollCompleted) {
+        // 초기 scroll 위치를 한 번만 설정하기 위해 사용
+        if (!savedIsInitialScrollCompleted) {
             postSideEffect(YearlyCalendarSideEffect.ScrollToInitialPosition)
             savedStateHandle[KEY_INITIAL_SCROLL_COMPLETED] = true
         }
     }
 
-    fun handleIntent(intent: YearlyCalendarIntent) {
-        when (intent) {
-            is YearlyCalendarIntent.VisibleYearChanged -> updateVisibleYear(intent.visibleYear)
-            is YearlyCalendarIntent.TodayButtonClicked -> scrollToToday()
-            is YearlyCalendarIntent.MonthButtonClicked -> navigateToMonthlyCalendar(intent.targetYearMonth)
+    fun handleAction(action: YearlyCalendarAction) {
+        when (action) {
+            is YearlyCalendarAction.VisibleYearChanged -> updateVisibleYear(action.newVisibleYear)
+            is YearlyCalendarAction.MonthClicked -> monthClicked(action.targetYearMonth)
+            is YearlyCalendarAction.TodayClicked -> todayClicked()
         }
     }
 
-    private fun updateVisibleYear(visibleYear: Year) = intent {
-        reduce { state.copy(visibleYear = visibleYear) }
+    private fun updateVisibleYear(newVisibleYear: Year) = intent {
+        reduce { state.copy(visibleYear = newVisibleYear) }
 
-        savedStateHandle[KEY_VISIBLE_YEAR] = visibleYear.value
+        savedStateHandle[KEY_VISIBLE_YEAR] = newVisibleYear.value
     }
 
-    private fun scrollToToday() = intent {
+    private fun monthClicked(targetYearMonth: YearMonth) = intent {
+        if (targetYearMonth.isAfterCurrentYearMonth()) {
+            postSideEffect(YearlyCalendarSideEffect.ShowMessage(UiText.StringResource(R.string.you_cannot_select_a_date_after_today)))
+        } else {
+            postSideEffect(YearlyCalendarSideEffect.MonthClicked(targetYearMonth))
+        }
+    }
+
+    private fun todayClicked() = intent {
         val currentYear = Year.now()
         val refreshKey = System.currentTimeMillis()
 
@@ -135,17 +151,9 @@ class YearlyCalendarViewModel @Inject constructor(
             )
         }
 
-        savedStateHandle[KEY_INIT_YEAR] = currentYear
+        savedStateHandle[KEY_INIT_YEAR] = currentYear.value
         savedStateHandle[KEY_REFRESH_KEY] = refreshKey
 
         postSideEffect(YearlyCalendarSideEffect.ScrollToToday)
-    }
-
-    private fun navigateToMonthlyCalendar(targetYearMonth: YearMonth) = intent {
-        if (targetYearMonth.isAfterCurrentYearMonth()) {
-            postSideEffect(YearlyCalendarSideEffect.ShowMsg(UiText.StringResource(R.string.you_cannot_select_a_date_after_today)))
-        } else {
-            postSideEffect(YearlyCalendarSideEffect.NavigateToMonthlyCalendar(targetYearMonth))
-        }
     }
 }

@@ -27,8 +27,8 @@ fun MonthCalendar(
     modifier: Modifier = Modifier,
     monthItem: CalendarMonthItem,
     onClick: ((YearMonth) -> Unit)? = null,
-    headerContent: @Composable ColumnScope.() -> Unit = {},
-    dayContent: @Composable RowScope.(CalendarDayItem) -> Unit,
+    header: @Composable ColumnScope.() -> Unit = {},
+    content: @Composable RowScope.(CalendarDayItem) -> Unit,
 ) {
     val weeks = remember(monthItem) {
         monthItem.days.chunked(7)
@@ -43,7 +43,7 @@ fun MonthCalendar(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        headerContent()
+        header()
 
         weeks.forEach { week ->
             Row(
@@ -52,7 +52,7 @@ fun MonthCalendar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 week.forEach { dayItem ->
-                    dayContent(dayItem)
+                    content(dayItem)
                 }
             }
         }
@@ -72,19 +72,14 @@ private fun MonthCalendarPreview(
         MonthCalendar(
             monthItem = previewData.monthItem,
         ) { dayItem ->
-            when (dayItem.isCurrentMonth) {
-                true -> ActiveDay(
+            if (dayItem.isCurrentMonth)
+                ActiveDay(
                     modifier = Modifier.weight(1f),
                     dayItem = dayItem,
                     diary = diary,
-                    isIconVisible = true
                 )
-
-                false -> InactiveDay(
-                    modifier = Modifier.weight(1f),
-                    dayItem = dayItem
-                )
-            }
+            else
+                InactiveDay(modifier = Modifier.weight(1f), dayItem = dayItem)
         }
     }
 }

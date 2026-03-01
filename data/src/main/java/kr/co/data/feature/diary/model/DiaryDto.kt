@@ -13,7 +13,7 @@ import kr.co.data.local.table.DiaryTable
  * 다만 나중에 다른 REST API(Gson)의 DTO로 사용할 수 있도록 @SerialName을 사용합니다.
  *
  * @property id
- * @property dateString
+ * @property date
  * @property title
  * @property content
  * @property emotionName
@@ -26,7 +26,7 @@ data class DiaryDto(
     val id: Long = 0L,
 
     @SerialName(DiaryTable.COLUMN_DATE)
-    val dateString: String = "",
+    val date: String = "",
 
     @SerialName(DiaryTable.COLUMN_TITLE)
     val title: String = "",

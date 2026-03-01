@@ -31,9 +31,9 @@ import kr.co.presentation.R
 import kr.co.presentation.common.composable.LoadingButton
 import kr.co.presentation.common.extension.getString
 import kr.co.presentation.feature.auth.preview.provider.LoginPreviewDataProvider
-import kr.co.presentation.feature.auth.viewmodel.LoginIntent
-import kr.co.presentation.feature.auth.viewmodel.LoginSideEffect
+import kr.co.presentation.feature.auth.viewmodel.LoginAction
 import kr.co.presentation.feature.auth.viewmodel.LoginScreenState
+import kr.co.presentation.feature.auth.viewmodel.LoginSideEffect
 import kr.co.presentation.feature.auth.viewmodel.LoginViewModel
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
@@ -42,8 +42,8 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun LoginScreen(
-    onNavigateToMainScreen: () -> Unit,
-    onNavigateToSignUpScreen: () -> Unit,
+    onLoginSucceeded: () -> Unit,
+    onSignUpClicked: () -> Unit,
     viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val state: LoginScreenState by viewModel.collectAsState()
@@ -53,26 +53,30 @@ fun LoginScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is LoginSideEffect.NavigateToMainScreen -> onNavigateToMainScreen()
-            is LoginSideEffect.NavigateToSignUpScreen -> onNavigateToSignUpScreen()
-            is LoginSideEffect.ShowMsg -> coroutineScope.launch {
+            is LoginSideEffect.LoginSucceeded -> onLoginSucceeded()
+            is LoginSideEffect.SignUpClicked -> onSignUpClicked()
+            is LoginSideEffect.ShowMessage -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
         }
     }
 
     LoginContent(
-        state = state,
+        email = state.email,
+        password = state.password,
+        isLoggingIn = state.isLoggingIn,
         snackbarHostState = snackbarHostState,
-        intent = viewModel::handleIntent
+        onAction = viewModel::handleAction
     )
 }
 
 @Composable
 fun LoginContent(
-    state: LoginScreenState = LoginScreenState(),
+    email: String = "minary@gmail.com",
+    password: String = "passwordValue",
+    isLoggingIn: Boolean = false,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    intent: (LoginIntent) -> Unit = {}
+    onAction: (LoginAction) -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -105,8 +109,8 @@ fun LoginContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                value = state.email,
-                onValueChange = { value -> intent(LoginIntent.EmailChanged(value)) },
+                value = email,
+                onValueChange = { value -> onAction(LoginAction.EmailChanged(value)) },
                 label = { Text(stringResource(R.string.user_id)) }
             )
 
@@ -120,8 +124,8 @@ fun LoginContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                value = state.password,
-                onValueChange = { value -> intent(LoginIntent.PasswordChanged(value)) },
+                value = password,
+                onValueChange = { value -> onAction(LoginAction.PasswordChanged(value)) },
                 label = { Text(stringResource(R.string.user_password)) },
                 visualTransformation = PasswordVisualTransformation()
             )
@@ -132,8 +136,8 @@ fun LoginContent(
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
                 text = stringResource(R.string.btn_login),
-                onClick = { intent(LoginIntent.LoginButtonClicked) },
-                isLoading = state.isLoggingIn
+                onClick = { onAction(LoginAction.LoginClicked) },
+                isLoading = isLoggingIn
             )
 
             // sign up text button
@@ -141,7 +145,7 @@ fun LoginContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(bottom = 24.dp)
-                    .clickable(onClick = { intent(LoginIntent.SignUpButtonClicked) }),
+                    .clickable(onClick = { onAction(LoginAction.SignUpClicked) }),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.Bottom
             ) {
@@ -156,12 +160,16 @@ fun LoginContent(
     }
 }
 
-@Preview(showBackground = true, locale = "ko", name = "LoginContent Preview")
+@Preview(showBackground = true, locale = "ko")
 @Composable
 private fun LoginContentPreview(
     @PreviewParameter(LoginPreviewDataProvider::class) state: LoginScreenState
 ) {
     MinaryTheme {
-        LoginContent(state)
+        LoginContent(
+            state.email,
+            state.password,
+            state.isLoggingIn,
+        )
     }
 }

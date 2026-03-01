@@ -11,7 +11,7 @@ import javax.inject.Inject
 
 private val Context.dataStore by preferencesDataStore(name = "minary_datastore")
 
-class AppDataStore @Inject constructor(
+class MinaryDataStore @Inject constructor(
     private val context: Context,
 ) {
     companion object {

@@ -13,17 +13,20 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,9 +50,8 @@ import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.feature.diary.preview.factory.DiaryPreviewDataFactory
 import kr.co.presentation.feature.diary.preview.model.DiaryPreviewData
 import kr.co.presentation.feature.diary.preview.provider.DiaryPreviewDataProvider
-import kr.co.presentation.feature.diary.viewmodel.DiaryIntent
+import kr.co.presentation.feature.diary.viewmodel.DiaryAction
 import kr.co.presentation.feature.diary.viewmodel.DiaryScreenMode
-import kr.co.presentation.feature.diary.viewmodel.DiaryScreenState
 import kr.co.presentation.feature.diary.viewmodel.DiarySideEffect
 import kr.co.presentation.feature.diary.viewmodel.DiaryViewModel
 import kr.co.presentation.theme.MinaryTheme
@@ -59,18 +61,20 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 
 @Composable
 fun DiaryScreen(
-    onNavigateToMainScreen: () -> Unit = {},
+    onDiaryDeleted: () -> Unit = {},
+    onLoadFailed: () -> Unit = {},
     viewModel: DiaryViewModel = hiltViewModel()
 ) {
-    val state: DiaryScreenState by viewModel.collectAsState()
+    val state by viewModel.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is DiarySideEffect.NavigateToMainScreen -> onNavigateToMainScreen()
-            is DiarySideEffect.ShowMsg -> coroutineScope.launch {
+            is DiarySideEffect.DiaryDeleted -> onDiaryDeleted()
+            is DiarySideEffect.LoadFailed -> onLoadFailed()
+            is DiarySideEffect.ShowMessage -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
         }
@@ -81,36 +85,46 @@ fun DiaryScreen(
         loading = {
             SkeletonDiaryContent()
         }
-    ) { diaryUiModel ->
+    ) { diary ->
         DiaryContent(
-            diaryUiModel = diaryUiModel,
+            diary = diary,
             screenMode = state.screenMode,
-            isBtnLoading = state.isDoneBtnLoading,
+            isSaving = state.isSaving,
+            isDeleting = state.isDeleting,
             snackbarHostState = snackbarHostState,
-            intent = viewModel::handleIntent
+            onAction = viewModel::handleAction
         )
     }
 }
 
 @Composable
 fun DiaryContent(
-    diaryUiModel: DiaryUiModel,
-    screenMode: DiaryScreenMode = DiaryScreenMode.Preview,
-    isBtnLoading: Boolean = false,
+    diary: DiaryUiModel,
+    screenMode: DiaryScreenMode = DiaryScreenMode.Edit,
+    isSaving: Boolean = false,
+    isDeleting: Boolean = false,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    intent: (DiaryIntent) -> Unit = {}
+    onAction: (DiaryAction) -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             when (screenMode) {
-                DiaryScreenMode.Edit -> EditTopBar(diaryUiModel.emotion, isBtnLoading, intent)
-                DiaryScreenMode.Preview -> PreviewTopBar(diaryUiModel.emotion, isBtnLoading, intent)
+                DiaryScreenMode.Edit -> EditTopBar(diary.emotion, isSaving, onAction)
+                DiaryScreenMode.Preview -> PreviewTopBar(diary.emotion, isDeleting, onAction)
             }
         }
     ) { paddingValues ->
-        val enabled = (screenMode == DiaryScreenMode.Edit)
+        val readOnly = (screenMode == DiaryScreenMode.Preview)
+
+        val textFieldColors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedIndicatorColor = if (readOnly) Color.Transparent else MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = if (readOnly) Color.Transparent else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -120,15 +134,16 @@ fun DiaryContent(
         ) {
             Text(
                 modifier = Modifier.padding(bottom = 8.dp),
-                text = diaryUiModel.date.toString(),
+                text = diary.date.toString(),
                 fontSize = 20.sp
             )
+
             TextField(
-                value = diaryUiModel.title,
-                onValueChange = { intent(DiaryIntent.TitleChanged(it)) },
+                value = diary.title,
+                onValueChange = { onAction(DiaryAction.TitleChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = enabled,
-                readOnly = !enabled,
+                readOnly = readOnly,
+                colors = textFieldColors,
                 singleLine = true,
                 maxLines = 1,
                 label = { Text(stringResource(R.string.diary_title_hint)) },
@@ -137,12 +152,15 @@ fun DiaryContent(
                     fontSize = 24.sp,
                 )
             )
+
             TextField(
-                value = diaryUiModel.content,
-                onValueChange = { intent(DiaryIntent.ContentChanged(it)) },
-                modifier = Modifier.fillMaxSize(),
-                enabled = enabled,
-                readOnly = !enabled,
+                value = diary.content,
+                onValueChange = { onAction(DiaryAction.ContentChanged(it)) },
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                readOnly = readOnly,
+                colors = textFieldColors,
                 label = { Text(stringResource(R.string.diary_content_hint)) },
                 textStyle = TextStyle(
                     fontWeight = FontWeight.Normal,
@@ -156,8 +174,8 @@ fun DiaryContent(
 @Composable
 fun EditTopBar(
     emotion: Emotion = Emotion.UNKNOWN,
-    isBtnLoading: Boolean = false,
-    intent: (DiaryIntent) -> Unit = {}
+    isSaving: Boolean = false,
+    onAction: (DiaryAction) -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -176,9 +194,9 @@ fun EditTopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             LoadingButton(
-                text = stringResource(R.string.diary_done_button),
-                isLoading = isBtnLoading,
-                onClick = { intent(DiaryIntent.DoneButtonClicked) },
+                text = stringResource(R.string.diary_save_button),
+                isLoading = isSaving,
+                onClick = { onAction(DiaryAction.SaveClicked) },
             )
         }
     }
@@ -187,8 +205,8 @@ fun EditTopBar(
 @Composable
 fun PreviewTopBar(
     emotion: Emotion = Emotion.UNKNOWN,
-    isBtnLoading: Boolean = false,
-    intent: (DiaryIntent) -> Unit = {}
+    isDeleting: Boolean = false,
+    onAction: (DiaryAction) -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -207,8 +225,8 @@ fun PreviewTopBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             LoadingIconButton(
-                onClick = { intent(DiaryIntent.DeleteButtonClicked) },
-                isLoading = isBtnLoading
+                onClick = { onAction(DiaryAction.DeleteClicked) },
+                isLoading = isDeleting
             ) {
                 Icon(
                     painter = painterResource(android.R.drawable.ic_menu_delete),
@@ -216,7 +234,7 @@ fun PreviewTopBar(
                 )
             }
 
-            Button(onClick = { intent(DiaryIntent.EditButtonClicked) }) {
+            Button(onClick = { onAction(DiaryAction.EditClicked) }) {
                 Text(stringResource(R.string.diary_edit_button))
             }
         }
@@ -242,9 +260,9 @@ fun EmotionIcon(
 private fun DiaryContentPreview(
     @PreviewParameter(DiaryPreviewDataProvider::class) diaryPreviewData: DiaryPreviewData,
 ) {
-    val diaryUiModel = DiaryPreviewDataFactory.createDiaryUiModel(diaryPreviewData.emotion)
+    val diary = DiaryPreviewDataFactory.createDiary(diaryPreviewData.emotion)
 
     MinaryTheme {
-        DiaryContent(diaryUiModel, diaryPreviewData.screenMode)
+        DiaryContent(diary, diaryPreviewData.screenMode)
     }
 }

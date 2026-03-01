@@ -2,7 +2,7 @@ package kr.co.data.feature.emotion
 
 import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
-import kr.co.domain.common.Converter
+import kr.co.domain.common.extension.toEmotion
 import kr.co.domain.feature.diary.model.Diary
 import kr.co.domain.feature.emotion.Emotion
 import javax.inject.Inject
@@ -29,9 +29,7 @@ class EmotionAnalysisAiDataSource @Inject constructor(
             val response = generativeModel.generateContent(prompt)
             val emotionName = response.text?.trim()
 
-            return emotionName?.let {
-                Converter.toEmotion(it)
-            } ?: Emotion.UNKNOWN
+            return emotionName?.toEmotion() ?: Emotion.UNKNOWN
         } catch (e: Exception){
             Log.e(tag, "emotionAnalysisAi: ${e.message}")
             return Emotion.UNKNOWN

@@ -24,69 +24,50 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import kotlinx.coroutines.launch
 import kr.co.presentation.R
-import kr.co.presentation.common.extension.getString
-import kr.co.presentation.feature.calendar.navigation.MonthlyCalendarRoute
-import kr.co.presentation.feature.dashboard.navigation.DashboardRoute
-import kr.co.presentation.feature.setting.navigation.SettingRoute
-import kr.co.presentation.feature.store.navigation.StoreRoute
 import kr.co.presentation.main.navigation.MainHost
 import kr.co.presentation.main.navigation.MainNavigationItem
-import kr.co.presentation.main.viewmodel.MainSideEffect
-import kr.co.presentation.main.viewmodel.MainViewModel
-import kr.co.presentation.navigation.extension.navigateIfNotCurrent
+import kr.co.presentation.navigation.DashboardRoute
+import kr.co.presentation.navigation.MinaryAppState
+import kr.co.presentation.navigation.MonthlyCalendarRoute
+import kr.co.presentation.navigation.SettingRoute
+import kr.co.presentation.navigation.StoreRoute
+import kr.co.presentation.navigation.navigateIfNotCurrent
 import kr.co.presentation.theme.MinaryTheme
-import org.orbitmvi.orbit.compose.collectSideEffect
-import java.time.LocalDate
 import java.time.YearMonth
 
 
 @SuppressLint("RestrictedApi")
 @Composable
 fun MainScreen(
-    onNavigateToDiaryScreen: (LocalDate) -> Unit,
-    viewModel: MainViewModel = hiltViewModel()
+    appState: MinaryAppState,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
-    val navController = rememberNavController()
-
-    viewModel.collectSideEffect { sideEffect ->
-        when (sideEffect) {
-            is MainSideEffect.NavigateToDiaryScreen -> {
-                onNavigateToDiaryScreen(sideEffect.date)
-            }
-
-            is MainSideEffect.ShowMsg -> coroutineScope.launch {
-                snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
-            }
-        }
-    }
+    val bottomNavController = rememberNavController()
 
     MainContent(
         snackbarHostState = snackbarHostState,
-        navController = navController,
+        navController = bottomNavController,
     ) { innerPadding ->
         val currentYearMonth = YearMonth.now()
+
         MainHost(
-            navController = navController,
-            startDestination = MonthlyCalendarRoute(currentYearMonth.year, currentYearMonth.monthValue),
-            modifier = Modifier.padding(innerPadding),
-            viewModel::handleIntent,
+            appState = appState,
+            navController = bottomNavController,
+            startDestination = MonthlyCalendarRoute(
+                currentYearMonth.year,
+                currentYearMonth.monthValue
+            ),
+            modifier = Modifier.padding(innerPadding)
         )
     }
 }
@@ -97,9 +78,14 @@ fun MainContent(
     navController: NavHostController = rememberNavController(),
     content: @Composable (PaddingValues) -> Unit = {}
 ) {
+    val currentYearMonth = YearMonth.now()
     val navigationItems = remember {
         listOf(
-            MainNavigationItem(R.string.calendar, MonthlyCalendarRoute(), Icons.Filled.DateRange),
+            MainNavigationItem(
+                R.string.calendar,
+                MonthlyCalendarRoute(currentYearMonth.year, currentYearMonth.monthValue),
+                Icons.Filled.DateRange
+            ),
             MainNavigationItem(R.string.dashboard, DashboardRoute, Icons.Filled.Star),
             MainNavigationItem(R.string.store, StoreRoute, Icons.Filled.ShoppingCart),
             MainNavigationItem(R.string.setting, SettingRoute, Icons.Filled.Settings),
@@ -107,7 +93,7 @@ fun MainContent(
     }
 
     Scaffold(
-        topBar = { TopBar() },
+        topBar = { MainTopBar() },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             BottomAppBar {
@@ -136,7 +122,7 @@ fun MainContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopBar() {
+private fun MainTopBar() {
     TopAppBar(
         title = { Text(stringResource(R.string.app_name)) },
         actions = {

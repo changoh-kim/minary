@@ -1,18 +1,19 @@
 package kr.co.data.local.converter
 
 import androidx.room.TypeConverter
-import kr.co.domain.common.Converter
+import kr.co.domain.common.extension.toBoolean
+import kr.co.domain.common.extension.toInt
 
 
 object BooleanConverters {
 
     @TypeConverter
     fun fromBoolean(value: Boolean?): Int? {
-        return value?.let { Converter.toInt(it) }
+        return value?.toInt()
     }
 
     @TypeConverter
     fun toBoolean(value: Int?): Boolean? {
-        return value?.let { Converter.toBoolean(it) }
+        return value?.toBoolean()
     }
 }

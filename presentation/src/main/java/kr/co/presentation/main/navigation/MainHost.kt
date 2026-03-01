@@ -4,26 +4,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 import kr.co.presentation.feature.calendar.navigation.calenderGraph
 import kr.co.presentation.feature.dashboard.navigation.dashboardGraph
 import kr.co.presentation.feature.setting.navigation.settingGraph
 import kr.co.presentation.feature.store.navigation.storeGraph
-import kr.co.presentation.main.viewmodel.MainIntent
+import kr.co.presentation.navigation.MinaryAppState
 
 
 @Composable
 fun MainHost(
-    navController: NavHostController = rememberNavController(),
+    appState: MinaryAppState,
+    navController: NavHostController,
     startDestination: Any,
     modifier: Modifier,
-    intent: (MainIntent) -> Unit = {},
 ) {
-
     NavHost(navController, startDestination, modifier) {
-        calenderGraph(navController, intent)
-        dashboardGraph(navController)
-        storeGraph(navController)
-        settingGraph(navController)
+        calenderGraph(appState, navController)
+        dashboardGraph(appState, navController)
+        storeGraph(appState, navController)
+        settingGraph(appState, navController)
     }
 }

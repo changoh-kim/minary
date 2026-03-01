@@ -11,7 +11,7 @@ import kr.co.presentation.feature.calendar.model.CalendarGridItem
 import java.time.Year
 
 
-internal class YearlyCalendarPreviewDataProvider(
+internal class CalendarGridItemPreviewDataProvider(
     calendarGenerator: CalendarGenerator = CalendarGenerator(),
 ) :
     PreviewParameterProvider<Flow<PagingData<CalendarGridItem>>> {

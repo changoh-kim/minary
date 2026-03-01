@@ -22,12 +22,12 @@ import javax.inject.Inject
 
 @Immutable
 data class MainActivityState(
-    val loginLoadState: LoadState<UserUiModel> = LoadState.Uninitialized,
+    val userLoadState: LoadState<UserUiModel> = LoadState.Uninitialized,
 )
 
 @Immutable
 sealed interface MainActivitySideEffect {
-    data class ShowMsg(val uiText: UiText) : MainActivitySideEffect
+    data class ShowMessage(val uiText: UiText) : MainActivitySideEffect
 }
 
 @HiltViewModel
@@ -47,25 +47,23 @@ class MainActivityViewModel @Inject constructor(
         safeCall { isUserLoggedInUseCase() }
             .map { it.toUserUiModel() }
             .launchAsLoadState { loadState ->
-                reduce { state.copy(loginLoadState = loadState) }
+                reduce { state.copy(userLoadState = loadState) }
 
                 when (loadState) {
                     is LoadState.Success -> syncDiaryUseCase()
-                    is LoadState.Error -> loadState.exception?.let { handleLoginError(it) }
+                    is LoadState.Error -> loadState.exception?.let { handleError(it) }
                     else -> {}
                 }
             }
     }
 
-    private fun handleLoginError(error: Throwable) = intent {
+    private fun handleError(error: Throwable) = intent {
         val message = when (error) {
             is AuthException.CurrentUserIsNullException -> UiText.StringResource(R.string.current_user_is_null)
-            else -> {
-                error.message
-                    ?.let { UiText.DynamicString(it) }
-                    ?: UiText.StringResource(R.string.unknown_error)
-            }
+            else -> error.message?.let { UiText.DynamicString(it) }
+                ?: UiText.StringResource(R.string.unknown_error)
         }
-        postSideEffect(MainActivitySideEffect.ShowMsg(message))
+
+        postSideEffect(MainActivitySideEffect.ShowMessage(message))
     }
 }

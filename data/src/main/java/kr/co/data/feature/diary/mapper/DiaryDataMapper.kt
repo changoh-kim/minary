@@ -2,7 +2,8 @@ package kr.co.data.feature.diary.mapper
 
 import kr.co.data.feature.diary.model.DiaryDto
 import kr.co.data.local.entity.DiaryEntity
-import kr.co.domain.common.Converter
+import kr.co.domain.common.extension.toEmotion
+import kr.co.domain.common.extension.toLocalDate
 import kr.co.domain.feature.diary.model.Diary
 
 
@@ -30,23 +31,28 @@ object DiaryDataMapper {
         isDeleted = isDeleted,
     )
 
-    fun DiaryDto.toDiaryEntity() = DiaryEntity(
-        id = id,
-        date = Converter.toDate(dateString),
-        title = title,
-        content = content,
-        emotion = Converter.toEmotion(emotionName),
-        timestamp = timestamp,
-        isSynced = true,
-        isDeleted = false,
-    )
+    fun DiaryDto.toDiaryEntity(): DiaryEntity {
+        val convertedDate = date.toLocalDate()
+        requireNotNull(convertedDate) { "Diary from server (id: $id) must have a valid date." }
+
+        return DiaryEntity(
+            id = id,
+            date = convertedDate,
+            title = title,
+            content = content,
+            emotion = emotionName.toEmotion(),
+            timestamp = timestamp,
+            isSynced = true,
+            isDeleted = false,
+        )
+    }
 
     fun DiaryEntity.toDiaryDto() = DiaryDto(
         id = id,
-        dateString = Converter.toDateString(date),
+        date = date.toString(),
         title = title,
         content = content,
-        emotionName = Converter.toEmotionName(emotion),
+        emotionName = emotion.name,
         timestamp = timestamp,
     )
 }

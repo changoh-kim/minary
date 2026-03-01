@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import kr.co.data.di.qualifier.IoScope
 import kr.co.data.feature.diary.mapper.DiaryDataMapper.toDiaryEntity
 import kr.co.data.feature.diary.model.DiaryDto
-import kr.co.data.feature.diary.source.remote.DiaryDownloadWorker.Companion.WORK_DIARY_DOWNLOAD
 import kr.co.data.local.dao.DiaryDao
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -53,7 +52,7 @@ class DiaryRemoteDataSource @Inject constructor(
             .build()
 
         workManager.enqueueUniqueWork(
-            WORK_DIARY_DOWNLOAD,
+            DiaryDownloadWorker.DIARY_DOWNLOAD,
             ExistingWorkPolicy.APPEND_OR_REPLACE,
             diaryDownloadWorker
         )
@@ -78,7 +77,7 @@ class DiaryRemoteDataSource @Inject constructor(
             .build()
 
         workManager.enqueueUniqueWork(
-            DiarySyncWorker.Companion.WORK_DIARY_SYNC,
+            DiarySyncWorker.DIARY_SYNC,
             ExistingWorkPolicy.APPEND_OR_REPLACE,
             diarySyncWorker
         )
