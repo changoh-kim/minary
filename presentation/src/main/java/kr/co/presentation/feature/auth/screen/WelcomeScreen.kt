@@ -23,16 +23,16 @@ import kr.co.presentation.theme.MinaryTheme
 
 @Composable
 fun WelcomeScreen(
-    onNavigateToLoginScreen:() -> Unit
+    onLoginClicked: () -> Unit
 ) {
     WelcomeContent(
-        onNavigateToLoginScreen = onNavigateToLoginScreen
+        onNavigateToLogin = onLoginClicked
     )
 }
 
 @Composable
 fun WelcomeContent(
-    onNavigateToLoginScreen: () -> Unit = {}
+    onNavigateToLogin: () -> Unit = {}
 ) {
     Surface {
         Box(
@@ -63,7 +63,7 @@ fun WelcomeContent(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
-                onClick = onNavigateToLoginScreen
+                onClick = onNavigateToLogin
             ) {
                 Text(
                     text = stringResource(R.string.login),

@@ -1,21 +1,14 @@
 package kr.co.presentation.main.navigation
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import kr.co.presentation.feature.diary.navigation.DiaryRoute
 import kr.co.presentation.main.screen.MainScreen
+import kr.co.presentation.navigation.MainRoute
+import kr.co.presentation.navigation.MinaryAppState
 
 
 internal fun NavGraphBuilder.mainGraph(
-    navController: NavHostController
+    appState: MinaryAppState,
 ) {
-
-    composable<MainRoute> {
-        MainScreen(
-            onNavigateToDiaryScreen = { date ->
-                navController.navigate(DiaryRoute(date.year, date.monthValue, date.dayOfMonth))
-            },
-        )
-    }
+    composable<MainRoute> { MainScreen(appState) }
 }

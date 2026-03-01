@@ -4,11 +4,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import kr.co.presentation.feature.store.screen.StoreScreen
+import kr.co.presentation.navigation.MinaryAppState
+import kr.co.presentation.navigation.StoreRoute
 
 
 internal fun NavGraphBuilder.storeGraph(
-    navController: NavHostController
+    appState: MinaryAppState,
+    navController: NavHostController,
 ) {
-
     composable<StoreRoute> { StoreScreen() }
 }

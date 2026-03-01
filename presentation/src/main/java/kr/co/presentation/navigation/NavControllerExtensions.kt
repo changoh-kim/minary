@@ -1,4 +1,4 @@
-package kr.co.presentation.navigation.extension
+package kr.co.presentation.navigation
 
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination

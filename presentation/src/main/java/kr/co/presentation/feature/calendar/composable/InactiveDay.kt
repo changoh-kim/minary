@@ -17,8 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kr.co.domain.feature.emotion.Emotion
 import kr.co.presentation.feature.calendar.model.CalendarDayItem
+import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.theme.MinaryTheme
+import java.time.LocalDate
 
 
 @Composable
@@ -49,6 +52,9 @@ fun InactiveDay(
 @Composable
 private fun InactiveDayPreview() {
     MinaryTheme {
-        InactiveDay(dayItem = CalendarDayItem(isCurrentMonth = false))
+        InactiveDay(
+            modifier = Modifier.size(46.dp),
+            dayItem = CalendarDayItem(isCurrentMonth = false)
+        )
     }
 }

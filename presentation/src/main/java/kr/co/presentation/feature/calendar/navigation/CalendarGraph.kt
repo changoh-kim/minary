@@ -6,31 +6,30 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import kr.co.presentation.feature.calendar.screen.MonthlyCalendarScreen
 import kr.co.presentation.feature.calendar.screen.YearlyCalendarScreen
-import kr.co.presentation.main.viewmodel.MainIntent
+import kr.co.presentation.navigation.MinaryAppState
+import kr.co.presentation.navigation.MonthlyCalendarRoute
+import kr.co.presentation.navigation.YearlyCalendarRoute
 
 
 internal fun NavGraphBuilder.calenderGraph(
+    appState: MinaryAppState,
     navController: NavHostController,
-    intent: (MainIntent) -> Unit = {},
 ) {
-
     composable<MonthlyCalendarRoute> {
         MonthlyCalendarScreen(
-            onNavigateToDiaryScreen = { date ->
-                intent(MainIntent.NavigateToDiaryScreen(date))
-            },
-            onNavigateToYearlyCalendar = { year ->
-                navController.navigate(YearlyCalenderRoute(year)) {
+            onYearClicked = { year ->
+                navController.navigate(YearlyCalendarRoute(year)) {
                     launchSingleTop = true
                     restoreState = true
                 }
             },
+            onDayClicked = { date -> appState.navigateToDiary(date) },
         )
     }
 
-    composable<YearlyCalenderRoute> {
+    composable<YearlyCalendarRoute> {
         YearlyCalendarScreen(
-            onNavigateToMonthlyCalendar = { yearMonth ->
+            onMonthClicked = { yearMonth ->
                 navController.navigate(MonthlyCalendarRoute(yearMonth.year, yearMonth.monthValue)) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         inclusive = true

@@ -1,7 +1,6 @@
 package kr.co.presentation.feature.auth.preview.provider
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import kr.co.presentation.common.state.LoadState
 import kr.co.presentation.feature.auth.viewmodel.SignUpScreenState
 
 
@@ -9,18 +8,20 @@ internal class SignUpPreviewDataProvider : PreviewParameterProvider<SignUpScreen
 
     override val values: Sequence<SignUpScreenState> = sequenceOf(
         SignUpScreenState(
-            signUpLoadState = LoadState.Uninitialized,
-            email = "testEmail",
-            name = "testName",
-            password = "testPw",
-            confirmPassword = "testConfirmPw"
+            signedUpUser = null,
+            email = "minary@gmail.com",
+            name = "minary",
+            password = "passwordValue",
+            confirmPassword = "passwordValue",
+            isSigningUp = false
         ),
         SignUpScreenState(
-            signUpLoadState = LoadState.Loading,
-            email = "testEmail",
-            name = "testName",
-            password = "testPw",
-            confirmPassword = "testConfirmPw"
+            signedUpUser = null,
+            email = "minary@gmail.com",
+            name = "minary",
+            password = "passwordValue",
+            confirmPassword = "passwordValue",
+            isSigningUp = true
         ),
     )
 }

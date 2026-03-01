@@ -1,6 +1,7 @@
 package kr.co.data.feature.diary.source.remote
 
 import android.content.Context
+import android.util.Log
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
@@ -24,7 +25,8 @@ class DiaryDownloadWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     companion object {
-        const val WORK_DIARY_DOWNLOAD = "diary_sync_download"
+        const val DIARY_DOWNLOAD = "diary_download"
+        private val TAG = DiaryDownloadWorker::class.java.simpleName
     }
 
     override suspend fun doWork(): Result {
@@ -41,8 +43,24 @@ class DiaryDownloadWorker @AssistedInject constructor(
                     .await()
 
             val downloadDiaries = diariesSnapshot.documents.mapNotNull { diaryDocSnapshot ->
-                val diaryDto = diaryDocSnapshot.toObject(DiaryDto::class.java)!!
-                diaryDto.toDiaryEntity().copy(isSynced = true, isDeleted = false)
+                try {
+                    val diaryDto = diaryDocSnapshot.toObject(DiaryDto::class.java)
+                    if (diaryDto == null) {
+                        Log.w(
+                            TAG,
+                            "Failed to parse Firestore document to DiaryDto. Document ID: ${diaryDocSnapshot.id}"
+                        )
+                        return@mapNotNull null
+                    }
+                    diaryDto.toDiaryEntity().copy(isSynced = true, isDeleted = false)
+                } catch (error: IllegalArgumentException) {
+                    Log.w(
+                        TAG,
+                        "Skipping remote diary due to mapping error. Document ID: ${diaryDocSnapshot.id}",
+                        error
+                    )
+                    null
+                }
             }
 
             if (downloadDiaries.isNotEmpty()) {

@@ -17,7 +17,7 @@ import java.time.LocalDate
 object DiaryPreviewDataFactory {
 
     @Composable
-    fun createDiaryUiState(
+    fun createDiary(
         diaryPreviewData: DiaryPreviewData,
         context: Context = LocalContext.current
     ): DiaryScreenState {
@@ -38,7 +38,7 @@ object DiaryPreviewDataFactory {
     }
 
     @Composable
-    fun createDiaryUiModel(
+    fun createDiary(
         emotion: Emotion,
         context: Context = LocalContext.current
     ): DiaryUiModel {

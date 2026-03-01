@@ -34,7 +34,6 @@ fun ActiveDay(
     modifier: Modifier = Modifier,
     dayItem: CalendarDayItem,
     diary: DiaryUiModel? = null,
-    isIconVisible: Boolean = false,
     onClick: ((CalendarDayItem) -> Unit)? = null
 ) {
     val isToday = dayItem.isToday()
@@ -64,19 +63,20 @@ fun ActiveDay(
             fontWeight = fontWeight,
         )
 
-        if (isIconVisible) {
-            if (diary != null) {
-                Box(
-                    modifier = Modifier
-                        .padding(6.dp)
-                        .size(6.dp)
-                        .clip(CircleShape)
-                        .background(diary.emotion.color, CircleShape)
-                )
-            } else {
-                Spacer(modifier = Modifier.padding(6.dp).size(6.dp))
-            }
-        }
+        if (diary != null)
+            Box(
+                modifier = Modifier
+                    .padding(6.dp)
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(diary.emotion.color, CircleShape)
+            )
+        else
+            Spacer(
+                modifier = Modifier
+                    .padding(6.dp)
+                    .size(6.dp)
+            )
     }
 }
 
@@ -85,14 +85,12 @@ fun ActiveDay(
 private fun ActiveDayPreview() {
     MinaryTheme {
         ActiveDay(
+            modifier = Modifier.size(46.dp),
             dayItem = CalendarDayItem(
                 date = LocalDate.now(),
                 isCurrentMonth = true,
             ),
-            diary = DiaryUiModel(
-                emotion = Emotion.TRIUMPH,
-            ),
-            isIconVisible = true,
+            diary = DiaryUiModel(emotion = Emotion.TRIUMPH),
         )
     }
 }

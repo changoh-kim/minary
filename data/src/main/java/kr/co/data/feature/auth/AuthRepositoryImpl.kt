@@ -1,6 +1,6 @@
 package kr.co.data.feature.auth
 
-import android.net.Uri
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
@@ -55,7 +55,7 @@ class AuthRepositoryImpl @Inject constructor(
             User(
                 email = user.email ?: "",
                 name = user.displayName ?: "",
-                photoUrl = user.photoUrl.toString() ?: ""
+                photoUrl = user.photoUrl.toString()
             )
         } else {
             throw AuthException.SignInUserIsNullException
@@ -75,7 +75,7 @@ class AuthRepositoryImpl @Inject constructor(
                 User(
                     email = user.email ?: "",
                     name = user.displayName ?: "",
-                    photoUrl = user.photoUrl.toString() ?: ""
+                    photoUrl = user.photoUrl.toString()
                 )
             )
         } else {
@@ -91,7 +91,7 @@ class AuthRepositoryImpl @Inject constructor(
                 user.updateProfile(
                     userProfileChangeRequest {
                         displayName = userName
-                        photoUri = Uri.parse(userPhotoUri)
+                        photoUri = userPhotoUri.toUri()
                     }
                 ).await()
             }

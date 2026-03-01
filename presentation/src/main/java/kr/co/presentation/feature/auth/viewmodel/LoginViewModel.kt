@@ -11,10 +11,9 @@ import kr.co.domain.feature.diary.usecase.CheckAndDownloadInitialDiariesUseCase
 import kr.co.presentation.R
 import kr.co.presentation.common.extension.safeCall
 import kr.co.presentation.common.model.UiText
-import kr.co.presentation.common.state.LoadState
 import kr.co.presentation.feature.auth.mapper.UserUiModelMapper.toUserUiModel
 import kr.co.presentation.feature.auth.model.UserUiModel
-import kr.co.presentation.feature.auth.navigation.LoginRoute
+import kr.co.presentation.navigation.LoginRoute
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.SimpleSyntax
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -26,7 +25,7 @@ import javax.inject.Inject
 
 @Immutable
 data class LoginScreenState(
-    val loginLoadState: LoadState<UserUiModel> = LoadState.Uninitialized,
+    val loggedInUser: UserUiModel? = null,
     val isLoggingIn: Boolean = false,
     val email: String = "",
     val password: String = ""
@@ -34,16 +33,16 @@ data class LoginScreenState(
 
 @Immutable
 sealed interface LoginSideEffect {
-    object NavigateToMainScreen : LoginSideEffect
-    object NavigateToSignUpScreen : LoginSideEffect
-    data class ShowMsg(val uiText: UiText) : LoginSideEffect
+    object LoginSucceeded : LoginSideEffect
+    object SignUpClicked : LoginSideEffect
+    data class ShowMessage(val uiText: UiText) : LoginSideEffect
 }
 
-sealed interface LoginIntent {
-    data class EmailChanged(val newEmail: String) : LoginIntent
-    data class PasswordChanged(val newPassword: String) : LoginIntent
-    object LoginButtonClicked : LoginIntent
-    object SignUpButtonClicked : LoginIntent
+sealed interface LoginAction {
+    data class EmailChanged(val newEmail: String) : LoginAction
+    data class PasswordChanged(val newPassword: String) : LoginAction
+    object LoginClicked : LoginAction
+    object SignUpClicked : LoginAction
 }
 
 @HiltViewModel
@@ -67,19 +66,29 @@ class LoginViewModel @Inject constructor(
     private fun initState() = intent {
         val route = savedStateHandle.toRoute<LoginRoute>()
 
-        val savedStateEmail = savedStateHandle[KEY_EMAIL] ?: ""
-        val savedStatePassword = savedStateHandle[KEY_PASSWORD] ?: ""
+        val savedEmail = savedStateHandle[KEY_EMAIL] ?: ""
+        val savedPassword = savedStateHandle[KEY_PASSWORD] ?: ""
 
-        reduce { state.copy(email = savedStateEmail, password = savedStatePassword) }
+        reduce { state.copy(email = savedEmail, password = savedPassword) }
     }
 
-    fun handleIntent(intent: LoginIntent) {
-        when (intent) {
-            is LoginIntent.EmailChanged -> updateEmail(intent.newEmail)
-            is LoginIntent.PasswordChanged -> updatePassword(intent.newPassword)
-            is LoginIntent.LoginButtonClicked -> login()
-            is LoginIntent.SignUpButtonClicked -> navigateToSignUpScreen()
+    fun handleAction(action: LoginAction) {
+        when (action) {
+            is LoginAction.EmailChanged -> updateEmail(action.newEmail)
+            is LoginAction.PasswordChanged -> updatePassword(action.newPassword)
+            is LoginAction.LoginClicked -> requestLogin()
+            is LoginAction.SignUpClicked -> signUpClicked()
         }
+    }
+
+    private fun handleError(error: Throwable) = intent {
+        val message = when (error) {
+            is AuthException.SignInUserIsNullException -> UiText.StringResource(R.string.login_failed)
+            else -> error.message?.let { UiText.DynamicString(it) }
+                ?: UiText.StringResource(R.string.unknown_error)
+        }
+
+        postSideEffect(LoginSideEffect.ShowMessage(message))
     }
 
     private fun updateEmail(newEmail: String) = intent {
@@ -89,31 +98,31 @@ class LoginViewModel @Inject constructor(
 
     private fun updatePassword(newPassword: String) = intent {
         reduce { state.copy(password = newPassword) }
-        savedStateHandle[KEY_EMAIL] = newPassword
+        savedStateHandle[KEY_PASSWORD] = newPassword
     }
 
-    private fun login() = intent {
+    private fun requestLogin() = intent {
         if (!validateInput()) return@intent
 
         safeCall { loginUseCase(state.email, state.password) }
             .map { it.toUserUiModel() }
             .onLoading { isLoading -> reduce { state.copy(isLoggingIn = isLoading) } }
-            .onError { handleLoginError(it) }
-            .launchOnSuccess {
+            .onError { handleError(it) }
+            .launchOnSuccess { loggedInUser ->
                 checkAndDownloadInitialDiariesUseCase()
-                postSideEffect(LoginSideEffect.NavigateToMainScreen)
+                postSideEffect(LoginSideEffect.LoginSucceeded)
             }
     }
 
     private suspend fun SimpleSyntax<LoginScreenState, LoginSideEffect>.validateInput(): Boolean {
         return when {
             state.email.isBlank() -> {
-                postSideEffect(LoginSideEffect.ShowMsg(UiText.StringResource(R.string.id_is_empty)))
+                postSideEffect(LoginSideEffect.ShowMessage(UiText.StringResource(R.string.id_is_empty)))
                 false
             }
 
             state.password.isBlank() -> {
-                postSideEffect(LoginSideEffect.ShowMsg(UiText.StringResource(R.string.password_is_empty)))
+                postSideEffect(LoginSideEffect.ShowMessage(UiText.StringResource(R.string.password_is_empty)))
                 false
             }
 
@@ -121,16 +130,5 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun navigateToSignUpScreen() = intent {
-        postSideEffect(LoginSideEffect.NavigateToSignUpScreen)
-    }
-
-    private fun handleLoginError(error: Throwable) = intent {
-        val message = when (error) {
-            is AuthException.SignInUserIsNullException -> UiText.StringResource(R.string.login_failed)
-            else -> error.message?.let { UiText.DynamicString(it) }
-                ?: UiText.StringResource(R.string.unknown_error)
-        }
-        postSideEffect(LoginSideEffect.ShowMsg(message))
-    }
+    private fun signUpClicked() = intent { postSideEffect(LoginSideEffect.SignUpClicked) }
 }

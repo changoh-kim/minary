@@ -1,46 +1,31 @@
 package kr.co.presentation.feature.auth.navigation
 
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import kr.co.presentation.feature.auth.screen.LoginScreen
 import kr.co.presentation.feature.auth.screen.SignUpScreen
 import kr.co.presentation.feature.auth.screen.WelcomeScreen
-import kr.co.presentation.main.navigation.MainRoute
+import kr.co.presentation.navigation.LoginRoute
+import kr.co.presentation.navigation.MinaryAppState
+import kr.co.presentation.navigation.SignUpRoute
+import kr.co.presentation.navigation.WelcomeRoute
 
 
 internal fun NavGraphBuilder.authGraph(
-    navController: NavHostController
+    appState: MinaryAppState,
 ) {
-
     composable<WelcomeRoute> {
-        WelcomeScreen(
-            onNavigateToLoginScreen = {
-                navController.navigate(LoginRoute)
-            }
-        )
+        WelcomeScreen(onLoginClicked = { appState.navigateToLogin() })
     }
 
     composable<LoginRoute> {
         LoginScreen(
-            onNavigateToMainScreen = {
-                navController.navigate(MainRoute) {
-                    popUpTo(WelcomeRoute) {
-                        inclusive = true
-                    }
-                }
-            },
-            onNavigateToSignUpScreen = {
-                navController.navigate(SignUpRoute)
-            }
+            onLoginSucceeded = { appState.navigateToMain() },
+            onSignUpClicked = { appState.navigateToSignUp() }
         )
     }
 
     composable<SignUpRoute> {
-        SignUpScreen(
-            onNavigateToLoginScreen = {
-                navController.popBackStack()
-            }
-        )
+        SignUpScreen(onSignUpSucceeded = { appState.navigateBack() })
     }
 }

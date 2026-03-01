@@ -41,7 +41,7 @@
     <string name="diary_saved">일기가 저장되었습니다.</string>
     <string name="diary_title_hint">제목</string>
     <string name="diary_content_hint">내용</string>
-    <string name="diary_done_button">완료</string>
+    <string name="diary_save_button">저장</string>
     <string name="diary_edit_button">편집</string>
     <string name="diary_delete_button_cd">일기 삭제 버튼</string>
 </resources>

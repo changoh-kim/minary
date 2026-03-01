@@ -15,7 +15,7 @@ import kr.co.data.feature.auth.AuthRepositoryImpl
 import kr.co.data.feature.calendar.repository.CalendarRepositoryImpl
 import kr.co.data.feature.diary.repository.DiaryRepositoryImpl
 import kr.co.data.feature.emotion.EmotionAnalysisAiDataSource
-import kr.co.data.local.AppDatabase
+import kr.co.data.local.MinaryDatabase
 import kr.co.data.local.dao.DiaryDao
 import kr.co.domain.feature.auth.repository.AuthRepository
 import kr.co.domain.feature.calendar.repository.CalendarRepository
@@ -25,7 +25,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class DataModule {
+abstract class MinaryDataModule {
 
     companion object {
         const val DATABASE_NAME = "minary_db"
@@ -33,18 +33,18 @@ abstract class DataModule {
 
         @Provides
         @Singleton
-        fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        fun provideAppDatabase(@ApplicationContext context: Context): MinaryDatabase {
             return Room.databaseBuilder(
                 context,
-                AppDatabase::class.java,
+                MinaryDatabase::class.java,
                 DATABASE_NAME
             ).build()
         }
 
         @Provides
         @Singleton
-        fun provideDiaryDao(appDatabase: AppDatabase): DiaryDao {
-            return appDatabase.diaryDao()
+        fun provideDiaryDao(minaryDatabase: MinaryDatabase): DiaryDao {
+            return minaryDatabase.diaryDao()
         }
 
         @Provides
