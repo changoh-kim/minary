@@ -13,12 +13,14 @@ import dagger.hilt.components.SingletonComponent
 import kr.co.data.di.qualifier.GeminiApiKey
 import kr.co.data.feature.auth.AuthRepositoryImpl
 import kr.co.data.feature.calendar.repository.CalendarRepositoryImpl
+import kr.co.data.feature.dashboard.repository.DashboardRepositoryImpl
 import kr.co.data.feature.diary.repository.DiaryRepositoryImpl
 import kr.co.data.feature.emotion.EmotionAnalysisAiDataSource
 import kr.co.data.local.MinaryDatabase
 import kr.co.data.local.dao.DiaryDao
 import kr.co.domain.feature.auth.repository.AuthRepository
 import kr.co.domain.feature.calendar.repository.CalendarRepository
+import kr.co.domain.feature.dashboard.repository.DashboardRepository
 import kr.co.domain.feature.diary.repository.DiaryRepository
 import javax.inject.Singleton
 
@@ -64,9 +66,7 @@ abstract class MinaryDataModule {
 
         @Provides
         @Singleton
-        fun provideWorkManager(
-            @ApplicationContext context: Context
-        ): WorkManager {
+        fun provideWorkManager(@ApplicationContext context: Context): WorkManager {
             return WorkManager.getInstance(context)
         }
     }
@@ -82,4 +82,8 @@ abstract class MinaryDataModule {
     @Binds
     @Singleton
     abstract fun bindDiaryRepository(impl: DiaryRepositoryImpl): DiaryRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDashBoardRepository(impl: DashboardRepositoryImpl): DashboardRepository
 }

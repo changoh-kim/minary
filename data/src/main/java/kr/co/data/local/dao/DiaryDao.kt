@@ -5,6 +5,8 @@ import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
+import kr.co.data.feature.dashboard.model.DashboardCountStats
+import kr.co.data.feature.dashboard.model.DashboardEmotionStats
 import kr.co.data.local.entity.DiaryEntity
 import java.time.LocalDate
 
@@ -99,4 +101,28 @@ interface DiaryDao {
      */
     @Query("DELETE FROM diary WHERE id IN (:ids)")
     suspend fun deleteDiariesByIds(ids: List<Long>): Int
+
+    /**
+     * 대시보드 히트맵 표시를 위한 최근 감정 목록을 조회합니다.
+     */
+    @Query("SELECT emotion FROM diary WHERE isDeleted = 0 ORDER BY date DESC LIMIT :limit")
+    suspend fun getDashboardRecentEmotions(limit: Int = 30): List<String>
+
+    /**
+     * 전체 일기 수와 전체 단어 수 합계를 가져옵니다.
+     */
+    @Query("SELECT COUNT(*) as totalDiaries, IFNULL(SUM(length(content)), 0) as totalWords FROM diary WHERE isDeleted = 0")
+    suspend fun getDashboardCountStats(): DashboardCountStats?
+
+    /**
+     * 감정별 빈도수를 내림차순으로 가져옵니다. (최빈/희소 감정 추출용)
+     */
+    @Query("""
+        SELECT emotion, COUNT(emotion) as count 
+        FROM diary 
+        WHERE isDeleted = 0 
+        GROUP BY emotion 
+        ORDER BY count DESC
+    """)
+    suspend fun getDashboardEmotionStats(): List<DashboardEmotionStats>
 }
