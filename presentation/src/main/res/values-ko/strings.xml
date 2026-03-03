@@ -44,4 +44,13 @@
     <string name="diary_save_button">저장</string>
     <string name="diary_edit_button">편집</string>
     <string name="diary_delete_button_cd">일기 삭제 버튼</string>
+    <string name="dashboard_deep_analysis">심층분석</string>
+    <string name="dashboard_diary_streak">일기 쓰기 연속 기록</string>
+    <string name="dashboard_stats">통계</string>
+    <string name="dashboard_days_written">일기 쓴 일수</string>
+    <string name="dashboard_total_words">단어 (전체 기간)</string>
+    <string name="dashboard_dominant_emotion">풍부한 감정</string>
+    <string name="dashboard_rarest_emotion">희소한 감정</string>
+    <string name="dashboard_unit_day">일</string>
+    <string name="dashboard_unit_word">자</string>
 </resources>

@@ -44,4 +44,13 @@
     <string name="diary_save_button">Save</string>
     <string name="diary_edit_button">Edit</string>
     <string name="diary_delete_button_cd">Delete diary button</string>
+    <string name="dashboard_deep_analysis">Deep Analysis</string>
+    <string name="dashboard_diary_streak">Diary Writing Streak</string>
+    <string name="dashboard_stats">Statistics</string>
+    <string name="dashboard_days_written">Days Written</string>
+    <string name="dashboard_total_words">Total Words</string>
+    <string name="dashboard_dominant_emotion">Dominant Emotion</string>
+    <string name="dashboard_rarest_emotion">Rarest Emotion</string>
+    <string name="dashboard_unit_day">Days</string>
+    <string name="dashboard_unit_word">Words</string>
 </resources>
