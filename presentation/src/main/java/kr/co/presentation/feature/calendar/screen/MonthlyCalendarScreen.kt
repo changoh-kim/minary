@@ -1,23 +1,30 @@
 package kr.co.presentation.feature.calendar.screen
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,7 +35,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -38,9 +44,11 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kr.co.domain.feature.diary.model.SyncStatus
 import kr.co.presentation.R
 import kr.co.presentation.common.composable.stringArrayResource
 import kr.co.presentation.common.extension.getString
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.feature.calendar.composable.ActiveDay
 import kr.co.presentation.feature.calendar.composable.InactiveDay
 import kr.co.presentation.feature.calendar.composable.MonthCalendar
@@ -49,13 +57,11 @@ import kr.co.presentation.feature.calendar.preview.provider.CalendarMonthItemPre
 import kr.co.presentation.feature.calendar.viewmodel.MonthlyCalendarAction
 import kr.co.presentation.feature.calendar.viewmodel.MonthlyCalendarSideEffect
 import kr.co.presentation.feature.calendar.viewmodel.MonthlyCalendarViewModel
-import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.LocalDate
 import java.time.YearMonth
-
 
 @Composable
 fun MonthlyCalendarScreen(
@@ -64,8 +70,7 @@ fun MonthlyCalendarScreen(
     viewModel: MonthlyCalendarViewModel = hiltViewModel(),
 ) {
     val state by viewModel.collectAsState()
-    val monthItems = viewModel.calendarMonths.collectAsLazyPagingItems()
-    val diaries by viewModel.diaries.collectAsState(emptyMap())
+    val monthItems = viewModel.calendarMonthItems.collectAsLazyPagingItems()
     val pagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { monthItems.itemCount }
@@ -102,10 +107,10 @@ fun MonthlyCalendarScreen(
 
     MonthlyCalendarContent(
         yearMonth = state.visibleYearMonth,
+        syncStatus = state.syncStatus,
         snackbarHostState = snackbarHostState,
         monthItems = monthItems,
         pagerState = pagerState,
-        diaries = diaries,
         onAction = viewModel::handleAction
     )
 }
@@ -113,28 +118,65 @@ fun MonthlyCalendarScreen(
 @Composable
 fun MonthlyCalendarContent(
     yearMonth: YearMonth = YearMonth.now(),
+    syncStatus: SyncStatus = SyncStatus.IDLE,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     monthItems: LazyPagingItems<CalendarMonthItem>,
     pagerState: PagerState = rememberPagerState(
         initialPage = 0,
         pageCount = { monthItems.itemCount },
     ),
-    diaries: Map<LocalDate, DiaryUiModel> = emptyMap(),
     onAction: (MonthlyCalendarAction) -> Unit = {},
 ) {
+    val context = LocalContext.current
+
+    LaunchedEffect(syncStatus) {
+        if (syncStatus == SyncStatus.FAILED) {
+            val result = snackbarHostState.showSnackbar(
+                message = context.getString(R.string.sync_failed),
+                actionLabel = context.getString(R.string.retry),
+                duration = SnackbarDuration.Indefinite
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                onAction(MonthlyCalendarAction.RetrySyncClicked)
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = { MonthlyCalendarTopBar(yearMonth = yearMonth, onAction = onAction) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
-        CalendarPager(
+
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)) {
+
+            CalendarPager(
+                modifier = Modifier.fillMaxSize(),
+                pagerState = pagerState,
+                monthItems = monthItems,
+                onAction = onAction,
+            )
+
+            SyncProgressOverlay(syncStatus = syncStatus)
+        }
+    }
+}
+
+@Composable
+private fun SyncProgressOverlay(syncStatus: SyncStatus) {
+    AnimatedVisibility(
+        visible = syncStatus == SyncStatus.LOADING,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        LinearProgressIndicator(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            pagerState = pagerState,
-            monthItems = monthItems,
-            diaries = diaries,
-            onAction = onAction,
+                .fillMaxWidth()
+                .height(2.dp),
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         )
     }
 }
@@ -199,7 +241,6 @@ private fun CalendarPager(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     monthItems: LazyPagingItems<CalendarMonthItem>,
-    diaries: Map<LocalDate, DiaryUiModel>,
     onAction: (MonthlyCalendarAction) -> Unit = {},
 ) {
     HorizontalPager(
@@ -221,7 +262,7 @@ private fun CalendarPager(
                 ActiveDay(
                     modifier = Modifier.weight(1f),
                     dayItem = dayItem,
-                    diary = diaries[dayItem.date],
+                    diary = dayItem.diary,
                 ) { day -> onAction(MonthlyCalendarAction.DayClicked(day)) }
             else
                 InactiveDay(modifier = Modifier.weight(1f), dayItem)
@@ -229,10 +270,18 @@ private fun CalendarPager(
     }
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
-private fun MonthlyCalendarContentPreview(
-    @PreviewParameter(CalendarMonthItemPreviewDataProvider::class) calendarMonths: Flow<PagingData<CalendarMonthItem>>
+private fun MonthlyCalendarScreenPreview(
+    @PreviewParameter(CalendarMonthItemPreviewDataProvider::class)
+    calendarMonths: Flow<PagingData<CalendarMonthItem>>
+) {
+    MonthlyCalendarPreviewContent(calendarMonths)
+}
+
+@Composable
+fun MonthlyCalendarPreviewContent(
+    calendarMonths: Flow<PagingData<CalendarMonthItem>>
 ) {
     val monthItems = calendarMonths.collectAsLazyPagingItems()
     MinaryTheme {

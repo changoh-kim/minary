@@ -2,21 +2,16 @@ package kr.co.presentation.main.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import kr.co.presentation.common.state.LoadState
-import kr.co.presentation.feature.auth.model.UserUiModel
+import kr.co.presentation.main.model.UserSessionUiModel
 
-
-internal class MainActivityPreviewDataProvider : PreviewParameterProvider<LoadState<UserUiModel>> {
-
-    override val values: Sequence<LoadState<UserUiModel>> = sequenceOf(
-        LoadState.Uninitialized,
+internal class MainActivityPreviewDataProvider :
+    PreviewParameterProvider<LoadState<UserSessionUiModel>> {
+    override val values: Sequence<LoadState<UserSessionUiModel>> = sequenceOf(
+        /*LoadState.Uninitialized,
         LoadState.Loading,
-        LoadState.Error(),
+        LoadState.Error(),*/
         LoadState.Success(
-            UserUiModel(
-                name = "minary",
-                email = "minary@gmail.com",
-                photoUrl = ""
-            )
+            UserSessionUiModel(email = "minary@gmail.com")
         )
     )
 }

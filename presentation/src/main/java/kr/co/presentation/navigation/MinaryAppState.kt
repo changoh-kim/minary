@@ -11,7 +11,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-
 @Composable
 fun rememberAppState(
     navController: NavHostController = rememberNavController(),
@@ -36,12 +35,17 @@ class MinaryAppState(
     val coroutineScope: CoroutineScope,
     val snackbarHostState: SnackbarHostState
 ) {
-    /*
-    Feature 단위 화면 이동(Feature Navigation)이 아니라
-    App 전역 화면 이동(App Global Navigation)일 경우 함수 작성
-    */
-    fun navigateToLogin() {
-        navController.navigate(LoginRoute) {
+    fun navigateToWelcome() {
+        navController.navigate(WelcomeRoute) {
+            popUpTo(navController.graph.id) {
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateToSignIn() {
+        navController.navigate(SignInRoute) {
             launchSingleTop = true
         }
     }
@@ -52,9 +56,17 @@ class MinaryAppState(
         }
     }
 
-    fun navigateToMain() {
-        navController.navigate(MainRoute) {
-            popUpTo(WelcomeRoute) { inclusive = true }
+    fun navigateToAccountDeletion() {
+        navController.navigate(AccountDeletionRoute) {
+            launchSingleTop = true
+        }
+    }
+
+    fun navigateToHome() {
+        navController.navigate(HomeRoute) {
+            popUpTo(WelcomeRoute) {
+                inclusive = true
+            }
             launchSingleTop = true
         }
     }

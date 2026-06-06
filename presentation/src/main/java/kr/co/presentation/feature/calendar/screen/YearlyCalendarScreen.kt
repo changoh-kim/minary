@@ -27,14 +27,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -48,6 +45,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kr.co.presentation.R
 import kr.co.presentation.common.extension.getString
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.feature.calendar.composable.MonthCalendarCanvas
 import kr.co.presentation.feature.calendar.extension.isCurrentYear
 import kr.co.presentation.feature.calendar.model.CalendarGridItem
@@ -64,7 +62,6 @@ import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.Year
 import java.time.YearMonth
 import kotlin.math.abs
-
 
 @Composable
 fun YearlyCalendarScreen(
@@ -153,6 +150,7 @@ fun YearlyCalendarContent(
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             YearlyCalendarTopBar(
                 modifier = Modifier.fillMaxWidth(),
@@ -180,20 +178,21 @@ private fun YearlyCalendarTopBar(
     onAction: (YearlyCalendarAction) -> Unit = {},
 ) {
     Box(
-        modifier = modifier.padding(16.dp)
+        modifier = modifier.padding(horizontal = 24.dp, vertical = 16.dp)
     ) {
         Text(
             modifier = Modifier.align(Alignment.CenterStart),
             text = "${year.value}",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+            style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = if (year.isCurrentYear()) Color.Red else Color.Black,
+            color = if (year.isCurrentYear()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
         )
 
         Text(
             text = stringResource(R.string.today),
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            color = Color.Red,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier
                 .align(Alignment.CenterEnd)
                 .clickable { onAction(YearlyCalendarAction.TodayClicked) }
@@ -254,17 +253,25 @@ private fun YearHeader(yearItem: CalendarYearItem) {
         text = "${yearItem.year.value}",
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 8.dp),
-        fontSize = 24.sp,
+            .padding(vertical = 16.dp),
+        style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
-        color = if (yearItem.isCurrentYear()) Color.Red else Color.Black
+        color = if (yearItem.isCurrentYear()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
     )
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
-private fun YearlyCalendarContentPreview(
-    @PreviewParameter(CalendarGridItemPreviewDataProvider::class) calendarGridItems: Flow<PagingData<CalendarGridItem>>
+private fun YearlyCalendarScreenPreview(
+    @PreviewParameter(CalendarGridItemPreviewDataProvider::class)
+    calendarGridItems: Flow<PagingData<CalendarGridItem>>
+) {
+    YearlyCalendarPreviewContent(calendarGridItems)
+}
+
+@Composable
+fun YearlyCalendarPreviewContent(
+    calendarGridItems: Flow<PagingData<CalendarGridItem>>
 ) {
     val calendarItems = calendarGridItems.collectAsLazyPagingItems()
     MinaryTheme {

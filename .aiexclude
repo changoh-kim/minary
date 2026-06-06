@@ -1,0 +1,71 @@
+# Secrets & Credentials
+local.properties
+.env
+.env.*
+secrets.properties
+signing.properties
+apikeys.properties
+keys.properties
+
+# Android Signing
+*.jks
+*.keystore
+.p12
+
+# Firebase / GCP Credentials
+google-services.json
+GoogleService-Info.plist
+service-account.json
+firebase-admin.json
+credentials.json
+
+# Build Outputs
+**/build/
+.gradle/
+
+# IDE
+.idea/
+*.iml
+
+# Generated Sources
+**/generated/
+**/_build/
+**/schemas/
+**/proto/
+
+# Android Artifacts
+*.apk
+*.aab
+*.aar
+
+# Firebase Functions
+firebase-server/lib/
+firebase-server/dist/
+firebase-server/.runtimeconfig.json
+firebase-server/node_modules/
+
+# CI/CD
+.github/workflows/
+fastlane/
+
+# Logs
+*.log
+logs/
+
+# Backup
+backup/
+exports/
+
+# Coverage & Profiling
+coverage/
+*.hprof
+
+# Large Assets
+*.mp4
+*.mov
+*.zip
+*.db
+
+# Internal Documents (optional)
+docs/internal/
+docs/securit

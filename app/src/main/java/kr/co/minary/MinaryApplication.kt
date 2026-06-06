@@ -5,8 +5,8 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.google.firebase.FirebaseApp
 import dagger.hilt.android.HiltAndroidApp
+import kr.co.minary.initializer.AppCheckInitializer
 import javax.inject.Inject
-
 
 @HiltAndroidApp
 class MinaryApplication : Application(), Configuration.Provider {
@@ -21,6 +21,9 @@ class MinaryApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        // FirebaseApp 초기화
         FirebaseApp.initializeApp(this)
+        // AppCheck 초기화
+        AppCheckInitializer.initialize()
     }
 }

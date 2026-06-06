@@ -3,26 +3,30 @@ package kr.co.presentation.main.viewmodel
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kr.co.domain.feature.auth.exception.AuthException
-import kr.co.domain.feature.auth.usecase.IsUserLoggedInUseCase
-import kr.co.domain.feature.diary.usecase.SyncDiaryUseCase
-import kr.co.presentation.R
-import kr.co.presentation.common.extension.safeCall
+import kr.co.domain.feature.diary.usecase.sync.StopRealtimeDiarySyncUseCase
+import kr.co.domain.feature.profile.usecase.sync.StopRealtimeUserProfileSyncUseCase
+import kr.co.domain.feature.session.usecase.GetSessionStateStreamUseCase
+import kr.co.domain.feature.setting.model.AppTheme
+import kr.co.domain.feature.setting.usecase.GetAppThemeStreamUseCase
+import kr.co.domain.feature.setting.usecase.sync.StopRealtimeUserSettingsSyncUseCase
+import kr.co.domain.feature.time.usecase.SyncServerTimeUseCase
+import kr.co.domain.infra.remote.model.ServiceStatus
+import kr.co.domain.infra.remote.usecase.CheckServiceStatusUseCase
 import kr.co.presentation.common.model.UiText
 import kr.co.presentation.common.state.LoadState
-import kr.co.presentation.feature.auth.mapper.UserUiModelMapper.toUserUiModel
-import kr.co.presentation.feature.auth.model.UserUiModel
+import kr.co.presentation.main.mapper.UserSessionUiModelMapper.toUserSessionUiModel
+import kr.co.presentation.main.model.UserSessionUiModel
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
-import org.orbitmvi.orbit.syntax.simple.postSideEffect
 import org.orbitmvi.orbit.syntax.simple.reduce
 import org.orbitmvi.orbit.viewmodel.container
 import javax.inject.Inject
 
-
 @Immutable
 data class MainActivityState(
-    val userLoadState: LoadState<UserUiModel> = LoadState.Uninitialized,
+    val userSession: LoadState<UserSessionUiModel?> = LoadState.Uninitialized,
+    val appTheme: AppTheme = AppTheme.SYSTEM,
+    val serviceStatus: ServiceStatus = ServiceStatus.Active,
 )
 
 @Immutable
@@ -30,40 +34,67 @@ sealed interface MainActivitySideEffect {
     data class ShowMessage(val uiText: UiText) : MainActivitySideEffect
 }
 
+sealed interface MainActivityAction {
+    object OnResumed : MainActivityAction
+}
+
 @HiltViewModel
 class MainActivityViewModel @Inject constructor(
-    private val isUserLoggedInUseCase: IsUserLoggedInUseCase,
-    private val syncDiaryUseCase: SyncDiaryUseCase,
+    private val syncServerTime: SyncServerTimeUseCase,
+    private val getAppThemeStream: GetAppThemeStreamUseCase,
+    private val getSessionStateStream: GetSessionStateStreamUseCase,
+
+    private val stopRealtimeUserProfileSync: StopRealtimeUserProfileSyncUseCase,
+    private val stopRealtimeUserSettingsSync: StopRealtimeUserSettingsSyncUseCase,
+    private val stopRealtimeDiarySync: StopRealtimeDiarySyncUseCase,
+
+    private val checkServiceStatus: CheckServiceStatusUseCase,
 ) : ViewModel(), ContainerHost<MainActivityState, MainActivitySideEffect> {
 
     override val container =
         container<MainActivityState, MainActivitySideEffect>(MainActivityState())
 
     init {
-        checkLogin()
+        checkService()
+        syncTime()
+        collectAppTheme()
+        collectUserSession()
     }
 
-    private fun checkLogin() = intent {
-        safeCall { isUserLoggedInUseCase() }
-            .map { it.toUserUiModel() }
-            .launchAsLoadState { loadState ->
-                reduce { state.copy(userLoadState = loadState) }
+    private fun syncTime() = intent {
+        syncServerTime()
+    }
 
-                when (loadState) {
-                    is LoadState.Success -> syncDiaryUseCase()
-                    is LoadState.Error -> loadState.exception?.let { handleError(it) }
-                    else -> {}
-                }
+    private fun collectAppTheme() = intent {
+        getAppThemeStream().collect { reduce { state.copy(appTheme = it) } }
+    }
+
+    private fun collectUserSession() = intent {
+        getSessionStateStream().collect { userSession ->
+            if (userSession != null) {
+                reduce { state.copy(userSession = LoadState.Success(userSession.toUserSessionUiModel())) }
+                collectAppTheme()
+            } else {
+                stopRealtimeSync()
+                reduce { state.copy(userSession = LoadState.Success(null)) }
             }
+        }
     }
 
-    private fun handleError(error: Throwable) = intent {
-        val message = when (error) {
-            is AuthException.CurrentUserIsNullException -> UiText.StringResource(R.string.current_user_is_null)
-            else -> error.message?.let { UiText.DynamicString(it) }
-                ?: UiText.StringResource(R.string.unknown_error)
-        }
+    private fun stopRealtimeSync() = intent {
+        stopRealtimeUserProfileSync()
+        stopRealtimeUserSettingsSync()
+        stopRealtimeDiarySync()
+    }
 
-        postSideEffect(MainActivitySideEffect.ShowMessage(message))
+    fun handleAction(action: MainActivityAction) {
+        when (action) {
+            is MainActivityAction.OnResumed -> checkService()
+        }
+    }
+
+    private fun checkService() = intent {
+        val status = checkServiceStatus()
+        reduce { state.copy(serviceStatus = status) }
     }
 }

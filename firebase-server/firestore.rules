@@ -1,0 +1,43 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 시스템 제어 문서
+    match /system/{document=**} {
+      allow read, write: if false;
+    }
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    match /users/{userId} {
+      // 사용자 프로필
+      match /profile/userProfile {
+        allow create, read, update: if isOwner(userId);
+        allow delete: if false;
+      }
+
+      // 사용자 설정
+      match /settings/userSettings {
+        allow create, read, update: if isOwner(userId);
+        allow delete: if false;
+      }
+
+      // 일기
+      match /diaries/{diaryId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // 그 외 모두 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

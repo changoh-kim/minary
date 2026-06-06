@@ -2,24 +2,23 @@ package kr.co.data.feature.calendar.source.local
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import kr.co.data.feature.calendar.mapper.CalendarDataMapper.toCalendarMonthDto
-import kr.co.data.feature.calendar.model.CalendarMonthDto
-import kr.co.domain.feature.calendar.generator.CalendarGenerator
+import kr.co.data.feature.calendar.mapper.CalendarMonthMapper.toCalendarMonthModel
+import kr.co.data.feature.calendar.model.CalendarMonthModel
+import kr.co.domain.feature.calendar.service.CalendarGenerator
 import java.time.Year
-
 
 class CalendarYearPagingSource(
     private val calendarGenerator: CalendarGenerator,
-) : PagingSource<Year, CalendarMonthDto>() {
+) : PagingSource<Year, CalendarMonthModel>() {
 
-    override fun getRefreshKey(state: PagingState<Year, CalendarMonthDto>): Year? {
+    override fun getRefreshKey(state: PagingState<Year, CalendarMonthModel>): Year? {
         return state.anchorPosition?.let { anchorPosition ->
             state.closestPageToPosition(anchorPosition)?.prevKey?.plusYears(1)
                 ?: state.closestPageToPosition(anchorPosition)?.nextKey?.minusYears(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<Year>): LoadResult<Year, CalendarMonthDto> {
+    override suspend fun load(params: LoadParams<Year>): LoadResult<Year, CalendarMonthModel> {
         return try {
             val startYear = Year.of(CalendarGenerator.START_YEAR_1902)
             val currentYear = Year.now()
@@ -27,7 +26,7 @@ class CalendarYearPagingSource(
             val loadSize = params.loadSize
 
             val expectedSize = loadSize * 12
-            val calendarMonthList = ArrayList<CalendarMonthDto>(expectedSize)
+            val calendarMonthList = ArrayList<CalendarMonthModel>(expectedSize)
 
             var firstYear: Year? = null
             var lastYear: Year? = null
@@ -46,7 +45,7 @@ class CalendarYearPagingSource(
                     calendarGenerator.generateMonths(
                         year,
                         CalendarGenerator.SortOrder.Ascending,
-                    ).map { it.toCalendarMonthDto() }
+                    ).map { it.toCalendarMonthModel() }
                 )
             }
 

@@ -5,13 +5,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import kr.co.domain.feature.emotion.Emotion
+import kr.co.domain.feature.emotion.model.Emotion
 import kr.co.presentation.R
 import kr.co.presentation.common.state.LoadState
 import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.feature.diary.preview.model.DiaryPreviewData
 import kr.co.presentation.feature.diary.viewmodel.DiaryScreenState
 import java.time.LocalDate
+import java.util.UUID
 
 
 object DiaryPreviewDataFactory {
@@ -27,11 +28,11 @@ object DiaryPreviewDataFactory {
             screenMode = diaryPreviewData.screenMode,
             diaryLoadState = LoadState.Success(
                 DiaryUiModel(
-                    id = 0L,
+                    id = UUID.randomUUID().toString(),
                     date = LocalDate.now(),
                     title = context.getString(titleResId),
                     content = context.getString(contentResId),
-                    emotion = diaryPreviewData.emotion
+                    emotions = listOf(diaryPreviewData.emotion)
                 )
             )
         )
@@ -45,11 +46,11 @@ object DiaryPreviewDataFactory {
         val (titleResId, contentResId) = getDiaryStringResources(emotion)
 
         return DiaryUiModel(
-            id = 0L,
+            id = UUID.randomUUID().toString(),
             date = LocalDate.now(),
             title = context.getString(titleResId),
             content = context.getString(contentResId),
-            emotion = emotion
+            emotions = listOf(emotion)
         )
     }
 
@@ -57,11 +58,11 @@ object DiaryPreviewDataFactory {
         return Emotion.entries.map { emotion ->
             val (titleRes, contentRes) = getDiaryStringResources(emotion)
             DiaryUiModel(
-                id = 0L,
+                id = UUID.randomUUID().toString(),
                 date = LocalDate.now(),
                 title = context.getString(titleRes),
                 content = context.getString(contentRes),
-                emotion = emotion
+                emotions = listOf(emotion)
             )
         }.toImmutableList()
     }

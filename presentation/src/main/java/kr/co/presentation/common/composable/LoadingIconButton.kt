@@ -10,11 +10,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
 
 
@@ -45,36 +46,40 @@ fun LoadingIconButton(
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun LoadingIconButtonNotLoadingPreview() {
     MinaryTheme {
-        LoadingIconButton(
-            onClick = { },
-            isLoading = false,
-        ) { isLoading ->
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "add",
-                tint = if (isLoading) Color.Transparent else LocalContentColor.current,
-            )
+        Surface(color = MaterialTheme.colorScheme.background) {
+            LoadingIconButton(
+                onClick = { },
+                isLoading = false,
+            ) { isLoading ->
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "add",
+                    tint = if (isLoading) Color.Transparent else LocalContentColor.current,
+                )
+            }
         }
     }
 }
 
-@Preview
+@ThemePreviews
 @Composable
 private fun LoadingIconButtonLoadingPreview() {
     MinaryTheme {
-        LoadingIconButton(
-            onClick = { },
-            isLoading = true,
-        ) { isLoading ->
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "add",
-                tint = if (isLoading) Color.Transparent else LocalContentColor.current,
-            )
+        Surface(color = MaterialTheme.colorScheme.background) {
+            LoadingIconButton(
+                onClick = { },
+                isLoading = true,
+            ) { isLoading ->
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "add",
+                    tint = if (isLoading) Color.Transparent else LocalContentColor.current,
+                )
+            }
         }
     }
 }

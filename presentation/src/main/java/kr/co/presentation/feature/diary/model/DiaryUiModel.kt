@@ -1,32 +1,29 @@
 package kr.co.presentation.feature.diary.model
 
-import android.os.Parcel
 import android.os.Parcelable
 import androidx.compose.runtime.Immutable
-import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
-import kr.co.domain.feature.emotion.Emotion
+import kr.co.domain.feature.diary.model.DiarySyncStatus
+import kr.co.domain.feature.emotion.model.Emotion
+import kr.co.presentation.common.parceler.LocalDateParceler
 import java.time.LocalDate
+import java.util.UUID
 
-
-object LocalDateParceler : Parceler<LocalDate> {
-    override fun create(parcel: Parcel): LocalDate {
-        return LocalDate.ofEpochDay(parcel.readLong())
-    }
-
-    override fun LocalDate.write(parcel: Parcel, flags: Int) {
-        parcel.writeLong(this.toEpochDay())
-    }
-}
 
 @Immutable
 @Parcelize
 @TypeParceler<LocalDate, LocalDateParceler>()
 data class DiaryUiModel(
-    val id: Long = 0L,
+    val id: String = UUID.randomUUID().toString(),
+
     val date: LocalDate = LocalDate.now(),
     val title: String = "",
     val content: String = "",
-    val emotion: Emotion = Emotion.UNKNOWN,
+    val emotions: List<Emotion> = emptyList(),
+    val imageUrls: List<String> = emptyList(),
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis(),
+    val timestamp: Long = System.currentTimeMillis(),
+    val syncStatus: DiarySyncStatus = DiarySyncStatus.PENDING_CREATE,
 ) : Parcelable

@@ -4,17 +4,17 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,7 +22,9 @@ import kr.co.presentation.feature.calendar.extension.isToday
 import kr.co.presentation.feature.calendar.model.CalendarMonthItem
 import kr.co.presentation.feature.calendar.preview.model.CalendarMonthPreviewData
 import kr.co.presentation.feature.calendar.preview.provider.CalendarMonthPreviewDataProvider
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
+import kr.co.presentation.theme.Blue500
 
 
 @Composable
@@ -33,22 +35,26 @@ fun MonthCalendarCanvas(
 ) {
     val textMeasurer = rememberTextMeasurer()
 
-    val titleStyle = remember {
+    val onSurface = MaterialTheme.colorScheme.onSurface
+    val primary = MaterialTheme.colorScheme.primary
+    val error = MaterialTheme.colorScheme.error
+
+    val titleStyle = remember(onSurface) {
         TextStyle(
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black,
+            color = onSurface,
             textAlign = TextAlign.Center,
         )
     }
-    val sundayStyle = remember {
-        TextStyle(fontSize = 10.sp, color = Color.Red, textAlign = TextAlign.Center)
+    val sundayStyle = remember(error) {
+        TextStyle(fontSize = 10.sp, color = error, textAlign = TextAlign.Center)
     }
-    val dayStyle = remember {
-        TextStyle(fontSize = 10.sp, color = Color.Black, textAlign = TextAlign.Center)
+    val dayStyle = remember(onSurface) {
+        TextStyle(fontSize = 10.sp, color = onSurface, textAlign = TextAlign.Center)
     }
     val saturdayStyle = remember {
-        TextStyle(fontSize = 10.sp, color = Color.Blue, textAlign = TextAlign.Center)
+        TextStyle(fontSize = 10.sp, color = Blue500, textAlign = TextAlign.Center)
     }
 
     Canvas(
@@ -58,9 +64,9 @@ fun MonthCalendarCanvas(
         )
     ) {
         val canvasWidth = size.width
-        val canvasHeight = size.height
+        //val canvasHeight = size.height
         val cellWeight = canvasWidth / 7
-        val paddingTop = 16.dp.toPx()
+        //val paddingTop = 16.dp.toPx()
 
         val titleLayout = textMeasurer.measure(
             text = monthItem.yearMonth.monthValue.toString(),
@@ -70,11 +76,11 @@ fun MonthCalendarCanvas(
             textLayoutResult = titleLayout,
             topLeft = Offset(
                 x = (cellWeight - titleLayout.size.width) / 2,
-                y = paddingTop
+                y = 0f
             )
         )
 
-        val gridStartY = paddingTop + titleLayout.size.height
+        val gridStartY = titleLayout.size.height + 4.dp.toPx()
 
         monthItem.days.forEachIndexed { index, dayItem ->
             val row = index / 7
@@ -104,7 +110,7 @@ fun MonthCalendarCanvas(
 
             if (dayItem.isCurrentMonth && dayItem.isToday()) {
                 drawCircle(
-                    color = Color.Blue.copy(alpha = 0.3f),
+                    color = primary.copy(alpha = 0.3f),
                     radius = cellWeight / 2,
                     center = Offset(x = xPos + cellWeight / 2, y = yPos + cellWeight / 2)
                 )
@@ -113,18 +119,20 @@ fun MonthCalendarCanvas(
     }
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
 private fun MonthCalendarCanvasPreview(
     @PreviewParameter(CalendarMonthPreviewDataProvider::class) previewData: CalendarMonthPreviewData,
 ) {
     MinaryTheme {
-        MonthCalendarCanvas(
-            modifier = Modifier
-                .aspectRatio(1f)
-                .padding(4.dp),
-            monthItem = previewData.monthItem,
-            onClick = {},
-        )
+        Surface(color = MaterialTheme.colorScheme.background) {
+            MonthCalendarCanvas(
+                modifier = Modifier
+                    .aspectRatio(1f)
+                    .padding(4.dp),
+                monthItem = previewData.monthItem,
+                onClick = {},
+            )
+        }
     }
 }

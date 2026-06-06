@@ -4,7 +4,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
-import kr.co.domain.feature.calendar.generator.CalendarGenerator
+import kr.co.domain.feature.calendar.service.CalendarGenerator
 import kr.co.presentation.feature.calendar.mapper.CalendarItemMapper.toCalendarMonthItem
 import kr.co.presentation.feature.calendar.model.CalendarMonthItem
 import java.time.YearMonth

@@ -19,12 +19,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kr.co.presentation.R
 import kr.co.presentation.common.skeleton.SkeletonButton
 import kr.co.presentation.common.skeleton.SkeletonIconButton
 import kr.co.presentation.common.skeleton.SkeletonSpacer
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
 
 
@@ -99,7 +99,7 @@ fun SkeletonDiaryTopBar() {
     }
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
 private fun SkeletonDiaryContentPreview() {
     MinaryTheme {

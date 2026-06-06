@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Minary</string>
-    <string name="today">Today</string>
-    <string name="month_title">%1$d</string>
-    <string name="you_cannot_select_a_date_after_today">You cannot select a date after today</string>
+
+    <!-- Home -->
+    <string name="search">search</string>
+    <string name="calendar">calendar</string>
+    <string name="dashboard">dashboard</string>
+    <string name="setting">setting</string>
+    <string name="home_error_storage_init">Failed to prepare storage. Please log out and try again.</string>
+    <string name="home_error_session_verification">User verification failed. Please log in again.</string>
+
+    <!-- Welcome -->
     <string name="welcome">Welcome</string>
     <string name="your_mind_diary">Your mind diary</string>
-    <string name="login">Login</string>
+
+    <!-- SignIn -->
     <string name="id">Id</string>
     <string name="user_id">User Id</string>
-    <string name="password">Password</string>
-    <string name="user_password">User Password</string>
-    <string name="btn_login">Login</string>
+    <string name="btn_sign_in">Sign in</string>
     <string name="do_not_have_an_account">Don\'t have an account?</string>
-    <string name="sign_up">Sign up</string>
+    <string name="id_is_empty">Id is empty</string>
+
+    <!-- SignUp -->
     <string name="create_an_account">Create an account</string>
     <string name="email">Email</string>
     <string name="user_email">User Email</string>
@@ -21,21 +29,43 @@
     <string name="user_name">User Name</string>
     <string name="confirm_password">Confirm password</string>
     <string name="user_confirm_password">User Confirm Password</string>
-    <string name="search">Search</string>
-    <string name="calendar">calendar</string>
-    <string name="dashboard">dashboard</string>
-    <string name="store">store</string>
-    <string name="setting">setting</string>
-    <string name="id_is_empty">Id is empty</string>
-    <string name="password_is_empty">Password is empty</string>
-    <string name="unknown_error">Unknown error</string>
-    <string name="login_failed">Login failed</string>
+    <string name="gender">Gender</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="gender_other">Other</string>
+    <string name="birthday">Birthday</string>
+    <string name="placeholder_birthday">YYYY-MM-DD</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="placeholder_phone">01012345678 (Without -)</string>
+    <string name="address">Address</string>
+    <string name="placeholder_address">Please enter your address</string>
     <string name="email_is_empty">Email is empty</string>
     <string name="name_is_empty">Name is empty</string>
     <string name="confirm_password_is_empty">Confirm password is empty</string>
     <string name="password_not_match">Password does not match</string>
-    <string name="account_creation_failed">Account creation failed</string>
-    <string name="current_user_is_null">Current user is null</string>
+    <string name="gender_is_not_selected">Gender is not selected</string>
+    <string name="address_is_empty">Address is empty</string>
+    <string name="phone_number_is_empty">Phone number is empty</string>
+    <string name="btn_check">Check</string>
+    <string name="email_is_available">This email is available.</string>
+    <string name="email_is_not_available">This email is already in use.</string>
+    <string name="email_check_required">Please check email availability.</string>
+    <string name="invalid_email_format">Invalid email format (e.g., example@mail.com)</string>
+    <string name="invalid_password_format">Password must be at least 8 characters, including letters and numbers</string>
+    <string name="invalid_phone_format">Phone number must be 10~11 digits without -</string>
+
+    <!-- Auth Common -->
+    <string name="sign_in">Sign in</string>
+    <string name="password">Password</string>
+    <string name="user_password">User Password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="password_is_empty">Password is empty</string>
+
+    <!-- Calendar -->
+    <string name="today">Today</string>
+    <string name="you_cannot_select_a_date_after_today">You cannot select a date after today</string>
+
+    <!-- Diary -->
     <string name="diary_title_is_empty">diary title is empty</string>
     <string name="diary_content_is_empty">diary content is empty</string>
     <string name="diary_saved">Your diary has been saved.</string>
@@ -44,6 +74,8 @@
     <string name="diary_save_button">Save</string>
     <string name="diary_edit_button">Edit</string>
     <string name="diary_delete_button_cd">Delete diary button</string>
+
+    <!-- Dashboard -->
     <string name="dashboard_deep_analysis">Deep Analysis</string>
     <string name="dashboard_diary_streak">Diary Writing Streak</string>
     <string name="dashboard_stats">Statistics</string>
@@ -53,4 +85,88 @@
     <string name="dashboard_rarest_emotion">Rarest Emotion</string>
     <string name="dashboard_unit_day">Days</string>
     <string name="dashboard_unit_word">Words</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_appearance">APPEARANCE</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_backup_cloud">BACKUP &amp; CLOUD</string>
+    <string name="settings_diary_sync">Diary Synchronization</string>
+    <string name="settings_diary_sync_desc">Keep your entries backed up and synced across devices automatically.</string>
+    <string name="settings_sign_out">Sign Out</string>
+    <string name="settings_sign_out_confirm_message">Are you sure you want to sign out?</string>
+    <string name="settings_version">Version %s</string>
+    <string name="settings_default_user_name">User Name</string>
+    <string name="settings_default_user_email">email@example.com</string>
+    <string name="settings_logout_sync_dialog_message">There are unsynced diary entries. Data may be lost. Are you sure you want to sign out?</string>
+
+    <!-- Profile Common -->
+    <string name="profile_common_back_desc">Back</string>
+    <string name="profile_common_more_desc">More options</string>
+    <string name="profile_label_full_name">Full Name</string>
+    <string name="profile_label_nickname">Nickname</string>
+    <string name="profile_label_email">Email Address</string>
+    <string name="profile_label_phone">Phone Number</string>
+    <string name="profile_label_gender">Gender</string>
+    <string name="profile_label_birthday">Birthday</string>
+    <string name="profile_label_address">Address</string>
+    <string name="profile_placeholder_name">Alex Johnson</string>
+    <string name="profile_placeholder_email">alex.johnson@example.com</string>
+
+    <!-- Profile Detail -->
+    <string name="profile_preview_title">Profile Preview</string>
+    <string name="profile_edit_button">Edit Profile</string>
+    <string name="profile_empty_dash">-</string>
+
+    <!-- Profile Edit -->
+    <string name="profile_edit_title">Edit Profile</string>
+    <string name="profile_save_button">Save</string>
+    <string name="profile_delete_account_button">Delete Account</string>
+    <string name="profile_label_password">Password</string>
+    <string name="profile_placeholder_password">Enter your password</string>
+    <string name="profile_delete_confirmation_title">Are you sure you want to delete your account?</string>
+    <string name="profile_delete_confirmation_message">All data will be deleted and cannot be recovered.\nPlease enter your password again for security.</string>
+    <string name="profile_delete_complete_button">Complete Account Deletion</string>
+    <string name="profile_edit_photo_cd">Edit Photo</string>
+    <string name="profile_change_photo">Change profile photo</string>
+    <string name="profile_placeholder_nickname">Nickname</string>
+    <string name="profile_placeholder_phone">+1 (555) 123–4567</string>
+    <string name="profile_placeholder_birthday">YYYY-MM-DD</string>
+    <string name="profile_placeholder_address">Enter your address</string>
+    <string name="profile_gender_male">Male</string>
+    <string name="profile_gender_female">Female</string>
+    <string name="profile_gender_other">Other</string>
+
+    <!-- Error Messages -->
+    <string name="network_unavailable">Network unavailable. Please check your connection.</string>
+    <string name="timeout">Request timed out. Please try again.</string>
+    <string name="invalid_credentials">Invalid email or password.</string>
+    <string name="user_not_found">User not found. Please check your email or sign up.</string>
+    <string name="email_already_in_use">This email is already in use.</string>
+    <string name="weak_password">The password is too weak.</string>
+    <string name="too_many_requests">Too many requests. Please try again later.</string>
+    <string name="requires_recent_sign_in">Please log in again to perform this sensitive operation.</string>
+    <string name="user_disabled">This account has been disabled. Please contact support.</string>
+    <string name="token_expired">Your session has expired. Please log in again.</string>
+    <string name="unexpected_error">An unexpected error occurred. Please try again later.</string>
+    <string name="unknown_error">Unknown error</string>
+
+    <!-- Maintenance -->
+    <string name="system_maintenance_title">System Maintenance</string>
+    <string name="system_maintenance_reason">The system is currently undergoing maintenance for a better service. Please try again later.</string>
+
+    <!-- Sync -->
+    <string name="initial_sync_in_progress">Fetching diary data…</string>
+    <string name="initial_sync_failed">Failed to fetch data.</string>
+    <string name="initial_sync_failed_description">Please check your network status and try again.</string>
+    <string name="initial_sync_retry">Retry</string>
+    <string name="sync_failed">Failed to sync data.</string>
+    <string name="retry">Retry</string>
+
+    <!-- Dialog -->
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>

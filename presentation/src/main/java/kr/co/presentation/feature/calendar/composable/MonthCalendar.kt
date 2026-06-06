@@ -7,17 +7,19 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import kr.co.presentation.feature.calendar.model.CalendarDayItem
 import kr.co.presentation.feature.calendar.model.CalendarMonthItem
 import kr.co.presentation.feature.calendar.preview.model.CalendarMonthPreviewData
 import kr.co.presentation.feature.calendar.preview.provider.CalendarMonthPreviewDataProvider
 import kr.co.presentation.feature.diary.preview.factory.DiaryPreviewDataFactory
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
 import java.time.YearMonth
 
@@ -59,7 +61,7 @@ fun MonthCalendar(
     }
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
 private fun MonthCalendarPreview(
     @PreviewParameter(CalendarMonthPreviewDataProvider::class) previewData: CalendarMonthPreviewData,
@@ -69,17 +71,19 @@ private fun MonthCalendarPreview(
     }
 
     MinaryTheme {
-        MonthCalendar(
-            monthItem = previewData.monthItem,
-        ) { dayItem ->
-            if (dayItem.isCurrentMonth)
-                ActiveDay(
-                    modifier = Modifier.weight(1f),
-                    dayItem = dayItem,
-                    diary = diary,
-                )
-            else
-                InactiveDay(modifier = Modifier.weight(1f), dayItem = dayItem)
+        Surface(color = MaterialTheme.colorScheme.background) {
+            MonthCalendar(
+                monthItem = previewData.monthItem,
+            ) { dayItem ->
+                if (dayItem.isCurrentMonth)
+                    ActiveDay(
+                        modifier = Modifier.weight(1f),
+                        dayItem = dayItem,
+                        diary = diary,
+                    )
+                else
+                    InactiveDay(modifier = Modifier.weight(1f), dayItem = dayItem)
+            }
         }
     }
 }
