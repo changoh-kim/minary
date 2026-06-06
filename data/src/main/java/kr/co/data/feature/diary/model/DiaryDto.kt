@@ -1,47 +1,73 @@
 package kr.co.data.feature.diary.model
 
 import androidx.annotation.Keep
+import com.google.firebase.firestore.PropertyName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kr.co.data.local.table.DiaryTable
+import java.util.UUID
 
-
-/**
- * firestore에 저장할 DiaryDto
- *
- * firestore는 @SerialName를 직접 사용하지 않습니다.
- * 다만 나중에 다른 REST API(Gson)의 DTO로 사용할 수 있도록 @SerialName을 사용합니다.
- *
- * @property id
- * @property date
- * @property title
- * @property content
- * @property emotionName
- * @property timestamp
- */
 @Keep
 @Serializable
 data class DiaryDto(
-    @SerialName(DiaryTable.COLUMN_ID)
-    val id: Long = 0L,
+    @SerialName(ID)
+    @get:PropertyName(ID)
+    @PropertyName(ID)
+    val id: String = UUID.randomUUID().toString(),
 
-    @SerialName(DiaryTable.COLUMN_DATE)
+    @SerialName(DATE)
+    @get:PropertyName(DATE)
+    @PropertyName(DATE)
     val date: String = "",
 
-    @SerialName(DiaryTable.COLUMN_TITLE)
+    @SerialName(TITLE)
+    @get:PropertyName(TITLE)
+    @PropertyName(TITLE)
     val title: String = "",
 
-    @SerialName(DiaryTable.COLUMN_CONTENT)
+    @SerialName(CONTENT)
+    @get:PropertyName(CONTENT)
+    @PropertyName(CONTENT)
     val content: String = "",
 
-    @SerialName(DiaryTable.COLUMN_EMOTION)
-    val emotionName: String = "",
+    @SerialName(EMOTIONS)
+    @get:PropertyName(EMOTIONS)
+    @PropertyName(EMOTIONS)
+    val emotions: List<String> = emptyList(),
 
-    @SerialName(DiaryTable.COLUMN_TIMESTAMP)
-    val timestamp: Long = 0L,
+    @SerialName(IMAGE_URLS)
+    @get:PropertyName(IMAGE_URLS)
+    @PropertyName(IMAGE_URLS)
+    val imageUrls: List<String> = emptyList(),
+
+    @SerialName(CREATED_AT)
+    @get:PropertyName(CREATED_AT)
+    @PropertyName(CREATED_AT)
+    val createdAt: Long = System.currentTimeMillis(),
+
+    @SerialName(LAST_MODIFIED_AT)
+    @get:PropertyName(LAST_MODIFIED_AT)
+    @PropertyName(LAST_MODIFIED_AT)
+    val lastModifiedAt: Long = System.currentTimeMillis(),
 ) {
-    // firestore의 toObject()는 인자 없는 클래스의 기본 생성자 DiaryDto()를 호출합니다.
-    // 1. data class로 써 모든 프로퍼티를 초기화 하여 인자 없는 기본 생성자를 자동 호출 가능하게 하거나
-    // 2. 또는 인자 없는 부생성자 선언하고, 기본 생성자를 명시적으로 초기화 할 수 있도록 해야합니다.
-    constructor() : this(0L, "", "", "", "", 0L)
+    constructor() : this(
+        id = UUID.randomUUID().toString(),
+        date = "",
+        title = "",
+        content = "",
+        emotions = emptyList(),
+        imageUrls = emptyList(),
+        createdAt = System.currentTimeMillis(),
+        lastModifiedAt = System.currentTimeMillis(),
+    )
+
+    companion object {
+        const val ID = "id"
+        const val DATE = "date"
+        const val TITLE = "title"
+        const val CONTENT = "content"
+        const val EMOTIONS = "emotions"
+        const val IMAGE_URLS = "imageUrls"
+        const val CREATED_AT = "createdAt"
+        const val LAST_MODIFIED_AT = "lastModifiedAt"
+    }
 }

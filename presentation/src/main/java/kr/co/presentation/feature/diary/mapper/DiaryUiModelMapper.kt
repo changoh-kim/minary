@@ -5,12 +5,17 @@ import kr.co.presentation.feature.diary.model.DiaryUiModel
 
 
 object DiaryUiModelMapper {
+
     fun Diary.toDiaryUiModel() = DiaryUiModel(
         id = id,
         date = date,
         title = title,
         content = content,
-        emotion = emotion,
+        emotions = emotions,
+        imageUrls = imageUrls,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        syncStatus = syncStatus,
     )
 
     fun DiaryUiModel.toDiary() = Diary(
@@ -18,6 +23,10 @@ object DiaryUiModelMapper {
         date = date,
         title = title,
         content = content,
-        emotion = emotion,
+        emotions = emotions,
+        imageUrls = imageUrls,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        syncStatus = syncStatus,
     )
 }

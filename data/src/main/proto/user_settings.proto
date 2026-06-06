@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_package = "kr.co.data.proto";
+option java_multiple_files = true;
+
+message UserSettingsProto {
+  ThemeProto theme = 1;
+  bool diary_sync_enabled = 2;
+  int64 last_modified_at = 3;
+}
+
+enum ThemeProto {
+  SYSTEM = 0;
+  LIGHT = 1;
+  DARK = 2;
+}

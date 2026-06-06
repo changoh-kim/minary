@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,13 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kr.co.domain.feature.emotion.Emotion
+import kr.co.domain.feature.emotion.model.Emotion
 import kr.co.presentation.common.extension.color
 import kr.co.presentation.feature.calendar.extension.isToday
 import kr.co.presentation.feature.calendar.model.CalendarDayItem
 import kr.co.presentation.feature.diary.model.DiaryUiModel
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
 import java.time.LocalDate
 
@@ -39,9 +40,9 @@ fun ActiveDay(
     val isToday = dayItem.isToday()
 
     val shape = if (isToday) CircleShape else MaterialTheme.shapes.small
-    val color = if (isToday) Color.LightGray else Color.Transparent
+    val color = if (isToday) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
 
-    val textColor = if (isToday) Color.Red else MaterialTheme.colorScheme.onBackground
+    val textColor = if (isToday) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground
     val fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
 
     Column(
@@ -69,7 +70,8 @@ fun ActiveDay(
                     .padding(6.dp)
                     .size(6.dp)
                     .clip(CircleShape)
-                    .background(diary.emotion.color, CircleShape)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    /*.background(diary.emotion.color, CircleShape)*/
             )
         else
             Spacer(
@@ -80,17 +82,20 @@ fun ActiveDay(
     }
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
 private fun ActiveDayPreview() {
     MinaryTheme {
-        ActiveDay(
-            modifier = Modifier.size(46.dp),
-            dayItem = CalendarDayItem(
-                date = LocalDate.now(),
-                isCurrentMonth = true,
-            ),
-            diary = DiaryUiModel(emotion = Emotion.TRIUMPH),
-        )
+        Surface(color = MaterialTheme.colorScheme.background) {
+            ActiveDay(
+                modifier = Modifier.size(46.dp),
+                dayItem = CalendarDayItem(
+                    date = LocalDate.now(),
+                    isCurrentMonth = true,
+                ),
+                /*diary = DiaryUiModel(emotion = Emotion.TRIUMPH),*/
+                diary = DiaryUiModel(),
+            )
+        }
     }
 }

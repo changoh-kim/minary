@@ -1,6 +1,9 @@
 package kr.co.domain.common.extension
 
-import kr.co.domain.feature.emotion.Emotion
+import kr.co.domain.feature.diary.model.DiarySyncStatus
+import kr.co.domain.feature.emotion.model.Emotion
+import kr.co.domain.feature.profile.model.Gender
+import kr.co.domain.feature.setting.model.AppTheme
 import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
@@ -44,6 +47,42 @@ fun String.toEmotion(): Emotion {
     return Emotion.entries.find {
         it.name.equals(normalized, ignoreCase = true)
     } ?: Emotion.UNKNOWN
+}
+
+/**
+ * 문자열을 Gender Enum으로 변환합니다.
+ * - 대소문자를 무시합니다.
+ * - 일치하는 값이 없으면 NONE을 반환합니다.
+ */
+fun String.toGender(): Gender {
+    val normalized = this.trim()
+    return Gender.entries.find {
+        it.name.equals(normalized, ignoreCase = true)
+    } ?: Gender.NONE
+}
+
+/**
+ * 문자열을 AppTheme Enum으로 변환합니다.
+ * - 대소문자를 무시합니다.
+ * - 일치하는 값이 없으면 SYSTEM을 반환합니다.
+ */
+fun String.toAppTheme(): AppTheme {
+    val normalized = this.trim()
+    return AppTheme.entries.find {
+        it.name.equals(normalized, ignoreCase = true)
+    } ?: AppTheme.SYSTEM
+}
+
+/**
+ * 문자열을 DiarySyncStatus Enum으로 변환합니다.
+ * - 대소문자를 무시합니다.
+ * - 일치하는 값이 없으면 LOCAL_ONLY 반환합니다.
+ */
+fun String.toSyncStatus(): DiarySyncStatus {
+    val normalized = this.trim()
+    return DiarySyncStatus.entries.find {
+        it.name.equals(normalized, ignoreCase = true)
+    } ?: DiarySyncStatus.PENDING_CREATE
 }
 
 /**

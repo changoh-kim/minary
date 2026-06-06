@@ -1,9 +1,11 @@
 package kr.co.presentation.feature.store.screen
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import kr.co.presentation.theme.MinaryTheme
+import kr.co.presentation.design.ThemePreviews
 
 
 @Composable
@@ -13,15 +15,22 @@ fun StoreScreen() {
 
 @Composable
 fun StoreContent(name: String) {
-    Text(
-        text = "Hello $name!",
-    )
+    Surface(color = MaterialTheme.colorScheme.background) {
+        Text(
+            text = "Hello, $name!",
+        )
+    }
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
-private fun StoreContentPreview() {
+private fun StoreScreenPreview() {
+    StoreContentPreview()
+}
+
+@Composable
+fun StoreContentPreview() {
     MinaryTheme {
-        StoreContent("Store")
+        StoreContent("Store Preview")
     }
 }

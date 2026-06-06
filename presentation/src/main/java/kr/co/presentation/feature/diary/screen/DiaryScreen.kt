@@ -1,6 +1,5 @@
 package kr.co.presentation.feature.diary.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,9 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,19 +29,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
-import kr.co.domain.feature.emotion.Emotion
 import kr.co.presentation.R
 import kr.co.presentation.common.composable.LoadStateContent
 import kr.co.presentation.common.composable.LoadingButton
 import kr.co.presentation.common.composable.LoadingIconButton
-import kr.co.presentation.common.extension.color
 import kr.co.presentation.common.extension.getString
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.feature.diary.composable.SkeletonDiaryContent
 import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.feature.diary.preview.factory.DiaryPreviewDataFactory
@@ -57,7 +52,6 @@ import kr.co.presentation.feature.diary.viewmodel.DiaryViewModel
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
-
 
 @Composable
 fun DiaryScreen(
@@ -111,8 +105,8 @@ fun DiaryContent(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             when (screenMode) {
-                DiaryScreenMode.Edit -> EditTopBar(diary.emotion, isSaving, onAction)
-                DiaryScreenMode.Preview -> PreviewTopBar(diary.emotion, isDeleting, onAction)
+                DiaryScreenMode.Edit -> EditTopBar(isSaving, onAction)
+                DiaryScreenMode.Preview -> PreviewTopBar(isDeleting, onAction)
             }
         }
     ) { paddingValues ->
@@ -173,7 +167,6 @@ fun DiaryContent(
 
 @Composable
 fun EditTopBar(
-    emotion: Emotion = Emotion.UNKNOWN,
     isSaving: Boolean = false,
     onAction: (DiaryAction) -> Unit = {}
 ) {
@@ -183,11 +176,6 @@ fun EditTopBar(
             .systemBarsPadding()
             .padding(start = 16.dp, end = 16.dp)
     ) {
-        EmotionIcon(
-            modifier = Modifier.align(Alignment.CenterStart),
-            emotion
-        )
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
@@ -204,7 +192,6 @@ fun EditTopBar(
 
 @Composable
 fun PreviewTopBar(
-    emotion: Emotion = Emotion.UNKNOWN,
     isDeleting: Boolean = false,
     onAction: (DiaryAction) -> Unit = {}
 ) {
@@ -214,11 +201,6 @@ fun PreviewTopBar(
             .systemBarsPadding()
             .padding(start = 16.dp, end = 16.dp)
     ) {
-        EmotionIcon(
-            modifier = Modifier.align(Alignment.CenterStart),
-            emotion
-        )
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
@@ -241,28 +223,22 @@ fun PreviewTopBar(
     }
 }
 
+@ThemePreviews
 @Composable
-fun EmotionIcon(
-    modifier: Modifier = Modifier,
-    emotion: Emotion
+private fun DiaryScreenPreview(
+    @PreviewParameter(DiaryPreviewDataProvider::class)
+    previewData: DiaryPreviewData,
 ) {
-    if (emotion != Emotion.UNKNOWN) {
-        Box(
-            modifier = modifier
-                .size(24.dp)
-                .background(emotion.color, CircleShape)
-        )
-    }
+    DiaryScreenPreviewContent(previewData)
 }
 
-@Preview(showBackground = true, locale = "ko")
 @Composable
-private fun DiaryContentPreview(
-    @PreviewParameter(DiaryPreviewDataProvider::class) diaryPreviewData: DiaryPreviewData,
+fun DiaryScreenPreviewContent(
+    previewData: DiaryPreviewData,
 ) {
-    val diary = DiaryPreviewDataFactory.createDiary(diaryPreviewData.emotion)
+    val diary = DiaryPreviewDataFactory.createDiary(previewData.emotion)
 
     MinaryTheme {
-        DiaryContent(diary, diaryPreviewData.screenMode)
+        DiaryContent(diary, previewData.screenMode)
     }
 }

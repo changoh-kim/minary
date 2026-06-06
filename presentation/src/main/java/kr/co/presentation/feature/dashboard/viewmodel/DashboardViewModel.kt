@@ -1,12 +1,17 @@
 package kr.co.presentation.feature.dashboard.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kr.co.domain.error.DomainError
+import kr.co.domain.feature.dashboard.model.Dashboard
 import kr.co.domain.feature.dashboard.usecase.GetDashboardUseCase
 import kr.co.presentation.R
+import kr.co.presentation.common.extension.TAG
+import kr.co.presentation.common.extension.handleDomainError
 import kr.co.presentation.common.extension.safeCall
 import kr.co.presentation.common.model.UiText
 import kr.co.presentation.common.state.LoadState
@@ -57,14 +62,14 @@ class DashboardViewModel @Inject constructor(
         if (savedDashboard != null) {
             reduce { state.copy(dashboardLoadState = LoadState.Success(savedDashboard)) }
         } else {
-            safeCall { getDashboardUseCase() }
+            safeCall<Dashboard, DomainError> { getDashboardUseCase() }
                 .map { it.toDashboardUiModel() }
                 .launchAsLoadState { loadState ->
                     reduce { state.copy(dashboardLoadState = loadState) }
 
                     when (loadState) {
                         is LoadState.Success -> savedStateHandle[KEY_DASHBOARD] = loadState.data
-                        is LoadState.Error -> loadState.exception?.let { handleError(it) }
+                        is LoadState.Error -> loadState.error?.let { handleDashboardError(it) }
                         else -> {}
                     }
                 }
@@ -73,11 +78,14 @@ class DashboardViewModel @Inject constructor(
 
     fun handleAction(action: DashboardAction) {}
 
-    private fun handleError(error: Throwable) = intent {
-        val message = error.message
-            ?.let { UiText.DynamicString(it) }
-            ?: UiText.StringResource(R.string.unknown_error)
-
-        postSideEffect(DashboardSideEffect.ShowMessage(message))
+    private fun handleDashboardError(error: DomainError) = intent {
+        handleDomainError(error) {
+            unexpected = { systemError ->
+                Log.e(TAG, "Failed to get dashboard: An unexpected error has occurred", systemError)
+                if (systemError != null) {
+                    postSideEffect(DashboardSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
+                }
+            }
+        }
     }
 }

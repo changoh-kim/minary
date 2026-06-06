@@ -11,4 +11,5 @@ plugins {
     alias(libs.plugins.firebase) apply false
     alias(libs.plugins.secrets) apply false
     alias(libs.plugins.kotlin.parcelize) apply false
+    alias(libs.plugins.protobuf) apply false
 }

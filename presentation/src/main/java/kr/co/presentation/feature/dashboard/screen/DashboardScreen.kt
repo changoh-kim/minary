@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,28 +31,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
-import kr.co.domain.feature.emotion.Emotion
 import kr.co.presentation.R
 import kr.co.presentation.common.composable.LoadStateContent
 import kr.co.presentation.common.extension.color
 import kr.co.presentation.common.extension.getString
 import kr.co.presentation.common.extension.resId
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.feature.dashboard.composable.SkeletonDashboardContent
 import kr.co.presentation.feature.dashboard.model.DashboardUiModel
 import kr.co.presentation.feature.dashboard.preview.DashboardPreviewDataProvider
 import kr.co.presentation.feature.dashboard.viewmodel.DashboardAction
 import kr.co.presentation.feature.dashboard.viewmodel.DashboardSideEffect
 import kr.co.presentation.feature.dashboard.viewmodel.DashboardViewModel
+import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
-
 
 @Composable
 fun DashboardScreen(
@@ -109,23 +109,21 @@ fun DashboardContent(
         Text(
             text = stringResource(R.string.dashboard_diary_streak),
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 히트맵 그리드 (8 x 5 예시)
-        EmotionHeatMap(emotions = dashboard.recentEmotions)
+        DiaryHeatMap(recentDiaries = dashboard.recentDiaries)
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Text(
             text = stringResource(R.string.dashboard_stats),
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 통계 카드 그리드
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -133,13 +131,13 @@ fun DashboardContent(
             DashboardCard(
                 modifier = Modifier.weight(1f),
                 title = stringResource(R.string.dashboard_days_written),
-                value = "${dashboard.totalDiaries}",
+                value = "${dashboard.totalDiaryCount}",
                 unit = stringResource(R.string.dashboard_unit_day)
             )
             DashboardCard(
                 modifier = Modifier.weight(1f),
                 title = stringResource(R.string.dashboard_total_words),
-                value = "${dashboard.totalWords}",
+                value = "${dashboard.totalWordCount}",
                 unit = stringResource(R.string.dashboard_unit_word)
             )
         }
@@ -151,14 +149,14 @@ fun DashboardContent(
             DashboardCard(
                 modifier = Modifier.weight(1f),
                 title = stringResource(R.string.dashboard_dominant_emotion),
-                value = stringResource(dashboard.dominantEmotion.resId),
-                valueColor = dashboard.dominantEmotion.color
+                value = stringResource(dashboard.mostFrequentEmotion.resId),
+                valueColor = dashboard.mostFrequentEmotion.color
             )
             DashboardCard(
                 modifier = Modifier.weight(1f),
                 title = stringResource(R.string.dashboard_rarest_emotion),
-                value = stringResource(dashboard.rarestEmotion.resId),
-                valueColor = dashboard.rarestEmotion.color
+                value = stringResource(dashboard.leastFrequentEmotion.resId),
+                valueColor = dashboard.leastFrequentEmotion.color
             )
         }
         Spacer(modifier = Modifier.height(32.dp))
@@ -166,7 +164,7 @@ fun DashboardContent(
 }
 
 @Composable
-private fun EmotionHeatMap(emotions: List<Emotion>) {
+private fun DiaryHeatMap(recentDiaries: List<DiaryUiModel?>) {
     val columns = 8
     val rows = 5
 
@@ -175,13 +173,18 @@ private fun EmotionHeatMap(emotions: List<Emotion>) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 repeat(columns) { colIndex ->
                     val index = rowIndex * columns + colIndex
-                    val emotion = emotions.getOrNull(index) ?: Emotion.UNKNOWN
+                    val diary = recentDiaries.getOrNull(index)
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(4.dp))
-                            .background(if (emotion == Emotion.UNKNOWN) Color(0xFFE9F0F8) else emotion.color)
+                            .background(
+                                if (diary != null)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.surface
+                            )
                     )
                 }
             }
@@ -195,12 +198,12 @@ private fun DashboardCard(
     title: String,
     value: String,
     unit: String? = null,
-    valueColor: Color = Color.Black
+    valueColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(24.dp))
-            .background(Color(0xFFE9F0F8))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(vertical = 32.dp, horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -208,32 +211,42 @@ private fun DashboardCard(
         Text(
             text = title,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray.copy(alpha = 0.6f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp),
             fontWeight = FontWeight.Bold,
-            color = if (valueColor == Color.Black) Color.White else valueColor // 이미지처럼 흰색 배경에 대비되게 하려면 조정 필요
+            color = valueColor
         )
         unit?.let {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = it,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray.copy(alpha = 0.6f)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
-fun DashboardContentPreview(
-    @PreviewParameter(DashboardPreviewDataProvider::class) dashboard: DashboardUiModel,
+private fun DashboardScreenPreview(
+    @PreviewParameter(DashboardPreviewDataProvider::class)
+    dashboard: DashboardUiModel,
+) {
+    DashboardPreviewContent(dashboard)
+}
+
+@Composable
+fun DashboardPreviewContent(
+    dashboard: DashboardUiModel
 ) {
     MinaryTheme {
-        DashboardContent(dashboard = dashboard)
+        Surface(color = MaterialTheme.colorScheme.background) {
+            DashboardContent(dashboard = dashboard)
+        }
     }
 }

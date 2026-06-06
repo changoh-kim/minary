@@ -1,7 +1,7 @@
 package kr.co.presentation.common.extension
 
 import androidx.compose.ui.graphics.Color
-import kr.co.domain.feature.emotion.Emotion
+import kr.co.domain.feature.emotion.model.Emotion
 import kr.co.presentation.R
 
 

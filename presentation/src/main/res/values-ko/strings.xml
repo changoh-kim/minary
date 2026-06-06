@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Minary</string>
-    <string name="today">오늘</string>
-    <string name="month_title">%1$d월</string>
-    <string name="you_cannot_select_a_date_after_today">오늘 이후에는 날짜를 선택할 수 없습니다</string>
+
+    <!-- Home -->
+    <string name="search">검색</string>
+    <string name="calendar">달력</string>
+    <string name="dashboard">대시보드</string>
+    <string name="setting">환경설정</string>
+    <string name="home_error_storage_init">저장소 준비에 실패했습니다. 로그아웃 후 다시 시도해주세요.</string>
+    <string name="home_error_session_verification">사용자 검증 실패. 다시 로그인해주세요.</string>
+
+    <!-- Welcome -->
     <string name="welcome">환영합니다.</string>
     <string name="your_mind_diary">당신의 마음속 다이어리를 작성해보세요</string>
-    <string name="login">로그인</string>
+
+    <!-- SignIn -->
     <string name="id">아이디</string>
     <string name="user_id">사용자 아이디</string>
-    <string name="password">비밀번호</string>
-    <string name="user_password">사용자 비밀번호</string>
-    <string name="btn_login">로그인</string>
+    <string name="btn_sign_in">로그인</string>
     <string name="do_not_have_an_account">계정이 없으신가요?</string>
-    <string name="sign_up">회원가입</string>
+    <string name="id_is_empty">아이디가 비어 있습니다</string>
+
+    <!-- SignUp -->
     <string name="create_an_account">계정 만들기</string>
     <string name="email">이메일</string>
     <string name="user_email">사용자 이메일</string>
@@ -21,21 +29,43 @@
     <string name="user_name">사용자 이름</string>
     <string name="confirm_password">비밀번호 확인</string>
     <string name="user_confirm_password">사용자 비밀번호 확인</string>
-    <string name="search">검색</string>
-    <string name="calendar">달력</string>
-    <string name="dashboard">대시보드</string>
-    <string name="store">상점</string>
-    <string name="setting">환경설정</string>
-    <string name="id_is_empty">아이디가 비어 있습니다</string>
-    <string name="password_is_empty">패스워드가 비어 있습니다</string>
-    <string name="unknown_error">알 수 없는 오류</string>
-    <string name="login_failed">로그인 실패</string>
+    <string name="gender">성별</string>
+    <string name="gender_male">남성</string>
+    <string name="gender_female">여성</string>
+    <string name="gender_other">기타</string>
+    <string name="birthday">생일</string>
+    <string name="placeholder_birthday">YYYY-MM-DD</string>
+    <string name="phone_number">핸드폰 번호</string>
+    <string name="placeholder_phone">01012345678 (- 제외)</string>
+    <string name="address">주소</string>
+    <string name="placeholder_address">주소를 입력해주세요</string>
     <string name="email_is_empty">이메일이 비어 있습니다</string>
     <string name="name_is_empty">이름이 비어 있습니다</string>
     <string name="confirm_password_is_empty">비밀번호 확인칸이 비어 있습니다</string>
     <string name="password_not_match">비밀번호가 일치하지 않습니다</string>
-    <string name="account_creation_failed">계정 생성에 실패했습니다</string>
-    <string name="current_user_is_null">없는 사용자입니다</string>
+    <string name="gender_is_not_selected">성별이 선택되지 않았습니다</string>
+    <string name="address_is_empty">주소가 비어 있습니다</string>
+    <string name="phone_number_is_empty">핸드폰 번호가 비어 있습니다</string>
+    <string name="btn_check">중복확인</string>
+    <string name="email_is_available">사용 가능한 이메일입니다.</string>
+    <string name="email_is_not_available">이미 사용 중인 이메일입니다.</string>
+    <string name="email_check_required">이메일 중복 확인이 필요합니다.</string>
+    <string name="invalid_email_format">올바른 이메일 형식이 아닙니다 (예: example@mail.com)</string>
+    <string name="invalid_password_format">비밀번호는 영문, 숫자를 포함하여 8자 이상이어야 합니다</string>
+    <string name="invalid_phone_format">전화번호는 - 없이 10~11자리 숫자로 입력해주세요</string>
+
+    <!-- Auth Common -->
+    <string name="sign_in">로그인</string>
+    <string name="password">비밀번호</string>
+    <string name="user_password">사용자 비밀번호</string>
+    <string name="sign_up">회원가입</string>
+    <string name="password_is_empty">패스워드가 비어 있습니다</string>
+
+    <!-- Calendar -->
+    <string name="today">오늘</string>
+    <string name="you_cannot_select_a_date_after_today">오늘 이후에는 날짜를 선택할 수 없습니다</string>
+
+    <!-- Diary -->
     <string name="diary_title_is_empty">일기 제목이 비어 있습니다.</string>
     <string name="diary_content_is_empty">일기 내용이 비어 있습니다</string>
     <string name="diary_saved">일기가 저장되었습니다.</string>
@@ -44,6 +74,8 @@
     <string name="diary_save_button">저장</string>
     <string name="diary_edit_button">편집</string>
     <string name="diary_delete_button_cd">일기 삭제 버튼</string>
+
+    <!-- Dashboard -->
     <string name="dashboard_deep_analysis">심층분석</string>
     <string name="dashboard_diary_streak">일기 쓰기 연속 기록</string>
     <string name="dashboard_stats">통계</string>
@@ -53,4 +85,88 @@
     <string name="dashboard_rarest_emotion">희소한 감정</string>
     <string name="dashboard_unit_day">일</string>
     <string name="dashboard_unit_word">자</string>
+
+    <!-- Settings -->
+    <string name="settings_title">환경설정</string>
+    <string name="settings_appearance">디스플레이</string>
+    <string name="settings_theme">테마</string>
+    <string name="settings_theme_light">라이트 모드</string>
+    <string name="settings_theme_dark">다크 모드</string>
+    <string name="settings_theme_system">시스템 설정</string>
+    <string name="settings_backup_cloud">백업 및 클라우드</string>
+    <string name="settings_diary_sync">일기 동기화</string>
+    <string name="settings_diary_sync_desc">작성한 일기를 자동으로 백업하고 다른 기기에서도 확인할 수 있습니다.</string>
+    <string name="settings_sign_out">로그아웃</string>
+    <string name="settings_sign_out_confirm_message">로그아웃 하시겠습니까?</string>
+    <string name="settings_version">버전 %s</string>
+    <string name="settings_default_user_name">사용자 이름</string>
+    <string name="settings_default_user_email">email@example.com</string>
+    <string name="settings_logout_sync_dialog_message">동기화가 되지 않은 다이어리 항목들이 있습니다. 데이터를 잃을 수 있습니다. 그래도 로그아웃 하시겠습니까?</string>
+
+    <!-- Profile Common -->
+    <string name="profile_common_back_desc">뒤로가기</string>
+    <string name="profile_common_more_desc">더보기</string>
+    <string name="profile_label_full_name">이름</string>
+    <string name="profile_label_nickname">닉네임</string>
+    <string name="profile_label_email">이메일 주소</string>
+    <string name="profile_label_phone">전화번호</string>
+    <string name="profile_label_gender">성별</string>
+    <string name="profile_label_birthday">생년월일</string>
+    <string name="profile_label_address">주소</string>
+    <string name="profile_placeholder_name">홍길동</string>
+    <string name="profile_placeholder_email">email@example.com</string>
+
+    <!-- Profile Detail -->
+    <string name="profile_preview_title">프로필 미리보기</string>
+    <string name="profile_edit_button">프로필 수정</string>
+    <string name="profile_empty_dash">-</string>
+
+    <!-- Profile Edit -->
+    <string name="profile_edit_title">프로필 수정</string>
+    <string name="profile_save_button">저장</string>
+    <string name="profile_delete_account_button">계정 삭제</string>
+    <string name="profile_label_password">비밀번호</string>
+    <string name="profile_placeholder_password">비밀번호를 입력하세요</string>
+    <string name="profile_delete_confirmation_title">정말로 탈퇴하시겠습니까?</string>
+    <string name="profile_delete_confirmation_message">탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.\n보안을 위해 비밀번호를 한 번 더 입력해주세요.</string>
+    <string name="profile_delete_complete_button">회원 탈퇴 완료</string>
+    <string name="profile_edit_photo_cd">사진 수정</string>
+    <string name="profile_change_photo">프로필 사진 변경</string>
+    <string name="profile_placeholder_nickname">닉네임</string>
+    <string name="profile_placeholder_phone">010–0000–0000</string>
+    <string name="profile_placeholder_birthday">YYYY-MM-DD</string>
+    <string name="profile_placeholder_address">주소를 입력하세요</string>
+    <string name="profile_gender_male">남성</string>
+    <string name="profile_gender_female">여성</string>
+    <string name="profile_gender_other">기타</string>
+
+    <!-- Error Messages -->
+    <string name="network_unavailable">네트워크 연결을 사용할 수 없습니다. 연결 상태를 확인해주세요.</string>
+    <string name="timeout">요청 시간이 초과되었습니다. 다시 시도해주세요.</string>
+    <string name="invalid_credentials">이메일 또는 비밀번호가 잘못되었습니다.</string>
+    <string name="user_not_found">사용자를 찾을 수 없습니다. 이메일을 확인하거나 회원가입을 해주세요.</string>
+    <string name="email_already_in_use">이미 사용 중인 이메일입니다.</string>
+    <string name="weak_password">비밀번호가 너무 취약합니다.</string>
+    <string name="too_many_requests">요청이 너무 많습니다. 잠시 후 다시 시도해주세요.</string>
+    <string name="requires_recent_sign_in">보안을 위해 다시 로그인해 주세요.</string>
+    <string name="user_disabled">비활성화된 계정입니다. 고객센터에 문의해주세요.</string>
+    <string name="token_expired">세션이 만료되었습니다. 다시 로그인해 주세요.</string>
+    <string name="unexpected_error">예기치 않은 오류가 발생했습니다. 잠시 후 다시 시도해주세요.</string>
+    <string name="unknown_error">알 수 없는 오류</string>
+
+    <!-- Maintenance -->
+    <string name="system_maintenance_title">시스템 점검 안내</string>
+    <string name="system_maintenance_reason">더 나은 서비스 제공을 위해 시스템 점검을 진행 중입니다. 잠시 후 다시 이용해 주세요.</string>
+
+    <!-- Sync -->
+    <string name="initial_sync_in_progress">일기 데이터를 가져오고 있습니다…</string>
+    <string name="initial_sync_failed">데이터를 가져오지 못했습니다.</string>
+    <string name="initial_sync_failed_description">네트워크 상태를 확인하고 다시 시도해주세요.</string>
+    <string name="initial_sync_retry">다시 시도</string>
+    <string name="sync_failed">데이터 동기화에 실패했습니다.</string>
+    <string name="retry">재시도</string>
+
+    <!-- Dialog -->
+    <string name="dialog_confirm">확인</string>
+    <string name="dialog_cancel">취소</string>
 </resources>

@@ -11,7 +11,6 @@ import kr.co.data.di.qualifier.GeminiApiKey
 import kr.co.minary.BuildConfig
 import javax.inject.Singleton
 
-
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class MinaryAppModule {

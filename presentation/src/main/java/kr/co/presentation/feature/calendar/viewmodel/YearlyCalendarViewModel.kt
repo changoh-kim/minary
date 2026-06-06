@@ -69,14 +69,6 @@ class YearlyCalendarViewModel @Inject constructor(
     override val container =
         container<YearlyCalendarScreenState, YearlyCalendarSideEffect>(YearlyCalendarScreenState())
 
-    /**
-     * 연간 달력 Pager에 표시될 페이지 데이터 Flow입니다.
-     * `stateFlow`를 기반으로 `initYear` 또는 `refreshKey`가 변경될 때마다 새로운 `PagingData`를 생성합니다.
-     *
-     * - **`state.initYear`**: Paging의 시작 기준이 되는 연도입니다.
-     * - **`state.refreshKey`**: `initYear`가 동일하더라도 Paging을 새로고침하고 싶을 때(예: '오늘' 버튼 클릭)
-     *   이 값을 변경하여 `distinctUntilChanged()`를 우회하고 Flow를 강제로 재실행시키는 역할을 합니다.
-     */
     @OptIn(ExperimentalCoroutinesApi::class)
     val calendarGridItems: Flow<PagingData<CalendarGridItem>> = container.stateFlow
         .map { state -> (state.initYear to state.refreshKey) }
@@ -111,7 +103,7 @@ class YearlyCalendarViewModel @Inject constructor(
             )
         }
 
-        // 초기 scroll 위치를 한 번만 설정하기 위해 사용
+        // 초기 scroll 위치를 한 번만 설정합니다.
         if (!savedIsInitialScrollCompleted) {
             postSideEffect(YearlyCalendarSideEffect.ScrollToInitialPosition)
             savedStateHandle[KEY_INITIAL_SCROLL_COMPLETED] = true

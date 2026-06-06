@@ -2,7 +2,7 @@ package kr.co.data.local.converter
 
 import androidx.room.TypeConverter
 import kr.co.domain.common.extension.toEmotion
-import kr.co.domain.feature.emotion.Emotion
+import kr.co.domain.feature.emotion.model.Emotion
 
 
 object EmotionConverters {

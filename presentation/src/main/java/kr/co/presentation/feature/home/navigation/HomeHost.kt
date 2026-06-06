@@ -1,0 +1,27 @@
+package kr.co.presentation.feature.home.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import kr.co.presentation.feature.calendar.navigation.calenderGraph
+import kr.co.presentation.feature.dashboard.navigation.dashboardGraph
+import kr.co.presentation.feature.setting.navigation.settingsGraph
+import kr.co.presentation.feature.store.navigation.storeGraph
+import kr.co.presentation.navigation.MinaryAppState
+
+
+@Composable
+fun HomeHost(
+    appState: MinaryAppState,
+    navController: NavHostController,
+    startDestination: Any,
+    modifier: Modifier,
+) {
+    NavHost(navController, startDestination, modifier) {
+        calenderGraph(appState, navController)
+        dashboardGraph(appState, navController)
+        storeGraph(appState, navController)
+        settingsGraph(appState, navController)
+    }
+}

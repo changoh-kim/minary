@@ -1,0 +1,34 @@
+{
+  "parameters": {
+    "last_modified_at": {
+      "defaultValue": { "value": "0" },
+      "valueType": "NUMBER"
+    },
+    "is_maintenance_mode": {
+      "defaultValue": { "value": "false" },
+      "valueType": "BOOLEAN"
+    },
+    "maintenance_reason": {
+      "defaultValue": { "value": "" },
+      "valueType": "STRING"
+    },
+    "user_data_sync_enabled": {
+      "defaultValue": { "value": "true" },
+      "valueType": "BOOLEAN"
+    },
+    "profile_photo_upload_enabled": {
+      "defaultValue": { "value": "true" },
+      "valueType": "BOOLEAN"
+    },
+    "diary_sync_enabled": {
+      "defaultValue": { "value": "true" },
+      "valueType": "BOOLEAN"
+    },
+    "ai_enabled": {
+      "defaultValue": { "value": "true" },
+      "valueType": "BOOLEAN"
+    }
+  },
+  "conditions": [],
+  "parameterGroups": {}
+}

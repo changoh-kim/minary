@@ -1,7 +1,7 @@
 package kr.co.presentation.feature.diary.preview.provider
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import kr.co.domain.feature.emotion.Emotion
+import kr.co.domain.feature.emotion.model.Emotion
 import kr.co.presentation.feature.diary.preview.model.DiaryPreviewData
 import kr.co.presentation.feature.diary.viewmodel.DiaryScreenMode
 

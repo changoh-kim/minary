@@ -4,12 +4,15 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable data object WelcomeRoute
-@Serializable data object LoginRoute
+@Serializable data object SignInRoute
 @Serializable data object SignUpRoute
-@Serializable data object MainRoute
+@Serializable data object AccountDeletionRoute
+@Serializable data object HomeRoute
 @Serializable data class DiaryRoute(val year: Int, val month: Int, val date: Int)
 @Serializable data class MonthlyCalendarRoute(val year: Int, val month: Int)
 @Serializable data class YearlyCalendarRoute(val year: Int)
 @Serializable data object DashboardRoute
 @Serializable data object StoreRoute
-@Serializable data object SettingRoute
+@Serializable data object SettingsRoute
+@Serializable data object ProfileDetailRoute
+@Serializable data object ProfileEditRoute

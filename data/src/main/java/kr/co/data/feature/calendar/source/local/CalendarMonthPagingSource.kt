@@ -2,24 +2,30 @@ package kr.co.data.feature.calendar.source.local
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import kr.co.data.feature.calendar.mapper.CalendarDataMapper.toCalendarMonthDto
-import kr.co.data.feature.calendar.model.CalendarMonthDto
-import kr.co.domain.feature.calendar.generator.CalendarGenerator
+import com.github.michaelbull.result.get
+import kotlinx.coroutines.flow.first
+import kr.co.data.feature.calendar.model.CalendarDayModel
+import kr.co.data.feature.calendar.model.CalendarMonthModel
+import kr.co.domain.feature.calendar.service.CalendarGenerator
+import kr.co.domain.feature.diary.model.SyncStatus
+import kr.co.domain.feature.diary.repository.DiaryRepository
+import kr.co.domain.feature.session.repository.SessionRepository
 import java.time.YearMonth
-
 
 class CalendarMonthPagingSource(
     private val calendarGenerator: CalendarGenerator,
-) : PagingSource<YearMonth, CalendarMonthDto>() {
+    private val sessionRepository: SessionRepository,
+    private val diaryRepository: DiaryRepository,
+) : PagingSource<YearMonth, CalendarMonthModel>() {
 
-    override fun getRefreshKey(state: PagingState<YearMonth, CalendarMonthDto>): YearMonth? {
+    override fun getRefreshKey(state: PagingState<YearMonth, CalendarMonthModel>): YearMonth? {
         return state.anchorPosition?.let { anchorPosition ->
             val anchorPage = state.closestPageToPosition(anchorPosition)
             anchorPage?.prevKey?.plusMonths(1) ?: anchorPage?.nextKey?.minusMonths(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<YearMonth>): LoadResult<YearMonth, CalendarMonthDto> {
+    override suspend fun load(params: LoadParams<YearMonth>): LoadResult<YearMonth, CalendarMonthModel> {
         return try {
             val startYearMonth =
                 YearMonth.of(CalendarGenerator.START_YEAR_1902, CalendarGenerator.START_MONTH_1)
@@ -27,7 +33,7 @@ class CalendarMonthPagingSource(
             val targetYearMonth = params.key ?: currentYearMonth
             val loadSize = params.loadSize
 
-            val calendarMonthList = ArrayList<CalendarMonthDto>(loadSize)
+            val calendarMonthList = ArrayList<CalendarMonthModel>(loadSize)
 
             var firstMonth: YearMonth? = null
             var lastMonth: YearMonth? = null
@@ -41,8 +47,37 @@ class CalendarMonthPagingSource(
                 if (firstMonth == null) firstMonth = yearMonth
                 lastMonth = yearMonth
 
+                val calendarMonth = calendarGenerator.generateMonth(yearMonth)
+                val startDate = calendarMonth.days.first().date
+                val endDate = calendarMonth.days.last().date
+
+                val diaries = diaryRepository.getDiariesByDateRange(startDate, endDate)
+                    .get()
+                    ?.associateBy { it.date } ?: emptyMap()
+
+                val syncStatus = diaryRepository.getSyncStatusStream(yearMonth).first()
+
+                // Trigger sync if IDLE or FAILED (optional, as per plan)
+                // IDLE 또는 실패한 경우 동기화 트리거(선택 사항, 계획에 따라)
+                if (syncStatus == SyncStatus.IDLE) {
+                    val user = sessionRepository.getCurrentUser().get()
+                    user?.let { diaryRepository.requestMonthSync(it.uid, yearMonth) }
+                }
+
+                val combinedDays = calendarMonth.days.map { day ->
+                    CalendarDayModel(
+                        date = day.date,
+                        isCurrentMonth = day.isCurrentMonth,
+                        diary = diaries[day.date]
+                    )
+                }
+
                 calendarMonthList.add(
-                    calendarGenerator.generateMonth(yearMonth).toCalendarMonthDto()
+                    CalendarMonthModel(
+                        yearMonth = yearMonth,
+                        days = combinedDays,
+                        syncStatus = syncStatus
+                    )
                 )
             }
 

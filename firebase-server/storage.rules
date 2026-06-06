@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 사용자 프로필 사진
+    match /profile_photos/{fileName} {
+      allow read, write: if isAuthenticated()
+        && fileName == request.auth.uid + ".jpg"
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches("image/.*");
+    }
+
+    // 그 외 모두 차단
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

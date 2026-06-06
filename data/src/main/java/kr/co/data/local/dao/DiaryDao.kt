@@ -1,128 +1,698 @@
 package kr.co.data.local.dao
 
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
-import kr.co.data.feature.dashboard.model.DashboardCountStats
-import kr.co.data.feature.dashboard.model.DashboardEmotionStats
+import kr.co.data.feature.diary.source.local.model.DiaryWithRelations
+import kr.co.data.feature.emotion.source.local.model.EmotionStats
+import kr.co.data.local.entity.DiaryEmotionEntity
 import kr.co.data.local.entity.DiaryEntity
+import kr.co.data.local.entity.DiaryImageUrlEntity
+import kr.co.domain.feature.diary.model.DiarySyncStatus
 import java.time.LocalDate
 
-
 @Dao
-interface DiaryDao {
+abstract class DiaryDao {
 
-    /**
-     * 로컬 DB에 저장된 일기의 총 개수를 반환합니다.
-     * @return 일기 개수
-     */
-    @Query("SELECT COUNT(id) FROM diary")
-    suspend fun countDiaries(): Int
+    companion object {
+        private const val SYNCED = "SYNCED"
+    }
 
-    /**
-     * [date]에 해당하는 일기 중 삭제되지 않은 일기를 조회합니다.
-     *
-     * @return 데이터가 있으면 DiaryEntity, 없으면 null을 반환합니다.
-     */
-    @Query("SELECT * FROM diary WHERE date = :date AND isDeleted = 0")
-    suspend fun getDiaryByDate(date: LocalDate): DiaryEntity?
 
-    /**
-     * [startDate]와 [endDate] 사이의 삭제되지 않은 모든 일기를 Flow 형태로 조회합니다.
-     *
-     * @param startDate 시작 날짜
-     * @param endDate 종료 날짜
-     * @return diary 테이블의 데이터가 변경되면 Flow가 자동으로 새 목록을 방출합니다.
-     */
-    @Query("SELECT * FROM diary WHERE date BETWEEN :startDate AND :endDate AND isDeleted = 0")
-    fun getDiariesFlowByRange(startDate: LocalDate, endDate: LocalDate): Flow<List<DiaryEntity>>
 
+    // ───────────────────────────────────────────────────────────────────────────────────
+    // DiaryEntity 삽입, 수정
+    //
+    // Protected: 외부에서 직접 호출 금지. @Transaction 함수를 통해서만 사용
+    // ───────────────────────────────────────────────────────────────────────────────────
     /**
-     * 서버와 동기화되지 않은 모든 일기를 조회합니다.
-     *
-     * @return 동기화되지 않은 일기 목록. 없으면 null을 반환합니다.
+     * @suppress 직접 호출 금지. [insertDiaryWithRelations]을 사용하세요.
      */
-    @Query("SELECT * FROM diary WHERE isSynced = 0")
-    suspend fun getUnsyncedDiaries(): List<DiaryEntity>?
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    protected abstract suspend fun insertDiary(diary: DiaryEntity)
 
-    /**
-     * 주어진 [ids] 목록에 해당하는 모든 일기의 `isSynced` 상태를 한 번에 업데이트합니다.
-     *
-     * @param ids 업데이트할 일기 ID 목록
-     * @param isSynced 적용할 동기화 상태
-     * @return 업데이트된 행의 개수를 반환합니다.
-     */
-    @Query("UPDATE diary SET isSynced = :isSynced WHERE id IN (:ids)")
-    suspend fun updateSyncStatus(ids: List<Long>, isSynced: Boolean): Int
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    protected abstract suspend fun insertDiary(diaries: List<DiaryEntity>)
 
-    /**
-     * 주어진 [id]에 해당하는 일기를 삭제 상태([isDeleted])로 변경하고,
-     * 동기화가 필요하도록 `isSynced` 상태를 `false`로 설정합니다.
-     *
-     * @param id 업데이트할 일기 ID
-     * @param isDeleted 적용할 삭제 상태
-     * @return 업데이트된 행의 개수를 반환합니다.
-     */
-    @Query("UPDATE diary SET isDeleted = :isDeleted, isSynced = 0 WHERE id = :id")
-    suspend fun updateDeleteStatus(id: Long, isDeleted: Boolean): Int
+    @Update
+    protected abstract suspend fun updateDiary(diary: DiaryEntity): Int
 
-    /**
-     * [diaryEntity]를 데이터베이스에 삽입하거나, Primary Key가 이미 존재하면 업데이트합니다. (Upsert)
-     *
-     * @return 추가되거나 업데이트된 행의 ID를 반환합니다.
-     */
+    @Update
+    protected abstract suspend fun updateDiary(diaries: List<DiaryEntity>): Int
+
     @Upsert
-    suspend fun upsertDiary(diaryEntity: DiaryEntity): Long
+    protected abstract suspend fun upsertDiary(diary: DiaryEntity)
 
-    /**
-     * 주어진 [diaries] 목록을 데이터베이스에 삽입하거나, Primary Key가 이미 존재하면 업데이트합니다. (Upsert)
-     *
-     * @param diaries Upsert할 DiaryEntity 목록
-     * @return 추가되거나 업데이트된 행의 ID 목록을 반환합니다.
-     */
     @Upsert
-    suspend fun upsertDiaries(diaries: List<DiaryEntity>): List<Long>
+    protected abstract suspend fun upsertDiary(diaries: List<DiaryEntity>)
+
+
+
+    // ───────────────────────────────────────────────────────────────────────────────────
+    // DiaryEmotionEntity 단독 조작
+    //
+    // Protected: 외부에서 직접 호출 금지. @Transaction 함수를 통해서만 사용
+    // ───────────────────────────────────────────────────────────────────────────────────
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    protected abstract suspend fun insertEmotions(emotions: List<DiaryEmotionEntity>)
+
+    @Query(
+        """
+        DELETE FROM ${DiaryEmotionEntity.TABLE_NAME}
+        WHERE ${DiaryEmotionEntity.COLUMN_DIARY_ID} = :diaryId
+        """
+    )
+    protected abstract suspend fun deleteEmotions(diaryId: String)
+
+    @Query(
+        """
+        DELETE FROM ${DiaryEmotionEntity.TABLE_NAME}
+        WHERE ${DiaryEmotionEntity.COLUMN_DIARY_ID} IN (:diaryIds)
+        """
+    )
+    protected abstract suspend fun deleteEmotions(diaryIds: List<String>)
+
+
+
+    // ───────────────────────────────────────────────────────────────────────────────────
+    // DiaryImageUrlEntity 단독 조작
+    //
+    // Protected: 외부에서 직접 호출 금지. @Transaction 함수를 통해서만 사용
+    // ───────────────────────────────────────────────────────────────────────────────────
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    protected abstract suspend fun insertImageUrls(imageUrls: List<DiaryImageUrlEntity>)
+
+    @Query(
+        """
+        DELETE FROM ${DiaryImageUrlEntity.TABLE_NAME}
+        WHERE ${DiaryImageUrlEntity.COLUMN_DIARY_ID} = :diaryId
+        """
+    )
+    protected abstract suspend fun deleteImageUrls(diaryId: String)
+
+    @Query(
+        """
+        DELETE FROM ${DiaryImageUrlEntity.TABLE_NAME}
+        WHERE ${DiaryImageUrlEntity.COLUMN_DIARY_ID} IN (:diaryIds)
+        """
+    )
+    protected abstract suspend fun deleteImageUrls(diaryIds: List<String>)
+
+
+
+    // ───────────────────────────────────────────────────────────────────────────────────
+    // Diary, Emotions, ImageUrls 삽입, 수정
+    //
+    // Internal: 같은 모듈 일 때 Dao 외부에서 직접 호출 가능
+    // ───────────────────────────────────────────────────────────────────────────────────
 
     /**
-     * 주어진 [diaryEntity]와 일치하는 일기를 데이터베이스에서 삭제합니다.
+     * 일기, 감정, 이미지 URL을 함께 삽입합니다.
      *
-     * @return 삭제된 행의 개수를 반환합니다.
+     * 1. [diary]를 diary 테이블에 삽입합니다.
+     * 2. [emotions]를 diaryEmotions 테이블에 삽입합니다.
+     * 3. [imageUrls]를 diaryImageUrls 테이블에 삽입합니다.
+     * 4. 하나라도 실패하면 전체 롤백됩니다.
+     *
+     * @throws SQLiteConstraintException id 또는 date 충돌 시
+     */
+    @Transaction
+    internal open suspend fun insertDiaryWithRelations(
+        diary: DiaryEntity,
+        emotions: List<DiaryEmotionEntity>,
+        imageUrls: List<DiaryImageUrlEntity>
+    ) {
+        insertDiary(diary)
+        insertEmotions(emotions)
+        insertImageUrls(imageUrls)
+    }
+
+    /**
+     * 일기, 감정, 이미지 URL을 함께 삽입합니다.
+     *
+     * [entry]의 데이터를 관계된 테이블에 삽입합니다.
+     * 하나라도 실패하면 전체 롤백됩니다.
+     *
+     * @throws SQLiteConstraintException id 또는 date 충돌 시
+     */
+    @Transaction
+    internal open suspend fun insertDiaryWithRelations(
+        entry: DiaryWithRelations,
+    ) {
+        insertDiaryWithRelations(
+            entry.diary,
+            entry.emotions,
+            entry.imageUrls,
+        )
+    }
+
+    /**
+     * 일기, 감정, 이미지 URL을 함께 수정합니다.
+     *
+     * 1. [diary]를 diary 테이블에 수정합니다.
+     * 2. [emotions]를 diaryEmotions 테이블에 수정합니다.
+     * 3. [imageUrls]를 diaryImageUrls 테이블에 수정합니다.
+     * 4. 하나라도 실패하면 전체 롤백됩니다.
+     *
+     * @throws SQLiteConstraintException date 충돌 시
+     */
+    @Transaction
+    internal open suspend fun updateDiaryWithRelations(
+        diary: DiaryEntity,
+        emotions: List<DiaryEmotionEntity>,
+        imageUrls: List<DiaryImageUrlEntity>
+    ) {
+        updateDiary(diary)
+        // 기존 감정/이미지 전체 삭제 후 재삽입 (변경 반영)
+        deleteEmotions(diary.id)
+        insertEmotions(emotions)
+
+        deleteImageUrls(diary.id)
+        insertImageUrls(imageUrls)
+    }
+
+    /**
+     * 일기, 감정, 이미지 URL을 함께 수정합니다.
+     *
+     * [entry]의 데이터를 관계된 테이블에 수정합니다.
+     * 하나라도 실패하면 전체 롤백됩니다.
+     *
+     * @throws SQLiteConstraintException date 충돌 시
+     */
+    @Transaction
+    internal open suspend fun updateDiaryWithRelations(
+        entry: DiaryWithRelations,
+    ) {
+        updateDiaryWithRelations(
+            entry.diary,
+            entry.emotions,
+            entry.imageUrls,
+        )
+    }
+
+    /**
+     * 일기, 감정, 이미지 URL을 함께 작성하거나 수정합니다.
+     *
+     * 로컬 데이터가 존재 여부에 따라
+     * [entry]의 데이터를 관계된 테이블에 작성 또는 수정합니다.
+     * 하나라도 실패하면 전체 롤백됩니다.
+     *
+     * @throws SQLiteConstraintException date 충돌 시
+     */
+    @Transaction
+    internal open suspend fun upsertDiaryWithRelations(
+        entry: DiaryWithRelations,
+    ) {
+        upsertDiaryWithRelations(
+            entry.diary,
+            entry.emotions,
+            entry.imageUrls,
+        )
+    }
+
+    /**
+     * 일기, 감정, 이미지 URL을 함께 작성하거나 수정합니다.
+     *
+     * 로컬 데이터가 존재 여부에 따라
+     * [diary]와 관계된 테이블에 작성 또는 수정합니다.
+     * 하나라도 실패하면 전체 롤백됩니다.
+     *
+     * @throws SQLiteConstraintException date 충돌 시
+     */
+    @Transaction
+    internal open suspend fun upsertDiaryWithRelations(
+        diary: DiaryEntity,
+        emotions: List<DiaryEmotionEntity>,
+        imageUrls: List<DiaryImageUrlEntity>,
+    ) {
+        val localDiary = getDiary(diary.id)
+        if (localDiary == null) {
+            // 로컬에 없는 새 일기 → 삽입
+            insertDiaryWithRelations(
+                diary = diary,
+                emotions = emotions,
+                imageUrls = imageUrls
+            )
+        } else {
+            updateDiaryWithRelations(
+                diary = diary,
+                emotions = emotions,
+                imageUrls = imageUrls
+            )
+        }
+    }
+
+    /**
+     * 일기 목록을 로컬에 일괄 동기화합니다.
+     * 각 항목별로 [upsertDiaryWithRelations]를 적용하며, 전체가 하나의 트랜잭션으로 처리됩니다.
+     */
+    @Transaction
+    internal open suspend fun upsertDiariesWithRelations(
+        items: List<DiaryWithRelations>,
+    ) {
+        items.forEach { upsertDiaryWithRelations(it) }
+    }
+
+    /**
+     * 일기 목록을 로컬에 일괄 동기화합니다.
+     * 각 항목별로 [upsertDiaryWithRelations]를 적용하며, 전체가 하나의 트랜잭션으로 처리됩니다.
+     */
+    @Transaction
+    internal open suspend fun upsertDiariesWithRelationsFromRaw(
+        items: List<Triple<DiaryEntity, List<DiaryEmotionEntity>, List<DiaryImageUrlEntity>>>,
+    ) {
+        items.forEach { (diary, emotions, imageUrls) ->
+            upsertDiaryWithRelations(diary, emotions, imageUrls)
+        }
+    }
+
+
+
+    // ───────────────────────────────────────────────────────────────────────────────────
+    // DiaryEntity, Emotions, ImageUrls 삭제
+    //
+    // ForeignKey.CASCADE 설정으로
+    // Diary 삭제시 Emotions, ImageUrls 자동 삭제
+    //
+    // Internal: 같은 모듈 일 때 Dao 외부에서 직접 호출 가능
+    // ───────────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * 일기, 감정, 이미지 URL을 함께 삭제합니다.
+     *
+     * [DiaryEmotionEntity], [DiaryImageUrlEntity] ForeignKey CASCADE 설정으로
+     * diaryEmotions, diaryImageUrls 테이블은 diary 테이블 삭제 시 자동 삭제됩니다.
+     */
+    @Query(
+        """
+        DELETE FROM ${DiaryEntity.TABLE_NAME} 
+        WHERE ${DiaryEntity.COLUMN_ID} = :id
+        """
+    )
+    internal abstract suspend fun deleteDiary(id: String): Int
+
+    /**
+     * 일기, 감정, 이미지 URL을 함께 삭제합니다.
+     *
+     * [DiaryEmotionEntity], [DiaryImageUrlEntity] ForeignKey CASCADE 설정으로
+     * diaryEmotions, diaryImageUrls 테이블은 diary 테이블 삭제 시 자동 삭제됩니다.
+     */
+    @Query(
+        """
+        DELETE FROM ${DiaryEntity.TABLE_NAME} 
+        WHERE ${DiaryEntity.COLUMN_ID} IN (:ids)
+        """
+    )
+    internal abstract suspend fun deleteDiariesByIds(ids: List<String>): Int
+
+    /**
+     * 일기, 감정, 이미지 URL을 함께 삭제합니다.
+     *
+     * [DiaryEmotionEntity], [DiaryImageUrlEntity] ForeignKey CASCADE 설정으로
+     * diaryEmotions, diaryImageUrls 테이블은 diary 테이블 삭제 시 자동 삭제됩니다.
      */
     @Delete
-    suspend fun deleteDiary(diaryEntity: DiaryEntity): Int
+    internal abstract suspend fun deleteDiary(diary: DiaryEntity): Int
 
     /**
-     * 주어진 [ids] 목록과 일치하는 모든 일기를 데이터베이스에서 삭제합니다.
+     * 일기, 감정, 이미지 URL을 함께 삭제합니다.
      *
-     * @param ids 삭제할 일기 ID 목록
-     * @return 삭제된 행의 개수를 반환합니다.
+     * [DiaryEmotionEntity], [DiaryImageUrlEntity] ForeignKey CASCADE 설정으로
+     * diaryEmotions, diaryImageUrls 테이블은 diary 테이블 삭제 시 자동 삭제됩니다.
      */
-    @Query("DELETE FROM diary WHERE id IN (:ids)")
-    suspend fun deleteDiariesByIds(ids: List<Long>): Int
+    @Delete
+    internal abstract suspend fun deleteDiaries(diaries: List<DiaryEntity>): Int
 
     /**
-     * 대시보드 히트맵 표시를 위한 최근 감정 목록을 조회합니다.
+     * 기준 시간([cutoff])보다 오래된 일기 중, 서버와 동기화가 완료된 데이터를 삭제합니다.
+     *
+     * 1. 로컬 저장 공간 관리 정책(예: 1년치 데이터 유지)을 위해 사용됩니다.
+     * 2. 서버에 업로드되지 않은 '동기화 대기' 상태의 항목은 절대 삭제하지 않습니다.
+     * 3. [DiaryEntity] 삭제 시, ForeignKey CASCADE 설정에 의해 연관된 감정([DiaryEmotionEntity]) 및
+     *    이미지 URL([DiaryImageUrlEntity]) 데이터도 데이터베이스에서 자동으로 함께 삭제됩니다.
+     *
+     * @param cutoff 이 시간보다 이전에 수정된(timestamp) 데이터를 삭제 대상으로 합니다.
+     * @return 삭제된 일기의 개수를 반환합니다.
      */
-    @Query("SELECT emotion FROM diary WHERE isDeleted = 0 ORDER BY date DESC LIMIT :limit")
-    suspend fun getDashboardRecentEmotions(limit: Int = 30): List<String>
+    @Transaction
+    @Query(
+        """
+        DELETE FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_LAST_MODIFIED_AT} < :cutoff
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} = '$SYNCED'
+        """
+    )
+    internal abstract suspend fun deleteOldDiaries(cutoff: Long): Int
+
+
+
+    // ───────────────────────────────────────────────────────────────────────────────────
+    // 조회 관련 함수
+    //
+    // Internal: 같은 모듈 일 때 Dao 외부에서 직접 호출 가능
+    // ───────────────────────────────────────────────────────────────────────────────────
+
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_ID} = :id
+        """
+    )
+    internal abstract suspend fun getDiary(id: String): DiaryEntity?
+
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_DATE} = :date
+        """
+    )
+    internal abstract suspend fun getDiary(date: LocalDate): DiaryEntity?
 
     /**
-     * 전체 일기 수와 전체 단어 수 합계를 가져옵니다.
+     * 특정 일기의 모든 감정을 조회합니다.
      */
-    @Query("SELECT COUNT(*) as totalDiaries, IFNULL(SUM(length(content)), 0) as totalWords FROM diary WHERE isDeleted = 0")
-    suspend fun getDashboardCountStats(): DashboardCountStats?
+    @Query(
+        """
+        SELECT * FROM ${DiaryEmotionEntity.TABLE_NAME}
+        WHERE ${DiaryEmotionEntity.COLUMN_DIARY_ID} = :diaryId
+        """
+    )
+    internal abstract suspend fun getEmotions(diaryId: String): List<DiaryEmotionEntity>
 
     /**
-     * 감정별 빈도수를 내림차순으로 가져옵니다. (최빈/희소 감정 추출용)
+     * 특정 일기의 모든 이미지 URL을 조회합니다.
+     */
+    @Query(
+        """
+        SELECT * FROM ${DiaryImageUrlEntity.TABLE_NAME}
+        WHERE ${DiaryImageUrlEntity.COLUMN_DIARY_ID} = :diaryId
+        """
+    )
+    internal abstract suspend fun getImageUrls(diaryId: String): List<DiaryImageUrlEntity>
+
+    /**
+     * [id]로 일기, 감정, 이미지 URL을 함께 조회합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_ID} = :id
+        """
+    )
+    internal abstract suspend fun getDiaryWithRelations(id: String): DiaryWithRelations?
+
+    /**
+     * [date]로 일기, 감정, 이미지 URL을 함께 조회합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_DATE} = :date
+        """
+    )
+    internal abstract suspend fun getDiaryWithRelations(date: LocalDate): DiaryWithRelations?
+
+    /**
+     * [id]로 일기, 감정, 이미지 URL을 함께 관찰하는 Flow를 생성합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_ID} = :id
+        """
+    )
+    internal abstract fun getDiaryWithRelationsFlow(id: String): Flow<DiaryWithRelations?>
+
+    /**
+     * [date]로 일기, 감정, 이미지 URL을 함께 관찰하는 Flow를 생성합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_DATE} = :date
+        """
+    )
+    internal abstract fun getDiaryWithRelationsFlow(date: LocalDate): Flow<DiaryWithRelations?>
+
+    /**
+     * 전체 일기 목록을 내림차순(날짜: 현재에서 과거순)으로 반환합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
+        """
+    )
+    internal abstract suspend fun getAllDiariesWithRelations(): List<DiaryWithRelations>
+
+    /**
+     * 전체 일기 목록을 내림차순으로 관찰하는 Flow를 생성합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
+        """
+    )
+    internal abstract fun getAllDiariesWithRelationsFlow(): Flow<List<DiaryWithRelations>>
+
+    /**
+     * 특정 기간 일기 목록을 내림차순으로 반환합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_DATE} BETWEEN :startDate AND :endDate
+        ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
+        """
+    )
+    internal abstract suspend fun getDiariesByDateRangeWithRelations(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<DiaryWithRelations>
+
+    /**
+     * 특정 기간 일기 목록을 내림차순으로 관찰하는 Flow를 생성합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_DATE} BETWEEN :startDate AND :endDate
+        ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
+        """
+    )
+    internal abstract fun getDiariesByDateRangeWithRelationsFlow(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<List<DiaryWithRelations>>
+
+    /**
+     * 동기화 대기 중인 일기 목록을 관련 데이터와 함께 가져옵니다.
+     * 수정된 시간이 오래된 순서(ASC)로 정렬하여 동기화 순서를 보장하며,
+     * 한 번에 처리할 개수를 [limit]으로 제한합니다.
+     */
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_SYNC_STATUS} != '$SYNCED'
+        ORDER BY ${DiaryEntity.COLUMN_LAST_MODIFIED_AT} ASC
+        LIMIT :limit
+        """
+    )
+    internal abstract suspend fun getPendingDiariesWithRelations(limit: Int = 50): List<DiaryWithRelations>
+
+
+
+    // ─────────────────────────────────────
+    // 통계 관련 함수
+    //
+    // Internal: 같은 모듈 일 때 Dao 외부에서 직접 호출 가능
+    // ─────────────────────────────────────
+
+    @Query("SELECT COUNT(*) FROM ${DiaryEntity.TABLE_NAME}")
+    internal abstract suspend fun getTotalDiaryCount(): Int
+
+    @Query(
+        """
+        SELECT IFNULL(SUM(LENGTH(${DiaryEntity.COLUMN_CONTENT})), 0)
+        FROM ${DiaryEntity.TABLE_NAME}
+        """
+    )
+    internal abstract suspend fun getTotalWordCount(): Int
+
+    @Query(
+        """
+        SELECT IFNULL(SUM(LENGTH(${DiaryEntity.COLUMN_CONTENT})), 0)
+        FROM ${DiaryEntity.TABLE_NAME}
+        """
+    )
+    internal abstract fun getWordTotalCountFlow(): Flow<Int>
+
+    /**
+     * 가장 많이 기록된 감정과 횟수를 담은 [EmotionStats]객체를 반환합니다.
+     * 빈도수가 같을 경우 가장 최근에 기록된 감정을 우선합니다.
+     */
+    @Query(
+        """
+        SELECT e.${DiaryEmotionEntity.COLUMN_EMOTION}, COUNT(*) as count 
+        FROM ${DiaryEmotionEntity.TABLE_NAME} AS e
+        INNER JOIN ${DiaryEntity.TABLE_NAME} AS d ON e.${DiaryEmotionEntity.COLUMN_DIARY_ID} = d.${DiaryEntity.COLUMN_ID}
+        GROUP BY e.${DiaryEmotionEntity.COLUMN_EMOTION} 
+        ORDER BY count DESC, MAX(d.${DiaryEntity.COLUMN_LAST_MODIFIED_AT}) DESC 
+        LIMIT 1
+        """
+    )
+    internal abstract suspend fun getMostFrequentEmotionStats(): EmotionStats?
+
+    /**
+     * 가장 적게 기록된 감정과 횟수를 담은 [EmotionStats]객체를 반환합니다.
+     * 빈도수가 같을 경우 가장 최근에 기록된 감정을 우선합니다.
+     */
+    @Query(
+        """
+        SELECT e.${DiaryEmotionEntity.COLUMN_EMOTION}, COUNT(*) as count 
+        FROM ${DiaryEmotionEntity.TABLE_NAME} AS e
+        INNER JOIN ${DiaryEntity.TABLE_NAME} AS d ON e.${DiaryEmotionEntity.COLUMN_DIARY_ID} = d.${DiaryEntity.COLUMN_ID}
+        GROUP BY e.${DiaryEmotionEntity.COLUMN_EMOTION} 
+        ORDER BY count ASC, MAX(d.${DiaryEntity.COLUMN_LAST_MODIFIED_AT}) DESC 
+        LIMIT 1
+        """
+    )
+    internal abstract suspend fun getLeastFrequentEmotionStaus(): EmotionStats?
+
+    /**
+     * 전체 감정 빈도 랭킹을 반환합니다.
      */
     @Query("""
-        SELECT emotion, COUNT(emotion) as count 
-        FROM diary 
-        WHERE isDeleted = 0 
-        GROUP BY emotion 
+        SELECT ${DiaryEmotionEntity.COLUMN_EMOTION}, COUNT(*) as count 
+        FROM ${DiaryEmotionEntity.TABLE_NAME}
+        GROUP BY ${DiaryEmotionEntity.COLUMN_EMOTION}
         ORDER BY count DESC
     """)
-    suspend fun getDashboardEmotionStats(): List<DashboardEmotionStats>
+    internal abstract suspend fun getEmotionStatistics(): List<EmotionStats>
+
+    /**
+     * 특정 기간 동안 가장 많이 기록된 감정과 횟수를 반환합니다.
+     */
+    @Query("""
+        SELECT e.${DiaryEmotionEntity.COLUMN_EMOTION}, COUNT(*) as count
+        FROM ${DiaryEmotionEntity.TABLE_NAME} e
+        INNER JOIN ${DiaryEntity.TABLE_NAME} d ON e.${DiaryEmotionEntity.COLUMN_DIARY_ID} = d.${DiaryEntity.COLUMN_ID}
+        WHERE d.${DiaryEntity.COLUMN_DATE} BETWEEN :startDate AND :endDate
+        GROUP BY e.${DiaryEmotionEntity.COLUMN_EMOTION}
+        ORDER BY count DESC, MAX(d.${DiaryEntity.COLUMN_LAST_MODIFIED_AT}) DESC
+        LIMIT 1
+    """)
+    internal abstract suspend fun getEmotionStatisticsByDateRange(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): EmotionStats?
+
+
+
+    // ───────────────────────────────────────────────────────────────────────────────────
+    // 동기화 관련 함수
+    //
+    // Internal: 같은 모듈 일 때 Dao 외부에서 직접 호출 가능
+    // ───────────────────────────────────────────────────────────────────────────────────
+
+    /**
+     * 특정 일기의 동기화 상태를 조회합니다.
+     */
+    @Query(
+        """
+        SELECT ${DiaryEntity.COLUMN_SYNC_STATUS} FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_ID} = :id
+        """
+    )
+    internal abstract suspend fun getSyncStatus(id: String): DiarySyncStatus?
+
+    /**
+     * 특정 일기의 동기화 상태를 조회합니다.
+     */
+    internal suspend fun getSyncStatus(diary: DiaryEntity): DiarySyncStatus? {
+        return getSyncStatus(diary.id)
+    }
+
+    @Query(
+        """
+        SELECT MAX(${DiaryEntity.COLUMN_LAST_MODIFIED_AT}) 
+        FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_SYNC_STATUS} = '$SYNCED'
+        """
+    )
+    internal abstract suspend fun getLastSyncedAt(): Long?
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_SYNC_STATUS} != '$SYNCED'
+        """
+    )
+    internal abstract suspend fun getPendingItemCount(): Int
+
+    @Query(
+        """
+        SELECT COUNT(*) FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_SYNC_STATUS} != '$SYNCED'
+        """
+    )
+    internal abstract fun getPendingItemCountFlow(): Flow<Int>
+
+    @Query(
+        """
+        UPDATE ${DiaryEntity.TABLE_NAME} 
+        SET ${DiaryEntity.COLUMN_SYNC_STATUS} = '$SYNCED'
+        WHERE ${DiaryEntity.COLUMN_ID} = :id
+        """
+    )
+    internal abstract suspend fun markAsSynced(id: String): Int
+
+    @Query(
+        """
+        UPDATE ${DiaryEntity.TABLE_NAME} 
+        SET ${DiaryEntity.COLUMN_SYNC_STATUS} = '$SYNCED'
+        WHERE ${DiaryEntity.COLUMN_DATE} = :date
+        """
+    )
+    internal abstract suspend fun markAsSynced(date: LocalDate): Int
+
+    @Query(
+        """
+        UPDATE ${DiaryEntity.TABLE_NAME} 
+        SET ${DiaryEntity.COLUMN_SYNC_STATUS} = '$SYNCED'
+        WHERE ${DiaryEntity.COLUMN_ID} IN (:ids)
+        """
+    )
+    internal abstract suspend fun markAsSyncedByIds(ids: List<String>): Int
+
+    @Query(
+        """
+        SELECT IFNULL(MAX(${DiaryEntity.COLUMN_LAST_MODIFIED_AT}), 0)
+        FROM ${DiaryEntity.TABLE_NAME}
+        """
+    )
+    internal abstract suspend fun getLastModifiedAt(): Long
+
+    internal open suspend fun markAsSynced(diaries: List<DiaryEntity>) {
+        markAsSyncedByIds(diaries.map { it.id })
+    }
 }

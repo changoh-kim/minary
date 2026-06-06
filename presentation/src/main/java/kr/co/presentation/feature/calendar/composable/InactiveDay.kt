@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,13 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kr.co.domain.feature.emotion.Emotion
 import kr.co.presentation.feature.calendar.model.CalendarDayItem
-import kr.co.presentation.feature.diary.model.DiaryUiModel
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
-import java.time.LocalDate
 
 
 @Composable
@@ -40,7 +38,7 @@ fun InactiveDay(
         Text(
             text = "${dayItem.date.dayOfMonth}",
             style = MaterialTheme.typography.labelSmall,
-            color = Color.LightGray,
+            color = MaterialTheme.colorScheme.outline,
             fontWeight = FontWeight.Normal,
         )
 
@@ -48,13 +46,15 @@ fun InactiveDay(
     }
 }
 
-@Preview(showBackground = true, locale = "ko")
+@ThemePreviews
 @Composable
 private fun InactiveDayPreview() {
     MinaryTheme {
-        InactiveDay(
-            modifier = Modifier.size(46.dp),
-            dayItem = CalendarDayItem(isCurrentMonth = false)
-        )
+        Surface(color = MaterialTheme.colorScheme.background) {
+            InactiveDay(
+                modifier = Modifier.size(46.dp),
+                dayItem = CalendarDayItem(isCurrentMonth = false)
+            )
+        }
     }
 }

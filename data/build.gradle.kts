@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.serialization)
     alias(libs.plugins.firebase)
+    alias(libs.plugins.protobuf)
 }
 
 android {
@@ -31,8 +32,27 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    buildFeatures {
+        buildConfig = true
+    }
     kotlinOptions {
         jvmTarget = "17"
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = libs.protobuf.protoc.get().toString()
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("java") {
+                    option("lite")
+                }
+                create("kotlin")
+            }
+        }
     }
 }
 
@@ -52,13 +72,18 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // datastore
+    implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.protobuf.kotlin.lite)
 
     // firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.storage.ktx)
+    implementation(libs.firebase.functions.ktx)
+    implementation(libs.firebase.config)
 
     // paging
     implementation(libs.androidx.paging.runtime)
@@ -78,6 +103,12 @@ dependencies {
 
     // work
     implementation(libs.androidx.work.runtime.ktx)
+
+    // true-time
+    implementation(libs.truetime)
+
+    // exifinterface (image processor)
+    implementation(libs.androidx.exifinterface)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

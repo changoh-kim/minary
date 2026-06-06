@@ -1,0 +1,69 @@
+package kr.co.data.feature.profile.repository
+
+import android.net.Uri
+import android.util.Log
+import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.andThen
+import com.github.michaelbull.result.coroutines.runSuspendCatching
+import com.github.michaelbull.result.mapError
+import com.github.michaelbull.result.onErr
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kr.co.data.extension.TAG
+import kr.co.data.extension.toDomainError
+import kr.co.data.feature.profile.mapper.UserProfileMapper.toUserProfile
+import kr.co.data.feature.profile.mapper.UserProfileMapper.toUserProfileProto
+import kr.co.data.feature.profile.source.local.UserProfileLocalDataSource
+import kr.co.domain.error.DomainError
+import kr.co.domain.feature.profile.model.UserProfile
+import kr.co.domain.feature.profile.repository.UserProfileRepository
+import kr.co.domain.feature.profile.service.ImageProcessor
+import kr.co.domain.feature.profile.service.sync.UserProfileSyncScheduler
+import java.io.File
+import javax.inject.Inject
+
+class UserProfileRepositoryImpl @Inject constructor(
+    private val localDataSource: UserProfileLocalDataSource,
+    private val profileScheduler: UserProfileSyncScheduler,
+    private val imageProcessor: ImageProcessor,
+) : UserProfileRepository {
+
+    override suspend fun getUserProfileStream(): Flow<Result<UserProfile, DomainError>> =
+        localDataSource.getUserProfileFlow().map { Ok(it.toUserProfile()) }
+
+    override suspend fun updateUserProfile(
+        profile: UserProfile
+    ): Result<Unit, DomainError> =
+        runSuspendCatching {
+            localDataSource.updateUserProfile(profile.toUserProfileProto())
+            profileScheduler.scheduleProfilePush()
+        }
+        .onErr { Log.e(TAG, "Failed to save user profile", it) }
+        .mapError { it.toDomainError() }
+
+    override suspend fun updateUserProfilePhoto(
+        uid: String,
+        photoUrl: String,
+        lastModifiedAt: Long,
+    ): Result<String, DomainError> {
+        val targetUrl = localDataSource.getProfilePhotoFilePath(uid)
+
+        // 1. 이미지 리사이즈
+        return imageProcessor.resizeImage(
+            sourceUrl = photoUrl,
+            targetUrl = targetUrl
+        ).andThen { resizedPath ->
+            runSuspendCatching {
+                val newProfilePhotoUrl = Uri.fromFile(File(resizedPath)).toString()
+
+                // 2. 로컬 업데이트 및 서버 업데이트 스케줄링 예약
+                localDataSource.updateUserProfilePhotoUrl(newProfilePhotoUrl, lastModifiedAt)
+                profileScheduler.scheduleProfilePhotoPush()
+
+                newProfilePhotoUrl
+            }.onErr { Log.e(TAG, "Failed to upload profile photo", it) }
+            .mapError { it.toDomainError() }
+        }
+    }
+}

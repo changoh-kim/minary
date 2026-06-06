@@ -6,21 +6,23 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kr.co.data.feature.calendar.mapper.CalendarDataMapper.toCalendarMonth
+import kr.co.data.feature.calendar.mapper.CalendarMonthMapper.toCalendarMonth
 import kr.co.data.feature.calendar.source.local.CalendarMonthPagingSource
 import kr.co.data.feature.calendar.source.local.CalendarYearPagingSource
-import kr.co.domain.feature.calendar.generator.CalendarGenerator
 import kr.co.domain.feature.calendar.model.CalendarMonth
 import kr.co.domain.feature.calendar.repository.CalendarRepository
+import kr.co.domain.feature.calendar.service.CalendarGenerator
+import kr.co.domain.feature.diary.repository.DiaryRepository
+import kr.co.domain.feature.session.repository.SessionRepository
 import java.time.Year
 import java.time.YearMonth
 import javax.inject.Inject
 
-
 class CalendarRepositoryImpl @Inject constructor(
     private val calendarGenerator: CalendarGenerator,
+    private val sessionRepository: SessionRepository,
+    private val diaryRepository: DiaryRepository,
 ) : CalendarRepository {
-
     override fun getYearlyPages(targetYear: Year): Flow<PagingData<CalendarMonth>> {
         return Pager(
             config = PagingConfig(
@@ -64,7 +66,11 @@ class CalendarRepositoryImpl @Inject constructor(
             ),
             initialKey = targetYearMonth,
             pagingSourceFactory = {
-                CalendarMonthPagingSource(calendarGenerator)
+                CalendarMonthPagingSource(
+                    calendarGenerator,
+                    sessionRepository,
+                    diaryRepository
+                )
             }
         ).flow.map { pagingData ->
             pagingData.map { calendarMonthDto -> calendarMonthDto.toCalendarMonth() }
