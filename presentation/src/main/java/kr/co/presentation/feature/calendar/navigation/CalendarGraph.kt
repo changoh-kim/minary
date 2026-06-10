@@ -23,7 +23,7 @@ internal fun NavGraphBuilder.calenderGraph(
                     restoreState = true
                 }
             },
-            onDayClicked = { date -> appState.navigateToDiary(date) },
+            onDayClicked = { date -> appState.navigateToDiaryPreview(date) },
         )
     }
 

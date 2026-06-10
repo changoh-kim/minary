@@ -23,6 +23,7 @@ abstract class DiaryDao {
 
     companion object {
         private const val SYNCED = "SYNCED"
+        private const val PENDING_DELETE = "PENDING_DELETE"
     }
 
 
@@ -373,6 +374,7 @@ abstract class DiaryDao {
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
         WHERE ${DiaryEntity.COLUMN_DATE} = :date
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         """
     )
     internal abstract suspend fun getDiary(date: LocalDate): DiaryEntity?
@@ -407,6 +409,7 @@ abstract class DiaryDao {
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
         WHERE ${DiaryEntity.COLUMN_ID} = :id
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         """
     )
     internal abstract suspend fun getDiaryWithRelations(id: String): DiaryWithRelations?
@@ -419,6 +422,7 @@ abstract class DiaryDao {
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
         WHERE ${DiaryEntity.COLUMN_DATE} = :date
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         """
     )
     internal abstract suspend fun getDiaryWithRelations(date: LocalDate): DiaryWithRelations?
@@ -431,6 +435,7 @@ abstract class DiaryDao {
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
         WHERE ${DiaryEntity.COLUMN_ID} = :id
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         """
     )
     internal abstract fun getDiaryWithRelationsFlow(id: String): Flow<DiaryWithRelations?>
@@ -443,6 +448,7 @@ abstract class DiaryDao {
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
         WHERE ${DiaryEntity.COLUMN_DATE} = :date
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         """
     )
     internal abstract fun getDiaryWithRelationsFlow(date: LocalDate): Flow<DiaryWithRelations?>
@@ -454,6 +460,7 @@ abstract class DiaryDao {
     @Query(
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
         """
     )
@@ -466,6 +473,7 @@ abstract class DiaryDao {
     @Query(
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
         """
     )
@@ -479,6 +487,7 @@ abstract class DiaryDao {
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
         WHERE ${DiaryEntity.COLUMN_DATE} BETWEEN :startDate AND :endDate
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
         """
     )
@@ -495,6 +504,7 @@ abstract class DiaryDao {
         """
         SELECT * FROM ${DiaryEntity.TABLE_NAME}
         WHERE ${DiaryEntity.COLUMN_DATE} BETWEEN :startDate AND :endDate
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
         ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
         """
     )

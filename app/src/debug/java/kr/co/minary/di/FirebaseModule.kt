@@ -1,6 +1,5 @@
 package kr.co.minary.di
 
-import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,7 +17,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kr.co.presentation.common.extension.TAG
 import javax.inject.Singleton
 
 @Module
@@ -35,15 +33,15 @@ object FirebaseModule {
     @Singleton
     @Provides
     fun provideFirebaseAuth(): FirebaseAuth = Firebase.auth.apply {
-        useEmulator(EMULATOR_HOST, AUTH_PORT)
-        Log.d(TAG, "Firebase Auth emulator connected")
+        /*useEmulator(EMULATOR_HOST, AUTH_PORT)
+        Log.d(TAG, "Firebase Auth emulator connected")*/
     }
 
     @Singleton
     @Provides
     fun provideFirebaseFirestore(): FirebaseFirestore = Firebase.firestore.apply {
-        useEmulator(EMULATOR_HOST, FIRESTORE_PORT)
-        Log.d(TAG, "Firebase Firestore emulator connected")
+        /*useEmulator(EMULATOR_HOST, FIRESTORE_PORT)
+        Log.d(TAG, "Firebase Firestore emulator connected")*/
 
         firestoreSettings = firestoreSettings {
             setLocalCacheSettings(memoryCacheSettings { })
@@ -53,15 +51,15 @@ object FirebaseModule {
     @Singleton
     @Provides
     fun provideFirebaseFunctions(): FirebaseFunctions = Firebase.functions(REGION_SEOUL).apply {
-        useEmulator(EMULATOR_HOST, FUNCTIONS_PORT)
-        Log.d(TAG, "Firebase Functions emulator connected")
+        /*useEmulator(EMULATOR_HOST, FUNCTIONS_PORT)
+        Log.d(TAG, "Firebase Functions emulator connected")*/
     }
 
     @Singleton
     @Provides
     fun provideFirebaseStorage(): FirebaseStorage = Firebase.storage.apply {
-        useEmulator(EMULATOR_HOST, STORAGE_PORT)
-        Log.d(TAG, "Firebase Storage emulator connected")
+        /*useEmulator(EMULATOR_HOST, STORAGE_PORT)
+        Log.d(TAG, "Firebase Storage emulator connected")*/
     }
 
     @Singleton

@@ -124,6 +124,9 @@ class DiaryRepositoryImpl @Inject constructor(
         .map { it?.toDiary() }
         .mapError { it.toDomainError() }
 
+    override fun getDiaryStream(date: LocalDate): Flow<Diary?> =
+        localDataSource.getDiaryStream(date)
+
     override fun getDiariesByDateRangeStream(startDate: LocalDate, endDate: LocalDate): Flow<List<Diary>> =
         localDataSource.getDiariesByDateRangeStream(startDate, endDate)
 
