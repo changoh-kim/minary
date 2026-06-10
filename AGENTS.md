@@ -15,7 +15,12 @@
 - **절대 금지**: 상위 모듈이 하위 모듈을 참조하는 역방향 의존성(`domain`이 `data`나 `presentation`을 참조) 절대 금지.
 - **모듈간 협력**: Firebase 경로 등 모듈 간 공유되는 규약 수정 시, 클라이언트(`data`)와 서버(`firebase-server`)를 동시 수정해야 한다.
 
-## 2. 데이터 흐름 및 동기화 (Offline-First)
+## 2. 커뮤니케이션 및 언어 규칙
+- **기본 언어**: 에이전트의 모든 출력(진행 상황 보고, 답변, 구현 계획, 검증 결과 등)은 **한국어**를 원칙으로 한다.
+- **기술 용어**: 전문적인 기술 용어, 코드 참조, 에러 메시지 등은 정확한 전달을 위해 영어 원문을 그대로 사용하거나 병기한다.
+- **보고 형식**: 복잡한 작업은 `task.artifact.md`를 통해 가독성 있게 구조화하여 보고한다.
+
+## 3. 데이터 흐름 및 동기화 (Offline-First)
 - **SSOT**: 모든 UI(`presentation`)는 오직 Local DB(Room/DataStore)의 `Flow`만 구독한다.
 - **Write 흐름**: UI -> UseCase -> Local DB 갱신(UI 즉시 반영) -> Sync Worker 예약 -> Remote(Firebase) 반영
 - **LWW 충돌 해결**: 동기화 기준 시간은 절대 클라이언트 기기 시간(`System.currentTimeMillis()`)을 쓰지 않는다. 반드시 `ServerTimeProvider` (TrueTime 기반)를 사용해 `lastModifiedAt`을 갱신 및 비교한다.
