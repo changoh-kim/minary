@@ -62,6 +62,10 @@ class DiaryLocalDataSource @Inject constructor(
         return diaryDao.getDiaryWithRelations(diaryId)
     }
 
+    fun getDiaryStream(date: LocalDate): Flow<Diary?> {
+        return diaryDao.getDiaryWithRelationsFlow(date).map { it?.toDiary() }
+    }
+
     fun getDiariesByDateRangeStream(startDate: LocalDate, endDate: LocalDate): Flow<List<Diary>> {
         return diaryDao.getDiariesByDateRangeWithRelationsFlow(startDate, endDate).map {
             it.map { diaryEntity -> diaryEntity.toDiary() }

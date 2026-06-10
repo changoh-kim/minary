@@ -18,6 +18,7 @@ interface DiaryRepository {
     suspend fun deleteDiary(diary: Diary): Result<Unit, DomainError>
     suspend fun deleteOldDiaries(): Result<Unit, DomainError>
     suspend fun getDiary(date: LocalDate): Result<Diary?, DomainError>
+    fun getDiaryStream(date: LocalDate): Flow<Diary?>
     fun getDiariesByDateRangeStream(startDate: LocalDate, endDate: LocalDate): Flow<List<Diary>>
     suspend fun getDiariesByDateRange(startDate: LocalDate, endDate: LocalDate): Result<List<Diary>, DomainError>
     val diaryChangeEvent: Flow<Unit>

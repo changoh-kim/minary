@@ -7,10 +7,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kr.co.domain.feature.emotion.model.Emotion
 import kr.co.presentation.R
-import kr.co.presentation.common.state.LoadState
 import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.feature.diary.preview.model.DiaryPreviewData
-import kr.co.presentation.feature.diary.viewmodel.DiaryScreenState
 import java.time.LocalDate
 import java.util.UUID
 
@@ -21,20 +19,15 @@ object DiaryPreviewDataFactory {
     fun createDiary(
         diaryPreviewData: DiaryPreviewData,
         context: Context = LocalContext.current
-    ): DiaryScreenState {
+    ): DiaryUiModel {
         val (titleResId, contentResId) = getDiaryStringResources(diaryPreviewData.emotion)
 
-        return DiaryScreenState(
-            screenMode = diaryPreviewData.screenMode,
-            diaryLoadState = LoadState.Success(
-                DiaryUiModel(
-                    id = UUID.randomUUID().toString(),
-                    date = LocalDate.now(),
-                    title = context.getString(titleResId),
-                    content = context.getString(contentResId),
-                    emotions = listOf(diaryPreviewData.emotion)
-                )
-            )
+        return DiaryUiModel(
+            id = UUID.randomUUID().toString(),
+            date = LocalDate.now(),
+            title = context.getString(titleResId),
+            content = context.getString(contentResId),
+            emotions = listOf(diaryPreviewData.emotion)
         )
     }
 

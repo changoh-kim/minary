@@ -6,6 +6,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -71,16 +72,34 @@ class MinaryAppState(
         }
     }
 
-    fun navigateToDiary(date: LocalDate) {
+    fun navigateToDiaryPreview(
+        date: LocalDate,
+        builder: NavOptionsBuilder.() -> Unit = { launchSingleTop = true }
+    ) {
         navController.navigate(
-            DiaryRoute(
+            DiaryPreviewRoute(
                 date.year,
                 date.monthValue,
                 date.dayOfMonth,
-            )
-        ) {
-            launchSingleTop = true
-        }
+            ),
+            builder
+        )
+    }
+
+    fun navigateToDiaryEdit(
+        date: LocalDate,
+        isNewDiary: Boolean,
+        builder: NavOptionsBuilder.() -> Unit = { launchSingleTop = true }
+    ) {
+        navController.navigate(
+            DiaryEditRoute(
+                date.year,
+                date.monthValue,
+                date.dayOfMonth,
+                isNewDiary,
+            ),
+            builder
+        )
     }
 
     fun navigateBack() = navController.popBackStack()
