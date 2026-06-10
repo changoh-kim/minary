@@ -1,17 +1,14 @@
-## 설명
-- [Bug] 잘못된 동작이나 버그 수정
-- [Feat] 새로운 기능 구현 및 추가
-- [Design] UI/UX 디자인 수정 및 스타일링
-- [Refactor] 코드 로직 개선 (결과물은 동일하나 구조 개선)
-- [Test] 테스트 코드 추가 및 리팩토링
-- [Docs] 문서 작성, 수정 및 주석 관리
-- [Style] 코드 포맷팅, 세미콜론 누락 등 (로직 변경 없음)
-- [Chore] 기타 잡무 (파일 이동, gitignore 등 설정)
-- [Build] 빌드 시스템(Gradle), 의존성 라이브러리 관리
-- [Release] 릴리즈 버전 배포 및 버전 Bump
+## related issue
+- closes: #
 
-## 관련 이슈
-- Closes #이슈번호
+## why
+-
 
-## 세부 내용
-- 세부 내용 작성
+## what
+-
+
+## impact
+-
+
+## screenshots (optional)
+<!-- UI 변경 시 첨부 -->
