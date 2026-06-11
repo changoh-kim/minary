@@ -111,7 +111,7 @@ fun MonthlyCalendarScreen(
         snackbarHostState = snackbarHostState,
         monthItems = monthItems,
         pagerState = pagerState,
-        onAction = viewModel::handleAction
+        onAction = { action -> viewModel.handleAction(action) }
     )
 }
 

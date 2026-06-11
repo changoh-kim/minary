@@ -1,13 +1,27 @@
 package kr.co.presentation.feature.diary.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -22,7 +36,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -33,10 +49,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import kr.co.presentation.R
 import kr.co.presentation.common.composable.LoadStateContent
-import kr.co.presentation.common.composable.LoadingButton
+import kr.co.presentation.common.composable.LoadingIconButton
 import kr.co.presentation.common.extension.getString
 import kr.co.presentation.design.ThemePreviews
-import kr.co.presentation.feature.diary.composable.SkeletonDiaryContent
+import kr.co.presentation.feature.diary.composable.SkeletonDiaryEditContent
 import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.feature.diary.preview.factory.DiaryPreviewDataFactory
 import kr.co.presentation.feature.diary.preview.model.DiaryPreviewData
@@ -47,17 +63,20 @@ import kr.co.presentation.feature.diary.viewmodel.DiaryEditViewModel
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun DiaryEditScreen(
     onDiarySaved: () -> Unit = {},
     onLoadFailed: () -> Unit = {},
+    onBack: () -> Unit = {},
     viewModel: DiaryEditViewModel = hiltViewModel()
 ) {
     val state by viewModel.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val hapticFeedback = LocalHapticFeedback.current
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
@@ -66,20 +85,24 @@ fun DiaryEditScreen(
             is DiaryEditSideEffect.ShowMessage -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
+            is DiaryEditSideEffect.MaxCharLimitReached -> {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
         }
     }
 
     LoadStateContent(
         loadState = state.diaryLoadState,
         loading = {
-            SkeletonDiaryContent()
+            SkeletonDiaryEditContent()
         }
     ) { diary ->
         DiaryEditContent(
             diary = diary,
             isSaving = state.isSaving,
             snackbarHostState = snackbarHostState,
-            onAction = viewModel::handleAction
+            onAction = { action -> viewModel.handleAction(action) },
+            onBack = onBack
         )
     }
 }
@@ -89,62 +112,169 @@ fun DiaryEditContent(
     diary: DiaryUiModel,
     isSaving: Boolean = false,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
-    onAction: (DiaryEditAction) -> Unit = {}
+    onAction: (DiaryEditAction) -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            EditTopBar(isSaving, onAction)
+            EditTopBar(isSaving, onAction, onBack)
         }
     ) { paddingValues ->
-        val textFieldColors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.Transparent,
-            unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-            unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(paddingValues)
+                .padding(16.dp)
         ) {
-            Text(
-                modifier = Modifier.padding(bottom = 8.dp),
-                text = diary.date.toString(),
-                fontSize = 20.sp
-            )
+            // Entry Date Section
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(8.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.diary_entry_date_label),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        letterSpacing = 0.6.sp
+                    )
+                    Text(
+                        text = diary.date.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
 
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Title Input
+            val isTitleError = diary.title.length >= DiaryEditViewModel.MAX_TITLE_LENGTH
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    text = stringResource(R.string.diary_title_hint),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = "${diary.title.length}/${DiaryEditViewModel.MAX_TITLE_LENGTH}",
+                    fontSize = 12.sp,
+                    fontWeight = if (isTitleError) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isTitleError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             TextField(
                 value = diary.title,
                 onValueChange = { onAction(DiaryEditAction.TitleChanged(it)) },
-                modifier = Modifier.fillMaxWidth(),
-                colors = textFieldColors,
-                singleLine = true,
-                maxLines = 1,
-                label = { Text(stringResource(R.string.diary_title_hint)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .border(
+                        if (isTitleError) 1.dp else 0.5.dp,
+                        color = if (isTitleError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant,
+                        RoundedCornerShape(12.dp)
+                    ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
                 textStyle = TextStyle(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp,
-                )
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                ),
+                singleLine = true
             )
 
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Your Story Input
+            val isContentError = diary.content.length >= DiaryEditViewModel.MAX_CONTENT_LENGTH
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    text = stringResource(R.string.diary_your_story_label),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = "${diary.content.length}/${DiaryEditViewModel.MAX_CONTENT_LENGTH}",
+                    fontSize = 12.sp,
+                    fontWeight = if (isContentError) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isContentError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             TextField(
                 value = diary.content,
                 onValueChange = { onAction(DiaryEditAction.ContentChanged(it)) },
                 modifier = Modifier
+                    .fillMaxWidth()
                     .weight(1f)
-                    .fillMaxWidth(),
-                colors = textFieldColors,
-                label = { Text(stringResource(R.string.diary_content_hint)) },
+                    .background(
+                        color = MaterialTheme.colorScheme.surface,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .border(
+                        if (isContentError) 1.dp else 0.5.dp,
+                        color = if (isContentError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outlineVariant,
+                        RoundedCornerShape(12.dp)
+                    ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
                 textStyle = TextStyle(
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
-                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    lineHeight = 26.sp
                 )
             )
+            
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -152,25 +282,45 @@ fun DiaryEditContent(
 @Composable
 fun EditTopBar(
     isSaving: Boolean = false,
-    onAction: (DiaryEditAction) -> Unit = {}
+    onAction: (DiaryEditAction) -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .systemBarsPadding()
-            .padding(start = 16.dp, end = 16.dp)
+            .statusBarsPadding()
+            .height(64.dp)
+            .padding(horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            LoadingButton(
-                text = stringResource(R.string.diary_save_button),
-                isLoading = isSaving,
-                onClick = { onAction(DiaryEditAction.SaveClicked) },
-            )
+        IconButton(onClick = onBack) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.profile_common_back_desc))
         }
+        Text(
+            text = stringResource(R.string.diary_edit_title),
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp)
+        )
+        LoadingIconButton(
+            isLoading = isSaving,
+            onClick = { onAction(DiaryEditAction.SaveClicked) },
+            modifier = Modifier.padding(end = 4.dp),
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ),
+            iconContent = { isLoading ->
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = stringResource(R.string.diary_save_button),
+                    tint = if (isLoading) Color.Transparent else MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        )
     }
 }
 
