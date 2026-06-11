@@ -18,6 +18,7 @@ internal fun NavGraphBuilder.diaryGraph(
         DiaryPreviewScreen(
             onDiaryDeleted = { appState.navigateBack() },
             onLoadFailed = { appState.navigateBack() },
+            onBack = { appState.navigateBack() },
             onNavigateToEdit = { date, isNewDiary ->
                 if (isNewDiary) {
                     appState.navigateToDiaryEdit(date, isNewDiary = true) {
@@ -44,7 +45,8 @@ internal fun NavGraphBuilder.diaryGraph(
                     appState.navigateBack()
                 }
             },
-            onLoadFailed = { appState.navigateBack() }
+            onLoadFailed = { appState.navigateBack() },
+            onBack = { appState.navigateBack() }
         )
     }
 }

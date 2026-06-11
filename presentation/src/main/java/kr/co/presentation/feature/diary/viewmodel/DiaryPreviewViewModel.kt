@@ -32,6 +32,7 @@ import javax.inject.Inject
 data class DiaryPreviewState(
     val diaryLoadState: LoadState<DiaryUiModel> = LoadState.Uninitialized,
     val isDeleting: Boolean = false,
+    val showDeleteDialog: Boolean = false,
 )
 
 @Immutable
@@ -45,6 +46,8 @@ sealed interface DiaryPreviewSideEffect {
 sealed interface DiaryPreviewAction {
     object DeleteClicked : DiaryPreviewAction
     object EditClicked : DiaryPreviewAction
+    object DeleteConfirmed : DiaryPreviewAction
+    object DeleteCancelled : DiaryPreviewAction
 }
 
 @HiltViewModel
@@ -81,10 +84,19 @@ class DiaryPreviewViewModel @Inject constructor(
 
     fun handleAction(action: DiaryPreviewAction) {
         when (action) {
-            is DiaryPreviewAction.DeleteClicked -> requestDeleteDiary()
+            is DiaryPreviewAction.DeleteClicked -> intent {
+                reduce { state.copy(showDeleteDialog = true) }
+            }
             is DiaryPreviewAction.EditClicked -> intent {
                 val diary = state.diaryLoadState.data ?: return@intent
                 postSideEffect(DiaryPreviewSideEffect.NavigateToEdit(diary.date, false))
+            }
+            is DiaryPreviewAction.DeleteConfirmed -> intent {
+                reduce { state.copy(showDeleteDialog = false) }
+                requestDeleteDiary()
+            }
+            is DiaryPreviewAction.DeleteCancelled -> intent {
+                reduce { state.copy(showDeleteDialog = false) }
             }
         }
     }

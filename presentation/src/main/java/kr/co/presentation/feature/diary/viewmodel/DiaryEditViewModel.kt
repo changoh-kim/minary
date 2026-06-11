@@ -45,6 +45,7 @@ sealed interface DiaryEditSideEffect {
     object DiarySaved : DiaryEditSideEffect
     object LoadFailed : DiaryEditSideEffect
     data class ShowMessage(val uiText: UiText) : DiaryEditSideEffect
+    object MaxCharLimitReached : DiaryEditSideEffect
 }
 
 sealed interface DiaryEditAction {
@@ -112,6 +113,10 @@ class DiaryEditViewModel @Inject constructor(
 
     private fun updateTitle(newTitle: String) = blockingIntent {
         val diary = state.diaryLoadState.data ?: return@blockingIntent
+        if (newTitle.length > MAX_TITLE_LENGTH) {
+            postSideEffect(DiaryEditSideEffect.MaxCharLimitReached)
+            return@blockingIntent
+        }
         reduce {
             state.copy(
                 diaryLoadState = LoadState.Success(diary.copy(title = newTitle))
@@ -121,6 +126,10 @@ class DiaryEditViewModel @Inject constructor(
 
     private fun updateContent(newContent: String) = blockingIntent {
         val diary = state.diaryLoadState.data ?: return@blockingIntent
+        if (newContent.length > MAX_CONTENT_LENGTH) {
+            postSideEffect(DiaryEditSideEffect.MaxCharLimitReached)
+            return@blockingIntent
+        }
         reduce {
             state.copy(
                 diaryLoadState = LoadState.Success(diary.copy(content = newContent))
@@ -185,5 +194,10 @@ class DiaryEditViewModel @Inject constructor(
             }
             else -> true
         }
+    }
+
+    companion object {
+        const val MAX_TITLE_LENGTH = 50
+        const val MAX_CONTENT_LENGTH = 500
     }
 }
