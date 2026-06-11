@@ -58,15 +58,14 @@ import kr.co.presentation.feature.home.preview.HomeScreenPreviewDataProvider
 import kr.co.presentation.feature.home.viewmodel.HomeAction
 import kr.co.presentation.feature.home.viewmodel.HomeScreenState
 import kr.co.presentation.feature.home.viewmodel.HomeViewModel
+import kr.co.presentation.navigation.CalendarRoute
 import kr.co.presentation.navigation.DashboardRoute
 import kr.co.presentation.navigation.MinaryAppState
-import kr.co.presentation.navigation.MonthlyCalendarRoute
-import kr.co.presentation.navigation.SettingsRoute
+import kr.co.presentation.navigation.SettingsTabRoute
 import kr.co.presentation.navigation.StoreRoute
 import kr.co.presentation.navigation.navigateIfNotCurrent
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
-import java.time.YearMonth
 
 @SuppressLint("RestrictedApi")
 @Composable
@@ -84,15 +83,10 @@ fun HomeScreen(
         snackbarHostState = snackbarHostState,
         navController = bottomNavController,
     ) { innerPadding ->
-        val currentYearMonth = YearMonth.now()
-
         HomeHost(
             appState = appState,
             navController = bottomNavController,
-            startDestination = MonthlyCalendarRoute(
-                currentYearMonth.year,
-                currentYearMonth.monthValue
-            ),
+            startDestination = CalendarRoute,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -106,12 +100,11 @@ fun HomeContent(
     navController: NavHostController = rememberNavController(),
     content: @Composable (PaddingValues) -> Unit = {}
 ) {
-    val currentYearMonth = YearMonth.now()
     val navigationItems = remember {
         listOf(
             HomeNavigationItem(
                 R.string.calendar,
-                MonthlyCalendarRoute(currentYearMonth.year, currentYearMonth.monthValue),
+                CalendarRoute,
                 Icons.Outlined.CalendarMonth
             ),
             HomeNavigationItem(
@@ -126,7 +119,7 @@ fun HomeContent(
             ),
             HomeNavigationItem(
                 R.string.setting,
-                SettingsRoute,
+                SettingsTabRoute,
                 Icons.Outlined.Settings
             ),
         )

@@ -11,31 +11,39 @@ import kr.co.presentation.navigation.MonthlyCalendarRoute
 import kr.co.presentation.navigation.YearlyCalendarRoute
 
 
-internal fun NavGraphBuilder.calenderGraph(
+import androidx.navigation.compose.navigation
+import kr.co.presentation.navigation.CalendarRoute
+import java.time.YearMonth
+
+internal fun NavGraphBuilder.calendarGraph(
     appState: MinaryAppState,
     navController: NavHostController,
 ) {
-    composable<MonthlyCalendarRoute> {
-        MonthlyCalendarScreen(
-            onYearClicked = { year ->
-                navController.navigate(YearlyCalendarRoute(year)) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
-            onDayClicked = { date -> appState.navigateToDiaryPreview(date) },
-        )
-    }
+    navigation<CalendarRoute>(
+        startDestination = MonthlyCalendarRoute(YearMonth.now().year, YearMonth.now().monthValue)
+    ) {
+        composable<MonthlyCalendarRoute> {
+            MonthlyCalendarScreen(
+                onYearClicked = { year ->
+                    navController.navigate(YearlyCalendarRoute(year)) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+                onDayClicked = { date -> appState.navigateToDiaryPreview(date) },
+            )
+        }
 
-    composable<YearlyCalendarRoute> {
-        YearlyCalendarScreen(
-            onMonthClicked = { yearMonth ->
-                navController.navigate(MonthlyCalendarRoute(yearMonth.year, yearMonth.monthValue)) {
-                    popUpTo(navController.graph.findStartDestination().id) {
-                        inclusive = true
+        composable<YearlyCalendarRoute> {
+            YearlyCalendarScreen(
+                onMonthClicked = { yearMonth ->
+                    navController.navigate(MonthlyCalendarRoute(yearMonth.year, yearMonth.monthValue)) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            inclusive = true
+                        }
                     }
                 }
-            }
-        )
+            )
+        }
     }
 }
