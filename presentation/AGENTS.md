@@ -21,6 +21,9 @@
     - 각 `Screen`은 전용 Preview를 포함해야 하며, 다양한 상태나 복잡한 데이터가 필요한 경우 `feature/{name}/preview` 패키지에 **`{name}ScreenPreviewParameterProvider`**를 구현하여 데이터를 분리 관리한다.
 - **UDF**: 모든 Composable은 비즈니스 로직이 없는 순수 함수로 작성하며 상태 호이스팅을 준수한다.
 - **Theme**: `MinaryTheme`을 기반으로 하며, 커스텀 속성은 `MaterialTheme` 확장을 통해 접근한다.
+- **Skeleton Screen**: 데이터 로딩이 필요한 화면은 사용자 경험을 위해 Skeleton 화면을 반드시 함께 구현한다.
+    - 구현 시 `presentation/common/skeleton`에 정의된 공통 컴포넌트(`SkeletonButton`, `SkeletonIconButton`, `SkeletonSpacer`, `SkeletonText` 등)를 적극 활용한다.
+    - 참고 예시: `SkeletonDiaryPreviewContent.kt`, `SkeletonDiaryEditContent.kt`
 
 ## 3. 에러 처리 및 Mapper 규칙
 - **Error**: UseCase 실패 시 `DomainError`를 `handleDomainError` 확장 함수를 통해 `UiText`로 변환하여 노출한다.
