@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -20,15 +21,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import kr.co.domain.feature.emotion.model.Emotion
-import kr.co.presentation.common.extension.color
+import androidx.compose.ui.unit.sp
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.feature.calendar.extension.isToday
 import kr.co.presentation.feature.calendar.model.CalendarDayItem
 import kr.co.presentation.feature.diary.model.DiaryUiModel
-import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
 import java.time.LocalDate
-
 
 @Composable
 fun ActiveDay(
@@ -39,11 +38,17 @@ fun ActiveDay(
 ) {
     val isToday = dayItem.isToday()
 
-    val shape = if (isToday) CircleShape else MaterialTheme.shapes.small
-    val color = if (isToday) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+    val backgroundColor = when {
+        isToday -> MaterialTheme.colorScheme.primary
+        else -> Color.Transparent
+    }
 
-    val textColor = if (isToday) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onBackground
-    val fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
+    val textColor = when {
+        isToday -> MaterialTheme.colorScheme.onPrimary
+        else -> MaterialTheme.colorScheme.onSurface
+    }
+
+    val fontWeight = if (isToday) FontWeight.Bold else FontWeight.Medium
 
     Column(
         modifier = modifier
@@ -52,33 +57,45 @@ fun ActiveDay(
                 enabled = (onClick != null),
                 onClick = { onClick?.invoke(dayItem) }
             )
-            .clip(shape)
-            .background(color),
+            .padding(4.dp)
+            .clip(CircleShape)
+            .background(backgroundColor),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "${dayItem.date.dayOfMonth}",
-            style = MaterialTheme.typography.labelSmall,
+            fontSize = 14.sp,
             color = textColor,
             fontWeight = fontWeight,
         )
 
-        if (diary != null)
+        if (diary != null) {
             Box(
                 modifier = Modifier
-                    .padding(6.dp)
-                    .size(6.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-                    /*.background(diary.emotion.color, CircleShape)*/
+                    .padding(top = 2.dp)
+                    .size(4.dp)
+                    .background(if (isToday) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary, CircleShape)
             )
-        else
-            Spacer(
-                modifier = Modifier
-                    .padding(6.dp)
-                    .size(6.dp)
+        } else {
+            Spacer(modifier = Modifier.height(6.dp))
+        }
+    }
+}
+
+@ThemePreviews
+@Composable
+private fun ActiveDayTodayPreview() {
+    MinaryTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            ActiveDay(
+                modifier = Modifier.size(48.dp),
+                dayItem = CalendarDayItem(
+                    isCurrentMonth = true,
+                ),
+                diary = DiaryUiModel(),
             )
+        }
     }
 }
 
@@ -87,14 +104,14 @@ fun ActiveDay(
 private fun ActiveDayPreview() {
     MinaryTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
+            val yesterday = LocalDate.now().minusDays(1)
             ActiveDay(
-                modifier = Modifier.size(46.dp),
+                modifier = Modifier.size(48.dp),
                 dayItem = CalendarDayItem(
-                    date = LocalDate.now(),
                     isCurrentMonth = true,
+                    date = yesterday
                 ),
-                /*diary = DiaryUiModel(emotion = Emotion.TRIUMPH),*/
-                diary = DiaryUiModel(),
+                diary = DiaryUiModel().copy(date = yesterday),
             )
         }
     }

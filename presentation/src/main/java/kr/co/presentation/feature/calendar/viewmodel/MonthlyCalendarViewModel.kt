@@ -21,6 +21,7 @@ import kr.co.domain.feature.diary.usecase.GetDiaryChangeEventUseCase
 import kr.co.domain.feature.diary.usecase.sync.GetMonthSyncStatusStreamUseCase
 import kr.co.domain.feature.diary.usecase.sync.RequestMonthSyncUseCase
 import kr.co.domain.infra.network.usecase.GetNetworkStatusStreamUseCase
+import kr.co.presentation.R
 import kr.co.presentation.common.model.UiText
 import kr.co.presentation.feature.calendar.mapper.CalendarItemMapper.toCalendarMonthItem
 import kr.co.presentation.feature.calendar.model.CalendarDayItem
@@ -154,7 +155,7 @@ class MonthlyCalendarViewModel @Inject constructor(
         when (action) {
             is MonthlyCalendarAction.VisibleMonthChanged -> updateVisibleMonth(action.newVisibleYearMonth)
             is MonthlyCalendarAction.YearClicked -> yearClicked(action.year)
-            is MonthlyCalendarAction.DayClicked -> dayClicked(action.dayItem.date)
+            is MonthlyCalendarAction.DayClicked -> dayClicked(action.dayItem)
             is MonthlyCalendarAction.TodayClicked -> todayClicked()
             is MonthlyCalendarAction.RetrySyncClicked -> retrySync()
         }
@@ -175,10 +176,6 @@ class MonthlyCalendarViewModel @Inject constructor(
         postSideEffect(MonthlyCalendarSideEffect.YearClicked(year))
     }
 
-    private fun dayClicked(date: LocalDate) = intent {
-        postSideEffect(MonthlyCalendarSideEffect.DayClicked(date))
-    }
-
     private fun todayClicked() = intent {
         val currentYearMonth = YearMonth.now()
         val refreshKey = System.currentTimeMillis()
@@ -190,5 +187,14 @@ class MonthlyCalendarViewModel @Inject constructor(
         savedStateHandle[KEY_REFRESH_KEY] = refreshKey
 
         postSideEffect(MonthlyCalendarSideEffect.ScrollToToday)
+    }
+
+    private fun dayClicked(dayItem: CalendarDayItem) = intent {
+        val today = LocalDate.now()
+        if (dayItem.date.isAfter(today)) {
+            postSideEffect(MonthlyCalendarSideEffect.ShowMessage(UiText.StringResource(R.string.diary_future_date_limit_message)))
+        } else {
+            postSideEffect(MonthlyCalendarSideEffect.DayClicked(dayItem.date))
+        }
     }
 }

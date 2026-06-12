@@ -1,18 +1,17 @@
 package kr.co.presentation.feature.calendar.navigation
 
+
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import kr.co.presentation.feature.calendar.screen.MonthlyCalendarScreen
 import kr.co.presentation.feature.calendar.screen.YearlyCalendarScreen
+import kr.co.presentation.navigation.CalendarRoute
 import kr.co.presentation.navigation.MinaryAppState
 import kr.co.presentation.navigation.MonthlyCalendarRoute
 import kr.co.presentation.navigation.YearlyCalendarRoute
-
-
-import androidx.navigation.compose.navigation
-import kr.co.presentation.navigation.CalendarRoute
 import java.time.YearMonth
 
 internal fun NavGraphBuilder.calendarGraph(
@@ -31,6 +30,7 @@ internal fun NavGraphBuilder.calendarGraph(
                     }
                 },
                 onDayClicked = { date -> appState.navigateToDiaryPreview(date) },
+                /*onNavigateToEdit = { date, isNewDiary -> appState.navigateToDiaryEdit(date, isNewDiary) }*/
             )
         }
 
@@ -42,7 +42,8 @@ internal fun NavGraphBuilder.calendarGraph(
                             inclusive = true
                         }
                     }
-                }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
     }

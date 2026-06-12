@@ -1,19 +1,28 @@
 package kr.co.presentation.feature.calendar.screen
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -27,11 +36,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -40,7 +52,6 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kr.co.presentation.R
@@ -66,6 +77,7 @@ import kotlin.math.abs
 @Composable
 fun YearlyCalendarScreen(
     onMonthClicked: (YearMonth) -> Unit,
+    onBack: () -> Unit = {},
     viewModel: YearlyCalendarViewModel = hiltViewModel()
 ) {
     val state by viewModel.collectAsState()
@@ -114,9 +126,7 @@ fun YearlyCalendarScreen(
         when (sideEffect) {
             is YearlyCalendarSideEffect.ScrollToInitialPosition -> {
                 snapshotFlow { calendarItems.itemCount }
-                    .distinctUntilChanged()
-                    .filter { itemCount -> itemCount > 0 }
-                    .first()
+                    .distinctUntilChanged().first { itemCount -> itemCount > 0 }
                     .let { pagingItemCount ->
                         gridState.scrollToItem(pagingItemCount - 1)
                     }
@@ -136,7 +146,8 @@ fun YearlyCalendarScreen(
         calendarItems = calendarItems,
         gridState = gridState,
         snackbarHostState = snackbarHostState,
-        onAction = viewModel::handleAction
+        onAction = viewModel::handleAction,
+        onBack = onBack
     )
 }
 
@@ -147,15 +158,17 @@ fun YearlyCalendarContent(
     gridState: LazyGridState = rememberLazyGridState(),
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onAction: (YearlyCalendarAction) -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             YearlyCalendarTopBar(
                 modifier = Modifier.fillMaxWidth(),
                 year = year,
                 onAction = onAction,
+                onBack = onBack
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -176,27 +189,47 @@ private fun YearlyCalendarTopBar(
     modifier: Modifier = Modifier,
     year: Year = Year.now(),
     onAction: (YearlyCalendarAction) -> Unit = {},
+    onBack: () -> Unit = {}
 ) {
     Box(
-        modifier = modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .height(64.dp)
+            .padding(horizontal = 4.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            modifier = Modifier.align(Alignment.CenterStart),
-            text = "${year.value}",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = if (year.isCurrentYear()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-        )
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, tint = Color(0xFF64748B))
+        }
 
         Text(
-            text = stringResource(R.string.today),
-            style = MaterialTheme.typography.titleMedium,
+            text = "${year.value}",
+            fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+
+        OutlinedButton(
+            onClick = { onAction(YearlyCalendarAction.TodayClicked) },
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .clickable { onAction(YearlyCalendarAction.TodayClicked) }
-        )
+                .padding(end = 12.dp),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text(
+                text = stringResource(R.string.today),
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
@@ -212,8 +245,8 @@ private fun CalendarGrid(
         state = gridState,
         columns = GridCells.Fixed(3),
         contentPadding = PaddingValues(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         items(
             count = calendarItems.itemCount,
@@ -234,13 +267,15 @@ private fun CalendarGrid(
                 val item = calendarItems[index] ?: return@items
                 when (item) {
                     is CalendarYearItem -> YearHeader(item)
-                    is CalendarMonthItem -> MonthCalendarCanvas(
-                        modifier = Modifier
-                            .aspectRatio(1f)
-                            .padding(4.dp),
-                        monthItem = item,
-                        onClick = { onAction(YearlyCalendarAction.MonthClicked(item.yearMonth)) }
-                    )
+                    is CalendarMonthItem -> {
+                        MonthCalendarCanvas(
+                            modifier = Modifier
+                                .aspectRatio(1f)
+                                .padding(4.dp),
+                            monthItem = item,
+                            onClick = { onAction(YearlyCalendarAction.MonthClicked(item.yearMonth)) }
+                        )
+                    }
                 }
             }
         }
@@ -249,15 +284,20 @@ private fun CalendarGrid(
 
 @Composable
 private fun YearHeader(yearItem: CalendarYearItem) {
-    Text(
-        text = "${yearItem.year.value}",
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp),
-        style = MaterialTheme.typography.headlineSmall,
-        fontWeight = FontWeight.Bold,
-        color = if (yearItem.isCurrentYear()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-    )
+            .padding(vertical = 16.dp)
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+            .padding(vertical = 8.dp, horizontal = 4.dp)
+    ) {
+        Text(
+            text = "${yearItem.year.value}",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (yearItem.isCurrentYear()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+        )
+    }
 }
 
 @ThemePreviews
