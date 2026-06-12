@@ -63,7 +63,9 @@
 
     <!-- Calendar -->
     <string name="today">Today</string>
-    <string name="you_cannot_select_a_date_after_today">You cannot select a date after today</string>
+    <string name="calendar_todays_diary_label">Today\'s Diary</string>
+    <string name="calendar_future_month_limit_message">Cannot move to the monthly calendar after this month</string>
+    <string name="diary_future_date_limit_message">Cannot write a diary entry for a future date.</string>
 
     <!-- Diary -->
     <string name="diary_title_is_empty">diary title is empty</string>

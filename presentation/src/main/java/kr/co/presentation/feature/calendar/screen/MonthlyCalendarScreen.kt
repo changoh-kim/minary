@@ -3,20 +3,42 @@ package kr.co.presentation.feature.calendar.screen
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -31,23 +53,31 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import coil.compose.AsyncImage
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kr.co.domain.feature.diary.model.SyncStatus
+import kr.co.domain.feature.emotion.model.Emotion
 import kr.co.presentation.R
 import kr.co.presentation.common.composable.stringArrayResource
+import kr.co.presentation.common.extension.color
 import kr.co.presentation.common.extension.getString
+import kr.co.presentation.common.extension.resId
 import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.feature.calendar.composable.ActiveDay
 import kr.co.presentation.feature.calendar.composable.InactiveDay
@@ -57,11 +87,13 @@ import kr.co.presentation.feature.calendar.preview.provider.CalendarMonthItemPre
 import kr.co.presentation.feature.calendar.viewmodel.MonthlyCalendarAction
 import kr.co.presentation.feature.calendar.viewmodel.MonthlyCalendarSideEffect
 import kr.co.presentation.feature.calendar.viewmodel.MonthlyCalendarViewModel
+import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
 import org.orbitmvi.orbit.compose.collectSideEffect
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun MonthlyCalendarScreen(
@@ -111,7 +143,8 @@ fun MonthlyCalendarScreen(
         snackbarHostState = snackbarHostState,
         monthItems = monthItems,
         pagerState = pagerState,
-        onAction = { action -> viewModel.handleAction(action) }
+        onAction = viewModel::handleAction,
+        onDayClicked = onDayClicked
     )
 }
 
@@ -126,8 +159,10 @@ fun MonthlyCalendarContent(
         pageCount = { monthItems.itemCount },
     ),
     onAction: (MonthlyCalendarAction) -> Unit = {},
+    onDayClicked: (LocalDate) -> Unit = {},
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(syncStatus) {
         if (syncStatus == SyncStatus.FAILED) {
@@ -144,23 +179,183 @@ fun MonthlyCalendarContent(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { MonthlyCalendarTopBar(yearMonth = yearMonth, onAction = onAction) },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { paddingValues ->
-
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)) {
-
-            CalendarPager(
-                modifier = Modifier.fillMaxSize(),
-                pagerState = pagerState,
-                monthItems = monthItems,
-                onAction = onAction,
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            MonthlyCalendarTopBar(
+                yearMonth = yearMonth,
+                onPreviousMonth = {
+                    coroutineScope.launch {
+                        if (pagerState.currentPage + 1 < monthItems.itemCount) {
+                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        }
+                    }
+                },
+                onNextMonth = {
+                    coroutineScope.launch {
+                        if (pagerState.currentPage - 1 >= 0) {
+                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                        }
+                    }
+                },
+                onAction = onAction
             )
-
-            SyncProgressOverlay(syncStatus = syncStatus)
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onDayClicked(LocalDate.now()) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape,
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = null)
+            }
         }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .background(
+                        MaterialTheme.colorScheme.surface,
+                        RoundedCornerShape(12.dp)
+                    )
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.8f),
+                        RoundedCornerShape(12.dp)
+                    )
+                    .padding(16.dp)
+            ) {
+                CalendarPager(
+                    modifier = Modifier.fillMaxWidth(),
+                    pagerState = pagerState,
+                    monthItems = monthItems,
+                    onAction = onAction,
+                )
+            }
+            // Today's Diary Section
+            val today = LocalDate.now()
+            val todayDayItem =
+                monthItems.itemSnapshotList.find { it?.yearMonth == YearMonth.from(today) }
+                    ?.days?.find { it.date == today }
+            val diary = todayDayItem?.diary
+
+            if (diary != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.calendar_todays_diary_label),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(start = 4.dp, bottom = 16.dp)
+                    )
+
+                    DiarySummaryCard(diary = diary, onClick = { onDayClicked(today) })
+                }
+            }
+
+            Spacer(modifier = Modifier.height(100.dp))
+        }
+
+        SyncProgressOverlay(syncStatus = syncStatus)
+    }
+}
+
+@Composable
+private fun DiarySummaryCard(diary: DiaryUiModel, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.3.dp)
+    ) {
+        Column {
+            if (diary.imageUrls.isNotEmpty()) {
+                AsyncImage(
+                    model = diary.imageUrls.first(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(130.dp),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = diary.date.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    if (diary.emotions.isNotEmpty()) {
+                        EmotionTag(emotion = diary.emotions.first())
+                    }
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = diary.title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = diary.content,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 22.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmotionTag(emotion: Emotion) {
+    Row(
+        modifier = Modifier
+            .background(
+                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                RoundedCornerShape(9999.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(12.dp)
+                .background(emotion.color, CircleShape)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = stringResource(emotion.resId),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onTertiaryContainer
+        )
     }
 }
 
@@ -184,30 +379,66 @@ private fun SyncProgressOverlay(syncStatus: SyncStatus) {
 @Composable
 private fun MonthlyCalendarTopBar(
     yearMonth: YearMonth,
+    onPreviousMonth: () -> Unit,
+    onNextMonth: () -> Unit,
     onAction: (MonthlyCalendarAction) -> Unit = {},
 ) {
-    Column {
-        Text(
-            text = "${yearMonth.year}",
-            modifier = Modifier
-                .padding(16.dp)
-                .clickable { onAction(MonthlyCalendarAction.YearClicked(yearMonth.year)) }
-        )
-
-        val months = stringArrayResource(R.array.months)
-        val monthText = months[yearMonth.monthValue - 1]
-
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                MaterialTheme.colorScheme.surface,
+            )
+            .height(64.dp)
+            .border(width = 1.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.05f))
+            .padding(horizontal = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Absolute.SpaceBetween,
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
         ) {
-            Text(text = monthText, modifier = Modifier.padding(16.dp))
+            IconButton(onClick = onPreviousMonth) {
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = null,
+                    tint = Color(0xFF64748B)
+                )
+            }
 
             Text(
+                text = yearMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.clickable { onAction(MonthlyCalendarAction.YearClicked(yearMonth.year)) }
+            )
+
+            IconButton(onClick = onNextMonth) {
+                Icon(
+                    Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = Color(0xFF64748B)
+                )
+            }
+        }
+
+        OutlinedButton(
+            onClick = { onAction(MonthlyCalendarAction.TodayClicked) },
+            modifier = Modifier.padding(end = 8.dp),
+            shape = RoundedCornerShape(8.dp),
+            border = BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            ),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+        ) {
+            Text(
                 text = stringResource(R.string.today),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .clickable { onAction(MonthlyCalendarAction.TodayClicked) },
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
             )
         }
     }
@@ -225,10 +456,10 @@ private fun WeekdayHeader() {
     ) {
         weekday.forEach { day ->
             Text(
-                text = day,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                text = day.uppercase(),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -263,9 +494,10 @@ private fun CalendarPager(
                     modifier = Modifier.weight(1f),
                     dayItem = dayItem,
                     diary = dayItem.diary,
-                ) { day -> onAction(MonthlyCalendarAction.DayClicked(day)) }
+                    onClick = { onAction(MonthlyCalendarAction.DayClicked(it)) }
+                )
             else
-                InactiveDay(modifier = Modifier.weight(1f), dayItem)
+                InactiveDay(modifier = Modifier.weight(1f), dayItem = dayItem)
         }
     }
 }

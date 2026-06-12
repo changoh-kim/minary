@@ -18,14 +18,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.feature.calendar.extension.isToday
 import kr.co.presentation.feature.calendar.model.CalendarMonthItem
 import kr.co.presentation.feature.calendar.preview.model.CalendarMonthPreviewData
 import kr.co.presentation.feature.calendar.preview.provider.CalendarMonthPreviewDataProvider
-import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
-import kr.co.presentation.theme.Blue500
-
 
 @Composable
 fun MonthCalendarCanvas(
@@ -34,11 +32,10 @@ fun MonthCalendarCanvas(
     onClick: () -> Unit = {},
 ) {
     val textMeasurer = rememberTextMeasurer()
-
     val onSurface = MaterialTheme.colorScheme.onSurface
     val primary = MaterialTheme.colorScheme.primary
+    val onPrimary = MaterialTheme.colorScheme.onPrimary
     val error = MaterialTheme.colorScheme.error
-
     val titleStyle = remember(onSurface) {
         TextStyle(
             fontSize = 18.sp,
@@ -54,7 +51,10 @@ fun MonthCalendarCanvas(
         TextStyle(fontSize = 10.sp, color = onSurface, textAlign = TextAlign.Center)
     }
     val saturdayStyle = remember {
-        TextStyle(fontSize = 10.sp, color = Blue500, textAlign = TextAlign.Center)
+        TextStyle(fontSize = 10.sp, color = primary, textAlign = TextAlign.Center)
+    }
+    val todayStyle = remember(onPrimary) {
+        TextStyle(fontSize = 10.sp, color = onPrimary, textAlign = TextAlign.Center)
     }
 
     Canvas(
@@ -67,7 +67,6 @@ fun MonthCalendarCanvas(
         //val canvasHeight = size.height
         val cellWeight = canvasWidth / 7
         //val paddingTop = 16.dp.toPx()
-
         val titleLayout = textMeasurer.measure(
             text = monthItem.yearMonth.monthValue.toString(),
             style = titleStyle
@@ -79,27 +78,35 @@ fun MonthCalendarCanvas(
                 y = 0f
             )
         )
-
         val gridStartY = titleLayout.size.height + 4.dp.toPx()
 
         monthItem.days.forEachIndexed { index, dayItem ->
             val row = index / 7
             val col = index % 7
-
             val xPos = col * cellWeight
             val yPos = gridStartY + (row * cellWeight)
-
             val currentStyle = when (col) {
                 0 -> sundayStyle
                 6 -> saturdayStyle
                 else -> dayStyle
             }
+
             val dayText = when (dayItem.isCurrentMonth) {
                 true -> dayItem.date.dayOfMonth.toString()
                 false -> ""
             }
 
-            val dayTextLayout = textMeasurer.measure(dayText, currentStyle)
+            val today = dayItem.isCurrentMonth && dayItem.isToday()
+            if (today) {
+                drawCircle(
+                    color = primary,
+                    radius = cellWeight / 2,
+                    center = Offset(x = xPos + cellWeight / 2, y = yPos + cellWeight / 2)
+                )
+            }
+
+            val dayTextLayout =
+                textMeasurer.measure(dayText, if (today) todayStyle else currentStyle)
             drawText(
                 textLayoutResult = dayTextLayout,
                 topLeft = Offset(
@@ -107,14 +114,6 @@ fun MonthCalendarCanvas(
                     y = yPos + (cellWeight - dayTextLayout.size.height) / 2
                 )
             )
-
-            if (dayItem.isCurrentMonth && dayItem.isToday()) {
-                drawCircle(
-                    color = primary.copy(alpha = 0.3f),
-                    radius = cellWeight / 2,
-                    center = Offset(x = xPos + cellWeight / 2, y = yPos + cellWeight / 2)
-                )
-            }
         }
     }
 }

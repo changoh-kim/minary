@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.map
 import kr.co.domain.feature.calendar.usecase.GetCalendarYearUseCase
 import kr.co.presentation.R
 import kr.co.presentation.common.model.UiText
-import kr.co.presentation.feature.calendar.extension.isAfterCurrentYearMonth
 import kr.co.presentation.feature.calendar.mapper.CalendarItemMapper.toCalendarMonthItem
 import kr.co.presentation.feature.calendar.mapper.insertYearSeparators
 import kr.co.presentation.feature.calendar.model.CalendarGridItem
@@ -30,7 +29,6 @@ import org.orbitmvi.orbit.viewmodel.container
 import java.time.Year
 import java.time.YearMonth
 import javax.inject.Inject
-
 
 @Immutable
 data class YearlyCalendarScreenState(
@@ -125,8 +123,9 @@ class YearlyCalendarViewModel @Inject constructor(
     }
 
     private fun monthClicked(targetYearMonth: YearMonth) = intent {
-        if (targetYearMonth.isAfterCurrentYearMonth()) {
-            postSideEffect(YearlyCalendarSideEffect.ShowMessage(UiText.StringResource(R.string.you_cannot_select_a_date_after_today)))
+        val currentYearMonth = YearMonth.now()
+        if (targetYearMonth.isAfter(currentYearMonth)) {
+            postSideEffect(YearlyCalendarSideEffect.ShowMessage(UiText.StringResource(R.string.calendar_future_month_limit_message)))
         } else {
             postSideEffect(YearlyCalendarSideEffect.MonthClicked(targetYearMonth))
         }

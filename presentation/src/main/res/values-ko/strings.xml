@@ -63,7 +63,9 @@
 
     <!-- Calendar -->
     <string name="today">오늘</string>
-    <string name="you_cannot_select_a_date_after_today">오늘 이후에는 날짜를 선택할 수 없습니다</string>
+    <string name="calendar_todays_diary_label">오늘의 일기</string>
+    <string name="calendar_future_month_limit_message">이번달 이후 월 캘린더로 이동할 수 없습니다</string>
+    <string name="diary_future_date_limit_message">오늘 이후 일기를 미리 작성할 수 없습니다.</string>
 
     <!-- Diary -->
     <string name="diary_title_is_empty">일기 제목이 비어 있습니다.</string>
