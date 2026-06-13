@@ -30,6 +30,7 @@ fun LoadingButton(
     enabled: Boolean = true,
     shape: Shape = ButtonDefaults.shape,
     colors: ButtonColors = ButtonDefaults.buttonColors(),
+    content: (@Composable () -> Unit)? = null
 ) {
     Button(
         onClick = onClick,
@@ -58,6 +59,11 @@ fun LoadingButton(
                     fontWeight = FontWeight.Bold
                 )
             )
+
+            if (content != null && !isLoading) {
+                Spacer(modifier = Modifier.size(8.dp))
+                content()
+            }
         }
     }
 }

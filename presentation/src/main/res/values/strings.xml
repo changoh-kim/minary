@@ -17,14 +17,29 @@
     <string name="your_mind_diary">Your mind diary</string>
 
     <!-- SignIn -->
-    <string name="id">Id</string>
-    <string name="user_id">User Id</string>
-    <string name="btn_sign_in">Sign in</string>
+    <string name="id">Email</string>
+    <string name="user_id">email@example.com</string>
+    <string name="btn_sign_in">Sign In</string>
     <string name="do_not_have_an_account">Don\'t have an account?</string>
     <string name="id_is_empty">Id is empty</string>
+    <string name="welcome_back">Welcome to Minary</string>
+    <string name="sign_in_subtitle">Enter your details to access your\naccount.</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="or_continue_with">OR CONTINUE WITH</string>
+    <string name="google_sign_in">Sign in with Google</string>
+    <string name="kakao_sign_in">Login with Kakao</string>
+    <string name="copyright">© 2024 Minary Platform Inc. All rights reserved.</string>
 
     <!-- SignUp -->
-    <string name="create_an_account">Create an account</string>
+    <string name="create_an_account">Join Minary</string>
+    <string name="create_account_title">Create Account</string>
+    <string name="sign_up_subtitle">Enter the information and experience Minary</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="back_to_login">Back to Login</string>
+    <string name="placeholder_name">Enter your name</string>
+    <string name="placeholder_password">Create a password</string>
+    <string name="placeholder_email">email@example.com</string>
+    <string name="placeholder_phone_us">+1 (555) 000-0000</string>
     <string name="email">Email</string>
     <string name="user_email">User Email</string>
     <string name="name">Name</string>
