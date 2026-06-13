@@ -11,6 +11,8 @@
     <string name="home_error_session_verification">사용자 검증 실패. 다시 로그인해주세요.</string>
 
     <!-- Welcome -->
+    <string name="welcome_title">마이너리에 오신 것을 환영합니다.\n당신의 감정 여행을\n시작해보세요.</string>
+    <string name="welcome_subtitle">일기 쓰기를 통해 당신의\n기분과 생각을 기록해보세요.</string>
     <string name="welcome">환영합니다.</string>
     <string name="your_mind_diary">당신의 마음속 다이어리를 작성해보세요</string>
 
