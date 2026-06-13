@@ -27,7 +27,10 @@ fun NavGraphBuilder.accountGraph(
     }
 
     composable<SignUpRoute> {
-        SignUpScreen(onSignUpSucceeded = { appState.navigateBack() })
+        SignUpScreen(
+            onSignUpSucceeded = { appState.navigateBack() },
+            onBackClicked = { appState.navigateBack() }
+        )
     }
 
     composable<AccountDeletionRoute> {
