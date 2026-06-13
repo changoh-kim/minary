@@ -11,6 +11,8 @@
     <string name="home_error_session_verification">User verification failed. Please log in again.</string>
 
     <!-- Welcome -->
+    <string name="welcome_title">Welcome to Minary.\nLet\'s start your\nemotional journey.</string>
+    <string name="welcome_subtitle">Track your moods and thoughts\nthrough daily journaling.</string>
     <string name="welcome">Welcome</string>
     <string name="your_mind_diary">Your mind diary</string>
 
