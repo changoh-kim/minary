@@ -104,6 +104,10 @@
     <string name="diary_edit_title">일기 편집</string>
     <string name="diary_max_char_limit_reached">최대 글자 수에 도달했습니다.</string>
 
+    <!-- AI Analysis -->
+    <string name="ai_analyzing_title">AI가 일기를 분석하고 있어요</string>
+    <string name="ai_analyzing_subtitle">잠시만 기다려 주세요</string>
+
     <!-- Dashboard -->
     <string name="dashboard_deep_analysis">심층분석</string>
     <string name="dashboard_diary_streak">일기 쓰기 연속 기록</string>

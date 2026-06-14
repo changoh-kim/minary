@@ -104,6 +104,10 @@
     <string name="diary_edit_title">Edit Diary</string>
     <string name="diary_max_char_limit_reached">Maximum character limit reached.</string>
 
+    <!-- AI Analysis -->
+    <string name="ai_analyzing_title">AI is analyzing your diary</string>
+    <string name="ai_analyzing_subtitle">Please wait a moment</string>
+
     <!-- Dashboard -->
     <string name="dashboard_deep_analysis">Deep Analysis</string>
     <string name="dashboard_diary_streak">Diary Writing Streak</string>

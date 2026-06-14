@@ -56,7 +56,7 @@ composeCompiler {
 
 dependencies {
     implementation(project(":domain"))
-
+    implementation(libs.androidx.compose.ui)
     // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
@@ -99,6 +99,9 @@ dependencies {
 
     // coil
     implementation(libs.coil.compose)
+
+    // lottie
+    implementation(libs.lottie.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
