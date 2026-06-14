@@ -52,6 +52,7 @@ import kr.co.presentation.common.composable.LoadStateContent
 import kr.co.presentation.common.composable.LoadingIconButton
 import kr.co.presentation.common.extension.getString
 import kr.co.presentation.design.ThemePreviews
+import kr.co.presentation.feature.diary.composable.AiAnalyzingOverlay
 import kr.co.presentation.feature.diary.composable.SkeletonDiaryEditContent
 import kr.co.presentation.feature.diary.model.DiaryUiModel
 import kr.co.presentation.feature.diary.preview.factory.DiaryPreviewDataFactory
@@ -97,13 +98,17 @@ fun DiaryEditScreen(
             SkeletonDiaryEditContent()
         }
     ) { diary ->
-        DiaryEditContent(
-            diary = diary,
-            isSaving = state.isSaving,
-            snackbarHostState = snackbarHostState,
-            onAction = { action -> viewModel.handleAction(action) },
-            onBack = onBack
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            DiaryEditContent(
+                diary = diary,
+                isSaving = state.isSaving,
+                snackbarHostState = snackbarHostState,
+                onAction = { action -> viewModel.handleAction(action) },
+                onBack = onBack,
+            )
+
+            AiAnalyzingOverlay(visible = state.isAnalyzing)
+        }
     }
 }
 
@@ -178,7 +183,9 @@ fun DiaryEditContent(
             // Title Input
             val isTitleError = diary.title.length >= DiaryEditViewModel.MAX_TITLE_LENGTH
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {
@@ -228,7 +235,9 @@ fun DiaryEditContent(
             // Your Story Input
             val isContentError = diary.content.length >= DiaryEditViewModel.MAX_CONTENT_LENGTH
             Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 4.dp, bottom = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp, bottom = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.Bottom
             ) {

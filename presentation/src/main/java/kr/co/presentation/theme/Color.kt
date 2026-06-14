@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 // Shared
 val Blue500 = Color(0xFF3B82F6)
 val Blue600 = Color(0xFF2563EB)
+val NightSky = Color(0xFF0D1B2A)
 
 // Light Palette (Based on the image)
 val PrimaryLight = Blue600

@@ -38,6 +38,7 @@ data class DiaryEditState(
     val diaryLoadState: LoadState<DiaryUiModel> = LoadState.Uninitialized,
     val isSaving: Boolean = false,
     val isNewDiary: Boolean = false,
+    val isAnalyzing: Boolean = false,
 )
 
 @Immutable
@@ -149,7 +150,7 @@ class DiaryEditViewModel @Inject constructor(
         }
 
         resultFlow
-            .onLoading { reduce { state.copy(isSaving = it) } }
+            .onLoading { reduce { state.copy(isSaving = it, isAnalyzing = it) } }
             .onError { handleSaveDiaryError(it) }
             .launchOnSuccess {
                 postSideEffect(DiaryEditSideEffect.ShowMessage(UiText.StringResource(R.string.diary_saved)))
