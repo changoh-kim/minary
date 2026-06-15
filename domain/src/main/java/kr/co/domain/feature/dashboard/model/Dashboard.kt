@@ -9,7 +9,8 @@ import kr.co.domain.feature.emotion.model.Emotion
 data class Dashboard(
     val recentDiaries: List<Diary?> = emptyList(),      // 연속 작성된 일기 목록(히트맵/스트릭 표시용)
     val totalDiaryCount: Int = 0,                       // 총 일기 개수
+    val weeklyDiaryCount: Int = 0,                      // 이번 주 일기 개수
     val totalWordCount: Int = 0,                        // 총 단어 수
-    val mostFrequentEmotion: Emotion = Emotion.UNKNOWN, // 가장 많이 기록된 감정 (풍부한 감정)
-    val leastFrequentEmotion: Emotion = Emotion.UNKNOWN // 가장 적게 기록된 감정 (희소한 감정)
+    val longestStreak: Int = 0,                         // 최장 연속 작성일
+    val emotionCounts: Map<Emotion, Int> = emptyMap()   // 감정별 작성 횟수
 )

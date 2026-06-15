@@ -10,9 +10,10 @@ object DashboardMapper {
         return Dashboard(
             recentDiaries = recentDiaries.map { it?.toDiary() },
             totalDiaryCount = totalDiaryCount,
+            weeklyDiaryCount = weeklyDiaryCount,
             totalWordCount = totalWordCount,
-            mostFrequentEmotion = mostFrequentEmotion,
-            leastFrequentEmotion = leastFrequentEmotion
+            longestStreak = longestStreak,
+            emotionCounts = emotionCounts
         )
     }
 
@@ -20,9 +21,10 @@ object DashboardMapper {
         return DashboardModel(
             recentDiaries = recentDiaries.map { it?.toDiaryWithRelations() },
             totalDiaryCount = totalDiaryCount,
+            weeklyDiaryCount = weeklyDiaryCount,
             totalWordCount = totalWordCount,
-            mostFrequentEmotion = mostFrequentEmotion,
-            leastFrequentEmotion = leastFrequentEmotion
+            longestStreak = longestStreak,
+            emotionCounts = emotionCounts
         )
     }
 }

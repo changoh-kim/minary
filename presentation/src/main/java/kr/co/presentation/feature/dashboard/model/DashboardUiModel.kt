@@ -12,7 +12,8 @@ import kr.co.presentation.feature.diary.model.DiaryUiModel
 data class DashboardUiModel(
     val recentDiaries: List<DiaryUiModel?> = emptyList(),
     val totalDiaryCount: Int = 0,
+    val weeklyDiaryCount: Int = 0,
     val totalWordCount: Int = 0,
-    val mostFrequentEmotion: Emotion = Emotion.UNKNOWN,
-    val leastFrequentEmotion: Emotion = Emotion.UNKNOWN
+    val longestStreak: Int = 0,
+    val emotionCounts: Map<Emotion, Int> = emptyMap()
 ) : Parcelable

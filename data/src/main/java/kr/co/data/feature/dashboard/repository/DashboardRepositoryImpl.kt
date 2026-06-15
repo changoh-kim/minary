@@ -14,7 +14,6 @@ import kr.co.data.local.provider.UserDatabaseProvider
 import kr.co.domain.error.DomainError
 import kr.co.domain.feature.dashboard.model.Dashboard
 import kr.co.domain.feature.dashboard.repository.DashboardRepository
-import kr.co.domain.feature.emotion.model.Emotion
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,37 +23,64 @@ class DashboardRepositoryImpl @Inject constructor(
     private val databaseProvider: UserDatabaseProvider,
 ) : DashboardRepository {
     companion object {
-        const val HEATMAP_SIZE = 40L
+        const val HEATMAP_SIZE = 90L
     }
 
     private val diaryDao get() = databaseProvider.getDatabase().diaryDao()
+
     override suspend fun getDashboard(): Result<Dashboard, DomainError> =
         runSuspendCatching {
-            val startDate = LocalDate.now()
-            val endDate = startDate.minusDays(HEATMAP_SIZE)
+            val today = LocalDate.now()
+            val startDate = today.minusDays(HEATMAP_SIZE)
 
             val recentDiaries =
                 diaryDao.getDiariesByDateRangeWithRelations(
                     startDate = startDate,
-                    endDate = endDate
-                ).fillEmptyDiaries(startDate)
+                    endDate = today
+                ).fillEmptyDiaries(today).reversed()
             val totalDiaryCount = diaryDao.getTotalDiaryCount()
+
+            val startOfWeek = today.with(java.time.DayOfWeek.MONDAY)
+            val weeklyDiaryCount = diaryDao.getDiaryCountByDateRange(startOfWeek, today)
+
             val totalWordCount = diaryDao.getTotalWordCount()
-            val mostFrequentEmotion =
-                diaryDao.getMostFrequentEmotionStats()?.emotion ?: Emotion.UNKNOWN
-            val leastFrequentEmotion =
-                diaryDao.getLeastFrequentEmotionStaus()?.emotion ?: Emotion.UNKNOWN
+
+            val emotionStats = diaryDao.getEmotionStatistics()
+            val emotionCounts = emotionStats.associate { it.emotion to it.count }
+
+            val allDates = diaryDao.getAllDiaryDates()
+            val longestStreak = calculateLongestStreak(allDates)
 
             DashboardModel(
                 recentDiaries = recentDiaries,
                 totalDiaryCount = totalDiaryCount,
+                weeklyDiaryCount = weeklyDiaryCount,
                 totalWordCount = totalWordCount,
-                mostFrequentEmotion = mostFrequentEmotion,
-                leastFrequentEmotion = leastFrequentEmotion,
+                longestStreak = longestStreak,
+                emotionCounts = emotionCounts,
             ).toDashboard()
         }
         .onErr { Log.e(TAG, "Failed to get dashboard", it) }
         .mapError { it.toDomainError() }
+
+    private fun calculateLongestStreak(dates: List<LocalDate>): Int {
+        if (dates.isEmpty()) return 0
+        val sortedDates = dates.distinct().sortedDescending()
+        var maxStreak = 0
+        var currentStreak = 0
+        var lastDate: LocalDate? = null
+
+        for (date in sortedDates) {
+            if (lastDate == null || lastDate.minusDays(1) == date) {
+                currentStreak++
+            } else {
+                maxStreak = maxOf(maxStreak, currentStreak)
+                currentStreak = 1
+            }
+            lastDate = date
+        }
+        return maxOf(maxStreak, currentStreak)
+    }
 
     /**
      * 기준일(today)로부터 지정된 일수(days)만큼 역순으로 리스트를 생성하며,
@@ -64,7 +90,7 @@ class DashboardRepositoryImpl @Inject constructor(
         baseDate: LocalDate,
     ): List<DiaryWithRelations?> {
         val diaryMap = this.associateBy { it.diary.date }
-        return (0..HEATMAP_SIZE).map { offset ->
+        return (0 until HEATMAP_SIZE).map { offset ->
             diaryMap[baseDate.minusDays(offset)]
         }
     }

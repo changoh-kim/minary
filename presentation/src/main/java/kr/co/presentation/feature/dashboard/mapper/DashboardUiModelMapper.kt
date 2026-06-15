@@ -11,16 +11,18 @@ object DashboardUiModelMapper {
     fun Dashboard.toDashboardUiModel() = DashboardUiModel(
         recentDiaries = recentDiaries.map { it?.toDiaryUiModel() },
         totalDiaryCount = totalDiaryCount,
+        weeklyDiaryCount = weeklyDiaryCount,
         totalWordCount = totalWordCount,
-        mostFrequentEmotion = mostFrequentEmotion,
-        leastFrequentEmotion = leastFrequentEmotion
+        longestStreak = longestStreak,
+        emotionCounts = emotionCounts
     )
 
     fun DashboardUiModel.toDashboard() = Dashboard(
         recentDiaries = recentDiaries.map { it?.toDiary() },
         totalDiaryCount = totalDiaryCount,
+        weeklyDiaryCount = weeklyDiaryCount,
         totalWordCount = totalWordCount,
-        mostFrequentEmotion = mostFrequentEmotion,
-        leastFrequentEmotion = leastFrequentEmotion
+        longestStreak = longestStreak,
+        emotionCounts = emotionCounts
     )
 }

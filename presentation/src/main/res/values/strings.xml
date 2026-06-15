@@ -109,15 +109,20 @@
     <string name="ai_analyzing_subtitle">Please wait a moment</string>
 
     <!-- Dashboard -->
+    <string name="dashboard_insights">Insights</string>
     <string name="dashboard_deep_analysis">Deep Analysis</string>
-    <string name="dashboard_diary_streak">Diary Writing Streak</string>
-    <string name="dashboard_stats">Statistics</string>
-    <string name="dashboard_days_written">Days Written</string>
+    <string name="dashboard_entry_consistency">Entry Consistency (Last 90 Days)</string>
+    <string name="dashboard_90_days_ago">90 Days Ago</string>
+    <string name="dashboard_today">Today</string>
+    <string name="dashboard_total_entries">Total Entries</string>
+    <string name="dashboard_longest_streak">Longest Streak</string>
     <string name="dashboard_total_words">Total Words</string>
-    <string name="dashboard_dominant_emotion">Dominant Emotion</string>
-    <string name="dashboard_rarest_emotion">Rarest Emotion</string>
-    <string name="dashboard_unit_day">Days</string>
-    <string name="dashboard_unit_word">Words</string>
+    <string name="dashboard_emotion_entries">Emotion Entries</string>
+    <string name="dashboard_this_week">this week</string>
+    <string name="dashboard_best_ever">Best ever!</string>
+    <string name="dashboard_insightful">Insightful</string>
+    <string name="dashboard_unit_day">days</string>
+    <string name="dashboard_unit_word">words</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>

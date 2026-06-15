@@ -7,25 +7,42 @@ import kr.co.presentation.feature.diary.model.DiaryUiModel
 import java.time.LocalDate
 
 
-internal class DashboardPreviewDataProvider : PreviewParameterProvider<DashboardUiModel> {
+class DashboardPreviewDataProvider : PreviewParameterProvider<DashboardUiModel> {
 
     override val values: Sequence<DashboardUiModel> = sequenceOf(
         DashboardUiModel(
-            recentDiaries = listOf(
-                DiaryUiModel(date = LocalDate.now()),
-                DiaryUiModel(date = LocalDate.now().minusDays(1)),
-                DiaryUiModel(date = LocalDate.now().minusDays(2)),
-                null,                                       //3
-                DiaryUiModel(date = LocalDate.now().minusDays(4)),
-                DiaryUiModel(date = LocalDate.now().minusDays(5)),
-                null,                                       //6
-                DiaryUiModel(date = LocalDate.now().minusDays(7))
-            ),
-            totalDiaryCount = 100,
-            totalWordCount = 10000,
-            mostFrequentEmotion = Emotion.JOY,
-            leastFrequentEmotion = Emotion.TRIUMPH
+            recentDiaries = run {
+                val random = java.util.Random(42) // 고정된 시드값 사용
+                val allEmotions = Emotion.entries
+                (0..90).map { dayOffset ->
+                    if (dayOffset % 7 == 3 || dayOffset % 11 == 0) {
+                        null
+                    } else {
+                        // 고정된 시드를 사용하여 항상 동일한 결과 생성
+                        val count = random.nextInt(5) + 1
+                        val emotions = (1..count).map {
+                            allEmotions[random.nextInt(allEmotions.size)]
+                        }.distinct()
+                        
+                        DiaryUiModel(
+                            date = LocalDate.now().minusDays(dayOffset.toLong()),
+                            emotions = emotions
+                        )
+                    }
+                }.reversed()
+            },
+            totalDiaryCount = 128,
+            weeklyDiaryCount = 5,
+            totalWordCount = 3450,
+            longestStreak = 15,
+            emotionCounts = mapOf(
+                Emotion.JOY to 24,
+                Emotion.SATISFACTION to 18,
+                Emotion.CALMNESS to 15,
+                Emotion.BOREDOM to 12,
+                Emotion.ANXIETY to 8
+            )
         ),
-        DashboardUiModel(), // Empty
+        //DashboardUiModel(), // Empty
     )
 }
