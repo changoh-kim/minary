@@ -537,8 +537,28 @@ abstract class DiaryDao {
     // Internal: 같은 모듈 일 때 Dao 외부에서 직접 호출 가능
     // ─────────────────────────────────────
 
+    @Query(
+        """
+        SELECT COUNT(*) 
+        FROM ${DiaryEntity.TABLE_NAME} 
+        WHERE ${DiaryEntity.COLUMN_DATE} BETWEEN :startDate AND :endDate 
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
+        """
+    )
+    internal abstract suspend fun getDiaryCountByDateRange(startDate: LocalDate, endDate: LocalDate): Int
+
     @Query("SELECT COUNT(*) FROM ${DiaryEntity.TABLE_NAME}")
     internal abstract suspend fun getTotalDiaryCount(): Int
+
+    @Query(
+        """
+        SELECT ${DiaryEntity.COLUMN_DATE} 
+        FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
+        ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
+        """
+    )
+    internal abstract suspend fun getAllDiaryDates(): List<LocalDate>
 
     @Query(
         """

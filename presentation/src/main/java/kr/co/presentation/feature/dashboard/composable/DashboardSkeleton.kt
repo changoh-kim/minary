@@ -1,15 +1,17 @@
 package kr.co.presentation.feature.dashboard.composable
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -22,13 +24,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import kr.co.presentation.R
 import kr.co.presentation.common.skeleton.SkeletonSpacer
 import kr.co.presentation.common.skeleton.SkeletonText
 import kr.co.presentation.design.ThemePreviews
 import kr.co.presentation.theme.MinaryTheme
-
 
 @Composable
 fun SkeletonDashboardContent(
@@ -38,65 +38,114 @@ fun SkeletonDashboardContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(24.dp)
     ) {
-        SkeletonText(
-            text = stringResource(R.string.dashboard_deep_analysis),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SkeletonText(
-            text = stringResource(R.string.dashboard_diary_streak),
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // 히트맵 스켈레톤
-        SkeletonEmotionHeatMap()
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        SkeletonText(
-            text = stringResource(R.string.dashboard_stats),
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 통계 카드 스켈레톤
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        // Header
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .height(56.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-            SkeletonDashboardCard(modifier = Modifier.weight(1f))
-            SkeletonDashboardCard(modifier = Modifier.weight(1f))
+            SkeletonText(
+                text = stringResource(R.string.dashboard_insights),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+
+        Column(modifier = Modifier.padding(16.dp)) {
+            SkeletonText(
+                text = stringResource(R.string.dashboard_deep_analysis),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // 히트맵 섹션
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(1.dp, MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
+                    .padding(20.dp)
+            ) {
+                SkeletonText(
+                    text = stringResource(R.string.dashboard_entry_consistency),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SkeletonEmotionHeatMap()
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    SkeletonText(text = "90 DAYS AGO", style = MaterialTheme.typography.labelSmall)
+                    SkeletonText(text = "TODAY", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+        }
+
+        // 통계 그리드
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            SkeletonDashboardCard(modifier = Modifier.weight(1f))
-            SkeletonDashboardCard(modifier = Modifier.weight(1f))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                SkeletonDashboardCard(modifier = Modifier.weight(1f))
+                SkeletonDashboardCard(modifier = Modifier.weight(1f))
+            }
+            SkeletonDashboardCard(modifier = Modifier.fillMaxWidth())
         }
-        Spacer(modifier = Modifier.height(32.dp))
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 감정 기록 섹션
+        Column(modifier = Modifier.padding(16.dp)) {
+            SkeletonText(
+                text = stringResource(R.string.dashboard_emotion_entries),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                repeat(3) {
+                    SkeletonSpacer(
+                        modifier = Modifier
+                            .size(width = 80.dp, height = 32.dp),
+                        shape = RoundedCornerShape(9999.dp)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(80.dp))
     }
 }
 
 @Composable
 private fun SkeletonEmotionHeatMap() {
-    val columns = 8
+    val columns = 18
     val rows = 5
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
         repeat(rows) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 repeat(columns) {
                     SkeletonSpacer(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f),
-                        shape = RoundedCornerShape(4.dp)
+                        modifier = Modifier.size(12.dp),
+                        shape = RoundedCornerShape(2.dp)
                     )
                 }
             }
@@ -108,27 +157,16 @@ private fun SkeletonEmotionHeatMap() {
 private fun SkeletonDashboardCard(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .clip(RoundedCornerShape(24.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(vertical = 32.dp, horizontal = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, MaterialTheme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
+            .padding(20.dp)
     ) {
-        SkeletonText(
-            text = stringResource(R.string.dashboard_days_written),
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        SkeletonText(
-            text = "0000",
-            style = MaterialTheme.typography.headlineLarge.copy(fontSize = 36.sp),
-            fontWeight = FontWeight.Bold
-        )
+        SkeletonText(text = "Title Text", style = MaterialTheme.typography.labelLarge)
         Spacer(modifier = Modifier.height(8.dp))
-        SkeletonText(
-            text = stringResource(R.string.dashboard_unit_day),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        SkeletonText(text = "Value Text", style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(8.dp))
+        SkeletonText(text = "Sub Label", style = MaterialTheme.typography.labelMedium)
     }
 }
 
