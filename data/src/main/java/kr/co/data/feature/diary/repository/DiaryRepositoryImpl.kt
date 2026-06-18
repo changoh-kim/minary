@@ -136,4 +136,14 @@ class DiaryRepositoryImpl @Inject constructor(
     ): Result<List<Diary>, DomainError> = runSuspendCatching {
         localDataSource.getDiariesByDateRange(startDate, endDate)
     }.mapError { it.toDomainError() }
+
+    override suspend fun getPagedDiaries(
+        query: String?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        limit: Int,
+        offset: Int
+    ): Result<List<Diary>, DomainError> = runSuspendCatching {
+        localDataSource.getPagedDiaries(query, startDate, endDate, limit, offset)
+    }.mapError { it.toDomainError() }
 }

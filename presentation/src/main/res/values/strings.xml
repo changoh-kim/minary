@@ -124,6 +124,19 @@
     <string name="dashboard_unit_day">days</string>
     <string name="dashboard_unit_word">words</string>
 
+    <!-- Search -->
+    <string name="search_entries_title">Search Entries</string>
+    <string name="search_placeholder">Search entries...</string>
+    <string name="recent_searches_title">Recent Searches</string>
+    <string name="clear_all">Clear All</string>
+    <string name="no_recent_searches">No recent searches</string>
+    <string name="search_loading">Searching…</string>
+    <string name="no_results_found">No results found.</string>
+    <string name="search_select_date_range">Select date range</string>
+    <string name="search_date_range_placeholder">Start Date - End Date</string>
+    <string name="date_format_dot">yyyy.MM.dd</string>
+    <string name="date_format_full">MMMM d, yyyy</string>
+
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_appearance">APPEARANCE</string>
@@ -207,4 +220,5 @@
     <!-- Dialog -->
     <string name="dialog_confirm">Confirm</string>
     <string name="dialog_cancel">Cancel</string>
+    <string name="dialog_reset">Reset</string>
 </resources>

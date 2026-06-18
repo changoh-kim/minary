@@ -21,5 +21,14 @@ interface DiaryRepository {
     fun getDiaryStream(date: LocalDate): Flow<Diary?>
     fun getDiariesByDateRangeStream(startDate: LocalDate, endDate: LocalDate): Flow<List<Diary>>
     suspend fun getDiariesByDateRange(startDate: LocalDate, endDate: LocalDate): Result<List<Diary>, DomainError>
+
+    suspend fun getPagedDiaries(
+        query: String? = null,
+        startDate: LocalDate? = null,
+        endDate: LocalDate? = null,
+        limit: Int,
+        offset: Int
+    ): Result<List<Diary>, DomainError>
+
     val diaryChangeEvent: Flow<Unit>
 }
