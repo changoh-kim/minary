@@ -62,7 +62,7 @@ import kr.co.presentation.navigation.CalendarRoute
 import kr.co.presentation.navigation.DashboardRoute
 import kr.co.presentation.navigation.MinaryAppState
 import kr.co.presentation.navigation.SettingsTabRoute
-import kr.co.presentation.navigation.StoreRoute
+import kr.co.presentation.navigation.SearchRoute
 import kr.co.presentation.navigation.navigateIfNotCurrent
 import kr.co.presentation.theme.MinaryTheme
 import org.orbitmvi.orbit.compose.collectAsState
@@ -114,7 +114,7 @@ fun HomeContent(
             ),
             HomeNavigationItem(
                 R.string.search,
-                StoreRoute,
+                SearchRoute,
                 Icons.Outlined.Search
             ),
             HomeNavigationItem(

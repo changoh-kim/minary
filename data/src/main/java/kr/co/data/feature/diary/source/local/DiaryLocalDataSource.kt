@@ -78,6 +78,21 @@ class DiaryLocalDataSource @Inject constructor(
         }
     }
 
+    suspend fun getPagedDiaries(
+        query: String?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        limit: Int,
+        offset: Int
+    ): List<Diary> {
+        val result = if (query.isNullOrBlank() && startDate == null && endDate == null) {
+            diaryDao.getAllDiariesPaged(limit, offset)
+        } else {
+            diaryDao.searchDiariesPaged(query ?: "", startDate, endDate, limit, offset)
+        }
+        return result.map { it.toDiary() }
+    }
+
     suspend fun getPendingItemCount(): Int {
         return diaryDao.getPendingItemCount()
     }

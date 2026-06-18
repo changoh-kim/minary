@@ -662,6 +662,39 @@ abstract class DiaryDao {
         return getSyncStatus(diary.id)
     }
 
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE (${DiaryEntity.COLUMN_TITLE} LIKE '%' || :query || '%' OR ${DiaryEntity.COLUMN_CONTENT} LIKE '%' || :query || '%')
+        AND (${DiaryEntity.COLUMN_DATE} BETWEEN :startDate AND :endDate OR (:startDate IS NULL OR :endDate IS NULL))
+        AND ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
+        ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
+        LIMIT :limit OFFSET :offset
+        """
+    )
+    internal abstract suspend fun searchDiariesPaged(
+        query: String,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        limit: Int,
+        offset: Int
+    ): List<DiaryWithRelations>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM ${DiaryEntity.TABLE_NAME}
+        WHERE ${DiaryEntity.COLUMN_SYNC_STATUS} != '$PENDING_DELETE'
+        ORDER BY ${DiaryEntity.COLUMN_DATE} DESC
+        LIMIT :limit OFFSET :offset
+        """
+    )
+    internal abstract suspend fun getAllDiariesPaged(
+        limit: Int,
+        offset: Int
+    ): List<DiaryWithRelations>
+
     @Query(
         """
         SELECT MAX(${DiaryEntity.COLUMN_LAST_MODIFIED_AT}) 

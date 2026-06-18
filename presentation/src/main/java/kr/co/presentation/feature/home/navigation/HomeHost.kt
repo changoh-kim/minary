@@ -7,9 +7,8 @@ import androidx.navigation.compose.NavHost
 import kr.co.presentation.feature.calendar.navigation.calendarGraph
 import kr.co.presentation.feature.dashboard.navigation.dashboardGraph
 import kr.co.presentation.feature.setting.navigation.settingsGraph
-import kr.co.presentation.feature.store.navigation.storeGraph
+import kr.co.presentation.feature.search.navigation.searchGraph
 import kr.co.presentation.navigation.MinaryAppState
-
 
 @Composable
 fun HomeHost(
@@ -21,7 +20,7 @@ fun HomeHost(
     NavHost(navController, startDestination, modifier) {
         calendarGraph(appState, navController)
         dashboardGraph(appState, navController)
-        storeGraph(appState, navController)
+        searchGraph(appState, navController)
         settingsGraph(appState, navController)
     }
 }

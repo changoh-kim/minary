@@ -124,6 +124,19 @@
     <string name="dashboard_unit_day">일</string>
     <string name="dashboard_unit_word">단어</string>
 
+    <!-- Search -->
+    <string name="search_entries_title">일기 검색</string>
+    <string name="search_placeholder">검색어를 입력하세요…</string>
+    <string name="recent_searches_title">최근 검색어</string>
+    <string name="clear_all">전체 삭제</string>
+    <string name="no_recent_searches">최근 검색어가 없습니다</string>
+    <string name="search_loading">검색 중…</string>
+    <string name="no_results_found">검색 결과가 없습니다.</string>
+    <string name="search_select_date_range">날짜 범위 선택</string>
+    <string name="search_date_range_placeholder">시작일 - 종료일</string>
+    <string name="date_format_dot">yyyy.MM.dd</string>
+    <string name="date_format_full">yyyy년 M월 d일</string>
+
     <!-- Settings -->
     <string name="settings_title">환경설정</string>
     <string name="settings_appearance">디스플레이</string>
@@ -207,4 +220,5 @@
     <!-- Dialog -->
     <string name="dialog_confirm">확인</string>
     <string name="dialog_cancel">취소</string>
+    <string name="dialog_reset">초기화</string>
 </resources>
