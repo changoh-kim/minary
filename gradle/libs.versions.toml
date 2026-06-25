@@ -1,17 +1,21 @@
 [versions]
-appVersion = "1.0.0"
+appVersionCode = "1"
+appVersionName = "1.0.0"
+minSdk = "28"
+compileSdk = "37"
+targetSdk = "37"
 agp = "9.2.1"
 coreSplashscreen = "1.0.1"
 datastore = "1.2.0"
-protobufPlugin = "0.9.5"
+protobufPlugin = "0.10.0"
 protobuf = "3.25.5"
 firebaseBom = "33.13.0"
-hilt = "2.56.2"
+hilt = "2.59.2"
 hiltNavigationCompose = "1.2.0"
 javaxInject = "1"
 coroutines = "1.8.0"
 ksp = "2.3.2"
-kotlin = "2.2.10"
+kotlin = "2.3.10"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -20,7 +24,6 @@ kotlinxSerializationJson = "1.6.3"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
 composeBom = "2025.03.01"
-appcompat = "1.7.0"
 navigationCompose = "2.8.9"
 orbit = "6.1.0"
 paging = "3.3.6"
@@ -36,15 +39,14 @@ kotlin-result = "2.3.1"
 truetime = "3.5"
 exifinterface = "1.4.2"
 lottie = "6.7.1"
-ui = "1.11.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-lifecycle-viewmodel-savedstate = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-savedstate", version.ref = "lifecycleRuntimeKtx" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -114,6 +116,7 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 #kotlin-reslut
 kotlin-result = { module = "com.michael-bull.kotlin-result:kotlin-result", version.ref = "kotlin-result" }
 kotlin-result-coroutines = { module = "com.michael-bull.kotlin-result:kotlin-result-coroutines", version.ref = "kotlin-result" }
+kotlin-parcelize-runtime = { module = "org.jetbrains.kotlin:kotlin-parcelize-runtime", version.ref = "kotlin" }
 
 #true-time
 truetime = { group = "com.github.instacart", name = "truetime-android", version.ref = "truetime" }
@@ -123,7 +126,6 @@ androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterfa
 
 #lottie
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
-androidx-compose-ui = { group = "androidx.compose.ui", name = "ui", version.ref = "ui" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -2,7 +2,6 @@ package kr.co.presentation.feature.calendar.model
 
 import androidx.compose.runtime.Immutable
 
-
 @Immutable
 interface CalendarBaseItem {
 

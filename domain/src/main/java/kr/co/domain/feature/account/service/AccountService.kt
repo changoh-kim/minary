@@ -1,7 +1,7 @@
 package kr.co.domain.feature.account.service
 
 import com.github.michaelbull.result.Result
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.account.model.Account
 import kr.co.domain.feature.account.model.SignUpInfo
 

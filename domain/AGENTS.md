@@ -1,20 +1,43 @@
 # domain/AGENTS.md
 
 > **BLUF**
-> Minary의 순수 비즈니스 뇌(Brain) 역할을 한다. Android SDK, Firebase SDK, DB 구현체 등을 전혀 모르는 **Pure Kotlin** 모듈이어야 한다.
+> `:domain`은 Minary의 순수 비즈니스 계약과 정책을 담는 모듈이다. 구현 기술을 모르고 Android framework에 의존하지 않는다.
 
-## 1. 의존성 및 모델링 규칙
-- **의존성 금지**: `android.*`, `firebase.*`, `room.*`, `work.*`, `Context` 절대 금지. (예외: `javax.inject`, `androidx.paging.common`)
-- **모델 명명**: 비즈니스 본질을 나타내는 **순수 명칭**을 사용한다 (예: `User`, `Diary`). 계층별 접미사(`Model`, `Dto` 등)를 붙이지 않는다.
-- **UseCase**: `operator fun invoke()`로 실행하며, 상태를 내부에 저장하지 않는다. 단일 책임 원칙(SRP)을 준수한다.
-- **Contract First**: 새로운 기능 추가 시 반드시 `domain`의 모델과 Repository 인터페이스를 먼저 정의한다.
+## 역할
+- domain model, repository contract, usecase, sync/service contract를 정의한다.
+- Offline-first와 LWW 동기화에 필요한 비즈니스 규칙의 경계를 제공한다.
+- data와 presentation이 공유하는 의미를 순수 Kotlin 계약으로 표현한다.
 
-## 2. 에러 (DomainError) 및 시간 규칙
-- **Error**: 반드시 `sealed interface DomainError` 계층으로 추상화하며, `Result<Value, DomainError>`를 반환한다.
-- **Time**: 기기 시간(`System.currentTimeMillis()`) 사용 금지. 항상 `ServerTimeProvider` 계약을 사용한다.
-- **State**: `domain.common.state`의 `SyncProcessState` 등 공통 상태 객체를 적극 활용한다.
+## 의존성 규칙
+- `:core:common`과 순수 Kotlin 의존성만 허용한다.
+- `javax.inject`처럼 순수 DI annotation은 허용하되 Android/Hilt Android API는 사용하지 않는다.
+- 새 라이브러리가 필요하면 Android 비의존 라이브러리만 선택한다.
+- Android SDK, Compose, Firebase SDK, Room, DataStore, WorkManager 구현체를 직접 참조하지 않는다.
+- 공통 error/state/model은 `:core:common`을 사용한다.
 
-## 3. 서비스 및 계약 규칙
-- **Domain Service**: 복잡한 비즈니스 정책은 Repository가 아닌 `CalendarGenerator`, `EmotionAnalyzer` 등 Domain Service로 분리한다.
-- **Sync 및 인터페이스 계약**: Domain은 데이터의 원천(Firestore, Room 등)이나 상세 구현 방식을 모른다. 비즈니스 로직 수행에 필요한 **추상화된 계약(`SyncManager`, `SyncResult` 등)**만을 정의하며, 외부 기술 라이브러리 API의 직접 참조를 절대 금지한다.
-- **Mapper**: 도메인 모델은 외부 계층의 Mapper를 통해서만 변환되며, 도메인 내부에는 매핑 로직을 두지 않는다.
+## 패키지/코드 배치 규칙
+- 기능별 계약은 `feature/{name}` 하위에 둔다.
+- 기능 내부는 필요에 따라 `model`, `repository`, `usecase`, `sync`로 구분한다.
+- 외부 시스템이나 앱 전역 서비스 성격의 계약은 `service/*`에 둔다.
+- domain model은 순수 명칭을 사용하고 `UiModel`, `Entity`, `Dto` 접미사를 붙이지 않는다.
+- UseCase는 단일 의도를 표현하고 상태를 저장하지 않는 호출형 API를 우선한다.
+- 계약 성격은 `repository`, `sync`, `service`로 구분하고 `port` 패키지는 사용하지 않는다.
+- 복잡한 순수 비즈니스 계산은 Repository가 아니라 feature 내부 generator/service 성격의 domain logic으로 분리한다.
+
+## 금지사항
+- data/presentation 모델로 변환하는 mapper를 domain에 두지 않는다.
+- Firebase, Room, WorkManager 같은 구현 기술명을 domain contract에 노출하지 않는다.
+- 동기화 기준 시간에 기기 시간을 직접 사용하지 않는다. 시간은 domain service 계약을 통해 다룬다.
+- UI 문자열, Android resource id, `Context`를 domain에 넣지 않는다.
+- raw exception을 domain API로 노출하지 않는다. 실패는 `Result<Value, DomainError>`로 표현한다.
+
+## 변경 시 체크리스트
+- domain model이 바뀌면 data mapper와 presentation mapper 영향을 함께 검증한다.
+- error/state 계층이 바뀌면 data error mapping과 presentation error handling을 함께 검증한다.
+- sync/service contract가 바뀌면 data 구현체와 DI binding을 함께 갱신한다.
+- UseCase 추가 시 repository/service contract가 구현 세부사항을 드러내지 않게 유지한다.
+
+## 권장 검증
+- `./gradlew :domain:test`
+- import 경계 확인: `rg "android\\.|androidx\\.compose|Firebase|Room|WorkManager|DataStore" domain/src/main/java`
+- contract 변경 시 `./gradlew :data:compileDebugKotlin :presentation:compileDebugKotlin`

@@ -2,10 +2,10 @@ package kr.co.data.feature.emotion.source.remote
 
 import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
-import kr.co.data.extension.TAG
-import kr.co.domain.common.extension.toEmotion
+import kr.co.core.common.extension.TAG
+import kr.co.core.common.extension.toEmotion
 import kr.co.domain.feature.diary.model.Diary
-import kr.co.domain.feature.emotion.model.Emotion
+import kr.co.core.common.model.Emotion
 import javax.inject.Inject
 import javax.inject.Singleton
 

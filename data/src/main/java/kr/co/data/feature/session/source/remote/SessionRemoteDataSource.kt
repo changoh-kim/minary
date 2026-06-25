@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
+import kr.co.core.firebase.provider.FirebaseAuthProvider
 import kr.co.data.feature.account.exception.AccountException
 import kr.co.data.feature.session.model.UserSessionModel
 import javax.inject.Inject
@@ -13,13 +14,13 @@ import javax.inject.Singleton
 
 @Singleton
 class SessionRemoteDataSource @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
+    private val firebaseAuthProvider: FirebaseAuthProvider,
 ) {
     /**
      * 로컬 세션에 저장된 사용자 정보를 반환합니다.
      */
     fun getCurrentUser(): UserSessionModel {
-        val currentUser = firebaseAuth.currentUser ?: throw AccountException.UserNotFoundException()
+        val currentUser = firebaseAuthProvider.currentUser ?: throw AccountException.UserNotFoundException()
         return UserSessionModel(
             uid = currentUser.uid,
             email = currentUser.email ?: "",
@@ -30,7 +31,7 @@ class SessionRemoteDataSource @Inject constructor(
      * 서버에서 최신 사용자 정보를 받아옵니다. 받아온 정보는 로컬 세션에 저장됩니다.
      */
     suspend fun reload(): UserSessionModel {
-        val firebaseUser = firebaseAuth.currentUser
+        val firebaseUser = firebaseAuthProvider.currentUser
             ?: throw AccountException.UserNotFoundException()
 
         try {
@@ -39,7 +40,7 @@ class SessionRemoteDataSource @Inject constructor(
             throw AccountException.SessionExpiredException()
         }
 
-        val currentUser = firebaseAuth.currentUser
+        val currentUser = firebaseAuthProvider.currentUser
             ?: throw AccountException.SessionExpiredException()
 
         return UserSessionModel(
@@ -62,9 +63,9 @@ class SessionRemoteDataSource @Inject constructor(
                 trySend(null)
             }
         }
-        firebaseAuth.addAuthStateListener(listener)
+        firebaseAuthProvider.addAuthStateListener(listener)
         awaitClose {
-            firebaseAuth.removeAuthStateListener(listener)
+            firebaseAuthProvider.removeAuthStateListener(listener)
         }
     }
 }

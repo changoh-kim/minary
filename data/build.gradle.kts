@@ -1,19 +1,16 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.serialization)
-    alias(libs.plugins.firebase)
-    alias(libs.plugins.protobuf)
 }
 
 android {
     namespace = "kr.co.data"
-    compileSdk = 35
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 28
+        minSdk = libs.versions.minSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -28,39 +25,33 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     buildFeatures {
         buildConfig = true
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
 }
 
-protobuf {
-    protoc {
-        artifact = libs.protobuf.protoc.get().toString()
-    }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                create("java") {
-                    option("lite")
-                }
-                create("kotlin")
-            }
-        }
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
 dependencies {
+    implementation(project(":core:common"))
+    implementation(project(":core:di"))
+    implementation(project(":core:storage"))
+    implementation(project(":core:database"))
+    implementation(project(":core:datastore"))
+    implementation(project(":core:firebase"))
     implementation(project(":domain"))
 
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
 
     // hilt
     implementation(libs.hilt.android)
@@ -71,14 +62,8 @@ dependencies {
     // serialization
     implementation(libs.kotlinx.serialization.json)
 
-    // datastore
-    implementation(libs.androidx.datastore)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.protobuf.kotlin.lite)
-
     // firebase
     implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.storage.ktx)
@@ -91,12 +76,6 @@ dependencies {
 
     // coroutines
     implementation(libs.kotlinx.coroutines.android)
-
-    // room
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx)
-    testImplementation(libs.androidx.room.testing)
 
     // generative ai
     implementation(libs.generative.ai)

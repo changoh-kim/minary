@@ -100,7 +100,7 @@
     <string name="diary_entry_date_label">작성 날짜</string>
     <string name="diary_your_story_label">너의 이야기</string>
     <string name="diary_emotion_label">감정</string>
-    <string name="diary_preview_title">일기 보기</string>
+    <string name="diary_detail_title">일기 보기</string>
     <string name="diary_edit_title">일기 편집</string>
     <string name="diary_max_char_limit_reached">최대 글자 수에 도달했습니다.</string>
 
@@ -168,7 +168,7 @@
     <string name="profile_placeholder_email">email@example.com</string>
 
     <!-- Profile Detail -->
-    <string name="profile_preview_title">프로필 미리보기</string>
+    <string name="profile_detail_title">세부 프로필</string>
     <string name="profile_edit_button">프로필 수정</string>
     <string name="profile_empty_dash">-</string>
 

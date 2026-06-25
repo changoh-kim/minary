@@ -2,7 +2,7 @@ package kr.co.domain.feature.account.usecase
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.account.service.AccountService
 import kr.co.domain.feature.diary.usecase.sync.StopAllDiarySyncUseCase
 import kr.co.domain.feature.profile.usecase.sync.StopAllUserProfileSyncUseCase

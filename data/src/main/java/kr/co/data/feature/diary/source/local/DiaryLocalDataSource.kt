@@ -3,12 +3,12 @@ package kr.co.data.feature.diary.source.local
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kr.co.data.feature.diary.mapper.DiaryMapper.toDiary
-import kr.co.data.feature.diary.source.local.model.DiaryWithRelations
-import kr.co.data.local.entity.DiaryEntity
-import kr.co.data.local.entity.DiarySyncMetadataEntity
-import kr.co.data.local.provider.UserDatabaseProvider
+import kr.co.core.database.model.DiaryWithRelations
+import kr.co.core.database.entity.DiaryEntity
+import kr.co.core.database.entity.DiarySyncMetadataEntity
+import kr.co.core.database.provider.UserDatabaseProvider
 import kr.co.domain.feature.diary.model.Diary
-import kr.co.domain.feature.diary.model.DiarySyncStatus
+import kr.co.core.common.state.DiarySyncStatus
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject

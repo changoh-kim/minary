@@ -3,8 +3,8 @@ package kr.co.data.feature.user.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kr.co.data.local.provider.UserSyncDataStoreProvider
-import kr.co.domain.common.state.SyncProcessState
+import kr.co.core.datastore.sync.UserSyncDataStoreProvider
+import kr.co.core.common.state.SyncProcessState
 import kr.co.domain.feature.user.repository.UserDataSyncStateRepository
 import javax.inject.Inject
 import javax.inject.Singleton

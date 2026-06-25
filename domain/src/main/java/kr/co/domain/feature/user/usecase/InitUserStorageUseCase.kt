@@ -2,7 +2,7 @@ package kr.co.domain.feature.user.usecase
 
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.session.repository.SessionRepository
 import javax.inject.Inject
 

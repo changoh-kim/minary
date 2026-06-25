@@ -3,7 +3,7 @@ package kr.co.domain.feature.account.usecase
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.onErr
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.account.model.Account
 import kr.co.domain.feature.account.service.AccountService
 import kr.co.domain.feature.user.usecase.StartUserDataSyncUseCase

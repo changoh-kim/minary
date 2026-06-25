@@ -6,11 +6,11 @@ import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kr.co.domain.common.state.SyncProcessState
-import kr.co.domain.error.DomainError
-import kr.co.domain.feature.profile.service.sync.UserProfileSyncManager
-import kr.co.domain.feature.setting.service.sync.UserSettingsSyncManager
-import kr.co.domain.feature.time.service.ServerTimeProvider
+import kr.co.core.common.state.SyncProcessState
+import kr.co.core.common.error.DomainError
+import kr.co.domain.feature.profile.sync.UserProfileSyncManager
+import kr.co.domain.feature.setting.sync.UserSettingsSyncManager
+import kr.co.domain.service.time.ServerTimeProvider
 import kr.co.domain.feature.user.repository.UserDataSyncStateRepository
 import javax.inject.Inject
 

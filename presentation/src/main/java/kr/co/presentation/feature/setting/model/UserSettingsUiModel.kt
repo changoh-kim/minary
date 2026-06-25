@@ -1,7 +1,7 @@
 package kr.co.presentation.feature.setting.model
 
 import androidx.compose.runtime.Immutable
-import kr.co.domain.feature.setting.model.AppTheme
+import kr.co.core.common.model.AppTheme
 
 @Immutable
 data class UserSettingsUiModel(

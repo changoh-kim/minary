@@ -1,8 +1,8 @@
 package kr.co.data.feature.search.source
 
 import kotlinx.coroutines.flow.Flow
-import kr.co.data.local.entity.RecentSearchEntity
-import kr.co.data.local.provider.UserDatabaseProvider
+import kr.co.core.database.entity.RecentSearchEntity
+import kr.co.core.database.provider.UserDatabaseProvider
 import javax.inject.Inject
 import javax.inject.Singleton
 

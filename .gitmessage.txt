@@ -1,6 +1,5 @@
-# <type>: <subject>
-#
-# Types
+<type>: <subject>
+
 # feat      new feature
 # fix       bug fix
 # refactor  code improvement
@@ -10,17 +9,17 @@
 # chore     maintenance
 # build     build, dependency
 # ci        CI/CD
-#
-# Examples
+
 # feat: add diary creation flow
 # fix: resolve sync conflict issue
 # refactor: separate repository responsibilities
-#
-# Body (optional)
-# why:
-# what:
-# impact:
-#
-# Footer (optional)
-# closes: #123
-# see also: #456
+
+why:
+- 작업 이유
+what:
+- 작업 내용
+impact:
+- 영향 받는 기능 또는 모듈
+
+closes: #123
+see also: #456

@@ -1,17 +1,16 @@
 package kr.co.presentation.feature.calendar.navigation
 
-
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import kr.co.presentation.feature.calendar.screen.MonthlyCalendarScreen
-import kr.co.presentation.feature.calendar.screen.YearlyCalendarScreen
-import kr.co.presentation.navigation.CalendarRoute
-import kr.co.presentation.navigation.MinaryAppState
-import kr.co.presentation.navigation.MonthlyCalendarRoute
-import kr.co.presentation.navigation.YearlyCalendarRoute
+import kr.co.presentation.feature.calendar.screen.monthly.MonthlyCalendarScreen
+import kr.co.presentation.feature.calendar.screen.yearly.YearlyCalendarScreen
+import kr.co.presentation.app.navigation.MinaryAppState
+import kr.co.presentation.app.navigation.route.CalendarRoute
+import kr.co.presentation.app.navigation.route.MonthlyCalendarRoute
+import kr.co.presentation.app.navigation.route.YearlyCalendarRoute
 import java.time.YearMonth
 
 internal fun NavGraphBuilder.calendarGraph(
@@ -29,7 +28,7 @@ internal fun NavGraphBuilder.calendarGraph(
                         restoreState = true
                     }
                 },
-                onDayClicked = { date -> appState.navigateToDiaryPreview(date) },
+                onDayClicked = { date -> appState.navigateToDiaryDetail(date) },
                 /*onNavigateToEdit = { date, isNewDiary -> appState.navigateToDiaryEdit(date, isNewDiary) }*/
             )
         }

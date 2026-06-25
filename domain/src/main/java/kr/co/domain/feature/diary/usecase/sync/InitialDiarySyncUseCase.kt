@@ -4,10 +4,10 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
-import kr.co.domain.common.state.SyncProcessState
-import kr.co.domain.error.DomainError
-import kr.co.domain.feature.diary.repository.sync.DiarySyncStateRepository
-import kr.co.domain.feature.diary.service.sync.DiarySyncManager
+import kr.co.core.common.state.SyncProcessState
+import kr.co.core.common.error.DomainError
+import kr.co.domain.feature.diary.sync.DiarySyncStateRepository
+import kr.co.domain.feature.diary.sync.DiarySyncManager
 import kr.co.domain.feature.session.repository.SessionRepository
 import javax.inject.Inject
 

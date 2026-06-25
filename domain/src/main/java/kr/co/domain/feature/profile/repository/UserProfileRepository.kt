@@ -2,7 +2,7 @@ package kr.co.domain.feature.profile.repository
 
 import com.github.michaelbull.result.Result
 import kotlinx.coroutines.flow.Flow
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.profile.model.UserProfile
 
 interface UserProfileRepository {

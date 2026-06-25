@@ -10,5 +10,5 @@
 ## impact
 - 영향 받는 기능 또는 모듈
 
-## screenshots (optional)
+## screenshots
 <!-- UI 변경 시 첨부 -->

@@ -1,6 +1,6 @@
 package kr.co.domain.feature.setting.usecase.sync
 
-import kr.co.domain.feature.setting.service.sync.UserSettingsRealtimeSyncScheduler
+import kr.co.domain.feature.setting.sync.UserSettingsRealtimeSyncScheduler
 import javax.inject.Inject
 
 

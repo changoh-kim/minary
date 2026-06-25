@@ -1,6 +1,6 @@
 package kr.co.domain.feature.setting.usecase.sync
 
-import kr.co.domain.feature.setting.service.sync.UserSettingsSyncScheduler
+import kr.co.domain.feature.setting.sync.UserSettingsSyncScheduler
 import javax.inject.Inject
 
 class StopAllUserSettingsSyncUseCase @Inject constructor(

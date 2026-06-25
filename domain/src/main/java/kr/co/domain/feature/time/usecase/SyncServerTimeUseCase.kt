@@ -2,9 +2,9 @@ package kr.co.domain.feature.time.usecase
 
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.onErr
-import kr.co.domain.error.DomainError
-import kr.co.domain.feature.time.service.ServerTimeProvider
-import kr.co.domain.feature.time.service.ServerTimeSyncScheduler
+import kr.co.core.common.error.DomainError
+import kr.co.domain.service.time.ServerTimeProvider
+import kr.co.domain.service.time.ServerTimeSyncScheduler
 import javax.inject.Inject
 
 

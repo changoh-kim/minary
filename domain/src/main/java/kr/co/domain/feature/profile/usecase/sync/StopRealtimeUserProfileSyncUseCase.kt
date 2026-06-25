@@ -1,6 +1,6 @@
 package kr.co.domain.feature.profile.usecase.sync
 
-import kr.co.domain.feature.profile.service.sync.UserProfileRealtimeSyncScheduler
+import kr.co.domain.feature.profile.sync.UserProfileRealtimeSyncScheduler
 import javax.inject.Inject
 
 

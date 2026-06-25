@@ -1,7 +1,7 @@
 package kr.co.domain.feature.user.repository
 
 import kotlinx.coroutines.flow.StateFlow
-import kr.co.domain.common.state.SyncProcessState
+import kr.co.core.common.state.SyncProcessState
 
 interface UserDataSyncStateRepository {
     val userDataSyncState: StateFlow<SyncProcessState>

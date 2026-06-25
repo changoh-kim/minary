@@ -1,7 +1,7 @@
 package kr.co.data.feature.profile.mapper
 
-import kr.co.data.proto.GenderProto
-import kr.co.domain.feature.profile.model.Gender
+import kr.co.core.datastore.proto.GenderProto
+import kr.co.core.common.model.Gender
 
 object GenderMapper {
     fun Gender.toGenderProto(): GenderProto {

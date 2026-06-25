@@ -1,6 +1,6 @@
 package kr.co.data.feature.session.source.local
 
-import kr.co.data.local.datastore.MinaryPrefsDataStore
+import kr.co.core.datastore.app.MinaryPrefsDataStore
 import javax.inject.Inject
 import javax.inject.Singleton
 

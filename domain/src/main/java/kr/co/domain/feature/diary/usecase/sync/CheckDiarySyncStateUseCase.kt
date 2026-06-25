@@ -3,8 +3,8 @@ package kr.co.domain.feature.diary.usecase.sync
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import kotlinx.coroutines.flow.first
-import kr.co.domain.error.DomainError
-import kr.co.domain.feature.diary.repository.sync.DiarySyncStateRepository
+import kr.co.core.common.error.DomainError
+import kr.co.domain.feature.diary.sync.DiarySyncStateRepository
 import javax.inject.Inject
 
 class CheckDiarySyncStateUseCase @Inject constructor(

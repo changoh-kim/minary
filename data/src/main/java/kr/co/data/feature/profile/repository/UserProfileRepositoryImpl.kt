@@ -10,16 +10,16 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kr.co.data.extension.TAG
+import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.profile.mapper.UserProfileMapper.toUserProfile
 import kr.co.data.feature.profile.mapper.UserProfileMapper.toUserProfileProto
 import kr.co.data.feature.profile.source.local.UserProfileLocalDataSource
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.profile.model.UserProfile
 import kr.co.domain.feature.profile.repository.UserProfileRepository
-import kr.co.domain.feature.profile.service.ImageProcessor
-import kr.co.domain.feature.profile.service.sync.UserProfileSyncScheduler
+import kr.co.domain.service.image.ImageProcessor
+import kr.co.domain.feature.profile.sync.UserProfileSyncScheduler
 import java.io.File
 import javax.inject.Inject
 

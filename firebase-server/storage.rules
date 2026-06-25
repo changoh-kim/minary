@@ -7,13 +7,13 @@ service firebase.storage {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
     // 사용자 프로필 사진
     match /profile_photos/{fileName} {
-      allow read, write: if isAuthenticated()
+      // 읽기 권한: 인증된 사용자라면 허용
+      allow read: if isAuthenticated();
+
+      // 쓰기 권한: 본인 파일만 가능하며, 크기와 타입 검증 포함
+      allow write: if isAuthenticated()
         && fileName == request.auth.uid + ".jpg"
         && request.resource.size < 5 * 1024 * 1024
         && request.resource.contentType.matches("image/.*");

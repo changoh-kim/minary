@@ -1,7 +1,7 @@
 package kr.co.domain.feature.diary.usecase.sync
 
 import kotlinx.coroutines.flow.Flow
-import kr.co.domain.feature.diary.model.SyncStatus
+import kr.co.core.common.state.SyncStatus
 import kr.co.domain.feature.diary.repository.DiaryRepository
 import java.time.YearMonth
 import javax.inject.Inject

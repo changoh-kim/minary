@@ -2,7 +2,7 @@ package kr.co.data.feature.search.repository
 
 import kotlinx.coroutines.flow.Flow
 import kr.co.data.feature.search.source.SearchLocalDataSource
-import kr.co.data.local.entity.RecentSearchEntity
+import kr.co.core.database.entity.RecentSearchEntity
 import kr.co.domain.feature.search.repository.SearchRepository
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -22,6 +22,14 @@ dependencyResolutionManagement {
 
 rootProject.name = "Minary"
 include(":app")
+include(":core:common")
+include(":core:di")
+include(":core:ui:common")
+include(":core:ui:design")
+include(":core:storage")
+include(":core:database")
+include(":core:datastore")
+include(":core:firebase")
 include(":domain")
 include(":data")
 include(":presentation")

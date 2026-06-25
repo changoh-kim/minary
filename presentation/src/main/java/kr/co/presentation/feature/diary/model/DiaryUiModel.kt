@@ -4,12 +4,11 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
-import kr.co.domain.feature.diary.model.DiarySyncStatus
-import kr.co.domain.feature.emotion.model.Emotion
-import kr.co.presentation.common.parceler.LocalDateParceler
+import kr.co.core.common.model.Emotion
+import kr.co.core.common.state.DiarySyncStatus
+import kr.co.core.ui.common.parceler.LocalDateParceler
 import java.time.LocalDate
 import java.util.UUID
-
 
 @Immutable
 @Parcelize

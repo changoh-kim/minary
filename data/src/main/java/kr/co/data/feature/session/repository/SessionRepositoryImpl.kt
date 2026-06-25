@@ -8,12 +8,12 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kr.co.data.extension.TAG
+import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.session.mapper.UserSessionMapper.toUserSession
 import kr.co.data.feature.session.source.local.SessionLocalDataSource
 import kr.co.data.feature.session.source.remote.SessionRemoteDataSource
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.session.model.UserSession
 import kr.co.domain.feature.session.repository.SessionRepository
 import javax.inject.Inject

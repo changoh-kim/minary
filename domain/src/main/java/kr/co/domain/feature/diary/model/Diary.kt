@@ -1,7 +1,7 @@
 package kr.co.domain.feature.diary.model
 
-import kr.co.domain.feature.diary.model.DiarySyncStatus
-import kr.co.domain.feature.emotion.model.Emotion
+import kr.co.core.common.model.Emotion
+import kr.co.core.common.state.DiarySyncStatus
 import java.time.LocalDate
 import java.util.UUID
 

@@ -1,10 +1,10 @@
 package kr.co.domain.feature.account.usecase
 
 import com.github.michaelbull.result.Result
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.account.model.SignUpInfo
 import kr.co.domain.feature.account.service.AccountService
-import kr.co.domain.feature.time.service.ServerTimeProvider
+import kr.co.domain.service.time.ServerTimeProvider
 import javax.inject.Inject
 
 class CreateAccountUseCase @Inject constructor(

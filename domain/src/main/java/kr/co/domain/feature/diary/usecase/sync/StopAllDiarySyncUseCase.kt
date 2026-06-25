@@ -1,6 +1,6 @@
 package kr.co.domain.feature.diary.usecase.sync
 
-import kr.co.domain.feature.diary.service.sync.DiarySyncScheduler
+import kr.co.domain.feature.diary.sync.DiarySyncScheduler
 import javax.inject.Inject
 
 class StopAllDiarySyncUseCase @Inject constructor(
