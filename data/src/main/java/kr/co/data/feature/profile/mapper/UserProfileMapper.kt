@@ -3,9 +3,9 @@ package kr.co.data.feature.profile.mapper
 import kr.co.data.feature.profile.mapper.GenderMapper.toGender
 import kr.co.data.feature.profile.mapper.GenderMapper.toGenderProto
 import kr.co.data.feature.profile.model.UserProfileDto
-import kr.co.data.proto.UserProfileProto
-import kr.co.domain.common.extension.toGender
-import kr.co.domain.common.extension.toLocalDate
+import kr.co.core.datastore.proto.UserProfileProto
+import kr.co.core.common.extension.toGender
+import kr.co.core.common.extension.toLocalDate
 import kr.co.domain.feature.profile.model.UserProfile
 import java.time.LocalDate
 

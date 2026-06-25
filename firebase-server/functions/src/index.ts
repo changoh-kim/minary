@@ -6,7 +6,7 @@ import {onObjectFinalized} from "firebase-functions/v2/storage";
 import {setGlobalOptions} from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import * as logger from "firebase-functions/logger";
-import {getDownloadURL} from "firebase-admin/storage";
+import {randomUUID} from "crypto";
 
 if (!admin.apps.length) {
   admin.initializeApp();
@@ -19,6 +19,14 @@ setGlobalOptions({
   invoker: "public",
   enforceAppCheck: false,
 });
+
+const PROJECT_ID =
+  process.env.GCLOUD_PROJECT ||
+  process.env.GOOGLE_CLOUD_PROJECT ||
+  "minary-2c818";
+const STORAGE_BUCKET =
+  process.env.FIREBASE_STORAGE_BUCKET ||
+  `${PROJECT_ID}.firebasestorage.app`;
 
 interface CreateAccountRequest {
   email?: string;
@@ -53,6 +61,31 @@ async function assertServiceAvailable(): Promise<void> {
       data.maintenanceReason || "The system is currently undergoing maintenance for a better service"
     );
   }
+}
+
+async function getStorageDownloadUrl(
+  bucketName: string,
+  filePath: string,
+  customMetadata: {[key: string]: string}
+): Promise<string> {
+  let downloadToken = customMetadata.firebaseStorageDownloadTokens?.split(",")[0];
+
+  if (!downloadToken) {
+    downloadToken = randomUUID();
+    const bucket = admin.storage().bucket(bucketName);
+    const file = bucket.file(filePath);
+
+    await file.setMetadata({
+      metadata: {
+        ...customMetadata,
+        firebaseStorageDownloadTokens: downloadToken,
+      },
+    });
+  }
+
+  const encodedPath = encodeURIComponent(filePath);
+  return `https://firebasestorage.googleapis.com/v0/b/${bucketName}` +
+    `/o/${encodedPath}?alt=media&token=${downloadToken}`;
 }
 
 // 회원가입 이메일 중복 확인
@@ -195,9 +228,14 @@ export const deleteAccountAndUserData = onCall(
 
       // 2. 프로필 사진 삭제 (Storage)
       try {
-        const bucket = admin.storage().bucket();
-        const profilePhotoFile = bucket.file(`profile_photos/${uid}.jpg`);
+        const profilePhotoPath = `profile_photos/${uid}.jpg`;
+        const bucket = admin.storage().bucket(STORAGE_BUCKET);
+        const profilePhotoFile = bucket.file(profilePhotoPath);
         await profilePhotoFile.delete({ignoreNotFound: true});
+        logger.info(
+          `Deleted profile photo for user ${uid} ` +
+          `from ${STORAGE_BUCKET}/${profilePhotoPath}`
+        );
       } catch (error) {
         logger.error(`Error deleting profile photo for user ${uid}:`, error);
       }
@@ -241,13 +279,13 @@ export const onProfilePhotoUploaded = onObjectFinalized(
     }
 
     try {
-      const bucket = admin.storage().bucket(event.data.bucket);
-      const file = bucket.file(filePath);
-
-      const downloadUrl = await getDownloadURL(file);
-
       // Metadata에서 lastModifiedAt 추출 (문자열 -> 숫자 변환)
       const customMetadata = event.data.metadata || {};
+      const downloadUrl = await getStorageDownloadUrl(
+        event.data.bucket,
+        filePath,
+        customMetadata
+      );
       const lastModifiedAt = customMetadata.lastModifiedAt ?
         parseInt(customMetadata.lastModifiedAt) :
         (event.data.updated ?
@@ -260,10 +298,10 @@ export const onProfilePhotoUploaded = onObjectFinalized(
         .collection("profile")
         .doc("userProfile");
 
-      await profileRef.update({
+      await profileRef.set({
         profilePhotoUrl: downloadUrl,
         lastModifiedAt,
-      });
+      }, {merge: true});
 
       logger.info(`Profile photo updated via trigger for user: ${uid} ` +
           `with timestamp: ${lastModifiedAt}`);
@@ -274,7 +312,6 @@ export const onProfilePhotoUploaded = onObjectFinalized(
 );
 
 const slackWebhookSecret = defineSecret("SLACK_WEBHOOK_URL");
-const PROJECT_ID = process.env.GCLOUD_PROJECT || "";
 
 // Slack 알림 메세지 전송
 async function sendSlackAlert(

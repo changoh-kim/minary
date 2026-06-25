@@ -1,10 +1,10 @@
 package kr.co.data.feature.setting.mapper
 
 import kr.co.data.feature.setting.model.UserSettingsDto
-import kr.co.data.proto.ThemeProto
-import kr.co.data.proto.UserSettingsProto
-import kr.co.domain.common.extension.toAppTheme
-import kr.co.domain.feature.setting.model.AppTheme
+import kr.co.core.datastore.proto.ThemeProto
+import kr.co.core.datastore.proto.UserSettingsProto
+import kr.co.core.common.extension.toAppTheme
+import kr.co.core.common.model.AppTheme
 import kr.co.domain.feature.setting.model.UserSettings
 
 object UserSettingsMapper {

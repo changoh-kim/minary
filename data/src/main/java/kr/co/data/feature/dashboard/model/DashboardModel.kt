@@ -1,7 +1,7 @@
 package kr.co.data.feature.dashboard.model
 
-import kr.co.data.feature.diary.source.local.model.DiaryWithRelations
-import kr.co.domain.feature.emotion.model.Emotion
+import kr.co.core.database.model.DiaryWithRelations
+import kr.co.core.common.model.Emotion
 
 data class DashboardModel(
     val recentDiaries: List<DiaryWithRelations?> = emptyList(),

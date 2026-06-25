@@ -5,13 +5,13 @@ import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
-import kr.co.data.extension.TAG
+import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.dashboard.mapper.DashboardMapper.toDashboard
 import kr.co.data.feature.dashboard.model.DashboardModel
-import kr.co.data.feature.diary.source.local.model.DiaryWithRelations
-import kr.co.data.local.provider.UserDatabaseProvider
-import kr.co.domain.error.DomainError
+import kr.co.core.database.model.DiaryWithRelations
+import kr.co.core.database.provider.UserDatabaseProvider
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.dashboard.model.Dashboard
 import kr.co.domain.feature.dashboard.repository.DashboardRepository
 import java.time.LocalDate

@@ -1,7 +1,7 @@
 package kr.co.domain.feature.account.usecase
 
 import com.github.michaelbull.result.Result
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.account.service.AccountService
 import javax.inject.Inject
 

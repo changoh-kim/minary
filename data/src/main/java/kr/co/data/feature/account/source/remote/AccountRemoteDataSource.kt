@@ -1,19 +1,19 @@
 package kr.co.data.feature.account.source.remote
 
 import com.google.firebase.auth.EmailAuthProvider
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
+import kr.co.core.firebase.provider.FirebaseAuthProvider
+import kr.co.core.firebase.provider.FirebaseFunctionsProvider
 import kr.co.data.feature.account.exception.AccountException
 import kr.co.data.feature.account.model.AccountModel
-import kr.co.data.remote.firebase.provider.FirebaseFunctionsProvider
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class AccountRemoteDataSource @Inject constructor(
-    private val firebaseAuth: FirebaseAuth,
+    private val firebaseAuthProvider: FirebaseAuthProvider,
     private val firebaseFunctionsProvider: FirebaseFunctionsProvider,
 ) {
     companion object {
@@ -59,7 +59,7 @@ class AccountRemoteDataSource @Inject constructor(
     }
 
     suspend fun deleteAccount(password: String): String {
-        val firebaseUser = firebaseAuth.currentUser
+        val firebaseUser = firebaseAuthProvider.currentUser
             ?: throw AccountException.UserNotFoundException()
 
         try {
@@ -70,7 +70,7 @@ class AccountRemoteDataSource @Inject constructor(
         }
         // 2. 재인증 (비밀번호 확인 및 토큰 갱신)
         val currentUser =
-            firebaseAuth.currentUser ?: throw AccountException.SessionExpiredException()
+            firebaseAuthProvider.currentUser ?: throw AccountException.SessionExpiredException()
         val email = currentUser.email ?: throw AccountException.UserNotFoundException()
 
         reauthenticate(currentUser, email, password)
@@ -82,7 +82,7 @@ class AccountRemoteDataSource @Inject constructor(
             .await()
 
         // 4. [추가] 클라이언트 세션 명시적 정리
-        firebaseAuth.signOut()
+        firebaseAuthProvider.signOut()
 
         return currentUser.uid
     }
@@ -99,7 +99,7 @@ class AccountRemoteDataSource @Inject constructor(
         require(email.isNotBlank()) { "Failed to sign in: Email is blank." }
         require(password.isNotBlank()) { "Failed to sign in: Password is blank." }
 
-        val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+        val result = firebaseAuthProvider.signInWithEmailAndPassword(email, password).await()
         val firebaseUser = result.user
             ?: throw AccountException.UserNotFoundException()
 
@@ -109,7 +109,7 @@ class AccountRemoteDataSource @Inject constructor(
         )
     }
 
-    fun signOut() = firebaseAuth.signOut()
+    fun signOut() = firebaseAuthProvider.signOut()
 
     suspend fun checkEmailAvailability(email: String): Boolean {
         require(email.isNotBlank()) { "Failed to check email availability: Email is blank." }

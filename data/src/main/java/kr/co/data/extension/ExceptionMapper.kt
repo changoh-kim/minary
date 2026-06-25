@@ -15,7 +15,7 @@ import com.google.firebase.storage.StorageException
 import kr.co.data.feature.account.exception.AccountException
 import kr.co.data.feature.diary.exception.DiaryException
 import kr.co.data.feature.time.exception.TimeException
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 
 
 fun Throwable.toDomainError(): DomainError = when (this) {

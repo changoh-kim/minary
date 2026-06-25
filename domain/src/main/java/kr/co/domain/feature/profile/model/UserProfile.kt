@@ -1,7 +1,7 @@
 package kr.co.domain.feature.profile.model
 
+import kr.co.core.common.model.Gender
 import java.time.LocalDate
-
 
 data class UserProfile(
     val uid: String = "",

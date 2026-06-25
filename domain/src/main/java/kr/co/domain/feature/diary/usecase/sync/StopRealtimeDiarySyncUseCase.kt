@@ -1,6 +1,6 @@
 package kr.co.domain.feature.diary.usecase.sync
 
-import kr.co.domain.feature.diary.service.sync.DiaryRealtimeSyncManager
+import kr.co.domain.feature.diary.sync.DiaryRealtimeSyncManager
 import javax.inject.Inject
 
 

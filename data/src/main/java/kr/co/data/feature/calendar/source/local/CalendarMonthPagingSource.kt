@@ -6,8 +6,8 @@ import com.github.michaelbull.result.get
 import kotlinx.coroutines.flow.first
 import kr.co.data.feature.calendar.model.CalendarDayModel
 import kr.co.data.feature.calendar.model.CalendarMonthModel
-import kr.co.domain.feature.calendar.service.CalendarGenerator
-import kr.co.domain.feature.diary.model.SyncStatus
+import kr.co.domain.feature.calendar.generator.CalendarGenerator
+import kr.co.core.common.state.SyncStatus
 import kr.co.domain.feature.diary.repository.DiaryRepository
 import kr.co.domain.feature.session.repository.SessionRepository
 import java.time.YearMonth

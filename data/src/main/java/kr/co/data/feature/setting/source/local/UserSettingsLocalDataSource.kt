@@ -5,10 +5,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kr.co.data.extension.TAG
-import kr.co.data.local.provider.UserSettingsDataStoreProvider
-import kr.co.data.proto.ThemeProto
-import kr.co.data.proto.UserSettingsProto
+import kr.co.core.common.extension.TAG
+import kr.co.core.datastore.settings.UserSettingsDataStoreProvider
+import kr.co.core.datastore.proto.ThemeProto
+import kr.co.core.datastore.proto.UserSettingsProto
 import javax.inject.Inject
 
 class UserSettingsLocalDataSource @Inject constructor(

@@ -4,9 +4,9 @@ import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.onErr
-import kr.co.domain.error.DomainError
-import kr.co.domain.feature.diary.repository.sync.DiarySyncStateRepository
-import kr.co.domain.feature.diary.service.sync.DiarySyncScheduler
+import kr.co.core.common.error.DomainError
+import kr.co.domain.feature.diary.sync.DiarySyncStateRepository
+import kr.co.domain.feature.diary.sync.DiarySyncScheduler
 import javax.inject.Inject
 
 class StartDiarySyncUseCase @Inject constructor(

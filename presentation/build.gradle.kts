@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
@@ -10,12 +9,12 @@ plugins {
 
 android {
     namespace = "kr.co.presentation"
-    compileSdk = 35
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 28
+        minSdk = libs.versions.minSdk.get().toInt()
 
-        buildConfigField("String", "VERSION_NAME", "\"${libs.versions.appVersion.get()}\"")
+        buildConfigField("String", "VERSION_NAME", "\"${libs.versions.appVersionName.get()}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -30,16 +29,21 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
     }
 }
 
@@ -55,8 +59,10 @@ composeCompiler {
 }
 
 dependencies {
+    implementation(project(":core:common"))
+    implementation(project(":core:ui:common"))
+    implementation(project(":core:ui:design"))
     implementation(project(":domain"))
-    implementation(libs.androidx.compose.ui)
     // hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
@@ -87,6 +93,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.kotlin.parcelize.runtime)
 
     // paging
     implementation(libs.androidx.paging.compose)

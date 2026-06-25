@@ -1,6 +1,6 @@
 package kr.co.data.feature.calendar.model
 
-import kr.co.domain.feature.diary.model.SyncStatus
+import kr.co.core.common.state.SyncStatus
 import java.time.YearMonth
 
 data class CalendarMonthModel(

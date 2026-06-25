@@ -7,7 +7,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kr.co.data.di.qualifier.GeminiApiKey
+import kr.co.core.di.qualifier.GeminiApiKey
 import kr.co.minary.BuildConfig
 import javax.inject.Singleton
 

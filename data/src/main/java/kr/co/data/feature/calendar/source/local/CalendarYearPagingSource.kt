@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import kr.co.data.feature.calendar.mapper.CalendarMonthMapper.toCalendarMonthModel
 import kr.co.data.feature.calendar.model.CalendarMonthModel
-import kr.co.domain.feature.calendar.service.CalendarGenerator
+import kr.co.domain.feature.calendar.generator.CalendarGenerator
 import java.time.Year
 
 class CalendarYearPagingSource(

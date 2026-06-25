@@ -1,7 +1,7 @@
 package kr.co.domain.feature.search.usecase
 
 import kr.co.domain.feature.search.repository.SearchRepository
-import kr.co.domain.feature.time.service.ServerTimeProvider
+import kr.co.domain.service.time.ServerTimeProvider
 import javax.inject.Inject
 
 class AddRecentSearchUseCase @Inject constructor(

@@ -6,11 +6,15 @@ secrets.properties
 signing.properties
 apikeys.properties
 keys.properties
+KEYS
+KEYS.*
+*.pem
+*.key
 
 # Android Signing
 *.jks
 *.keystore
-.p12
+*.p12
 
 # Firebase / GCP Credentials
 google-services.json
@@ -18,41 +22,73 @@ GoogleService-Info.plist
 service-account.json
 firebase-admin.json
 credentials.json
+*-service-account.json
 
 # Build Outputs
 **/build/
 .gradle/
+.kotlin/
+out/
+bin/
+gen/
+obj/
+captures/
+.externalNativeBuild/
+.cxx/
+gen-external-apklibs/
+proguard/
 
-# IDE
+# IDE / Local Machine State
 .idea/
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries/
+.idea/**/shelf/
+.idea/**/httpRequests/
+.idea/caches/
+.idea/libraries/
 *.iml
+*.ipr
+*.iws
+.DS_Store
+._*
+*.icloud
+*~
+*.swp
 
-# Generated Sources
+# Generated Sources / Reports
 **/generated/
 **/_build/
 **/schemas/
-**/proto/
+**/reports/
+**/test-results/
 
 # Android Artifacts
 *.apk
+*.ap_
 *.aab
 *.aar
+*.dex
+*.class
+output.json
+.signing/
 
-# Firebase Functions
+# Firebase Functions Outputs
 firebase-server/lib/
 firebase-server/dist/
 firebase-server/.runtimeconfig.json
 firebase-server/node_modules/
-
-# CI/CD
-.github/workflows/
-fastlane/
+firebase-debug.log
+firestore-debug.log
+pubsub-debug.log
+firebase-server/*-debug.log
 
 # Logs
 *.log
 logs/
 
-# Backup
+# Backup / Exports
 backup/
 exports/
 
@@ -60,12 +96,22 @@ exports/
 coverage/
 *.hprof
 
-# Large Assets
+# Fastlane Outputs / Secrets
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+fastlane/*.json
+fastlane/*.p8
+
+# Local Databases / Large Assets
+*.db
+*.sqlite
+*.sqlite3
 *.mp4
 *.mov
 *.zip
-*.db
 
-# Internal Documents (optional)
+# Internal Documents
 docs/internal/
-docs/securit
+docs/security/

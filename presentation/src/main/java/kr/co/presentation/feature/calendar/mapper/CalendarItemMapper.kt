@@ -3,13 +3,11 @@ package kr.co.presentation.feature.calendar.mapper
 import kotlinx.collections.immutable.toImmutableList
 import kr.co.domain.feature.calendar.model.CalendarDay
 import kr.co.domain.feature.calendar.model.CalendarMonth
+import kr.co.presentation.feature.calendar.mapper.CalendarDiaryUiMapper.toCalendarDiaryUiModel
 import kr.co.presentation.feature.calendar.model.CalendarDayItem
 import kr.co.presentation.feature.calendar.model.CalendarMonthItem
-import kr.co.presentation.feature.diary.mapper.DiaryUiModelMapper.toDiaryUiModel
-
 
 object CalendarItemMapper {
-
     fun CalendarMonth.toCalendarMonthItem(): CalendarMonthItem {
         return CalendarMonthItem(
             yearMonth = this.yearMonth,
@@ -22,7 +20,7 @@ object CalendarItemMapper {
         return CalendarDayItem(
             date = this.date,
             isCurrentMonth = this.isCurrentMonth,
-            diary = this.diary?.toDiaryUiModel()
+            diary = this.diary?.toCalendarDiaryUiModel()
         )
     }
 }

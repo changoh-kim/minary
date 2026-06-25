@@ -1,6 +1,6 @@
 package kr.co.domain.feature.account.model
 
-import kr.co.domain.feature.profile.model.Gender
+import kr.co.core.common.model.Gender
 import java.time.LocalDate
 
 data class SignUpInfo(

@@ -1,11 +1,11 @@
 package kr.co.domain.feature.diary.usecase
 
 import com.github.michaelbull.result.Result
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.diary.model.Diary
-import kr.co.domain.feature.diary.model.DiarySyncStatus
+import kr.co.core.common.state.DiarySyncStatus
 import kr.co.domain.feature.diary.repository.DiaryRepository
-import kr.co.domain.feature.time.service.ServerTimeProvider
+import kr.co.domain.service.time.ServerTimeProvider
 import javax.inject.Inject
 
 

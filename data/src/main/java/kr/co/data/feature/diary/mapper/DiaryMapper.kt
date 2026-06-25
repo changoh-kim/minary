@@ -1,14 +1,14 @@
 package kr.co.data.feature.diary.mapper
 
 import kr.co.data.feature.diary.model.DiaryDto
-import kr.co.data.feature.diary.source.local.model.DiaryWithRelations
-import kr.co.data.local.entity.DiaryEmotionEntity
-import kr.co.data.local.entity.DiaryEntity
-import kr.co.data.local.entity.DiaryImageUrlEntity
-import kr.co.domain.common.extension.toEmotion
-import kr.co.domain.common.extension.toLocalDate
+import kr.co.core.database.model.DiaryWithRelations
+import kr.co.core.database.entity.DiaryEmotionEntity
+import kr.co.core.database.entity.DiaryEntity
+import kr.co.core.database.entity.DiaryImageUrlEntity
+import kr.co.core.common.extension.toEmotion
+import kr.co.core.common.extension.toLocalDate
 import kr.co.domain.feature.diary.model.Diary
-import kr.co.domain.feature.diary.model.DiarySyncStatus
+import kr.co.core.common.state.DiarySyncStatus
 
 object DiaryMapper {
     fun Diary.toDiaryWithRelations() = DiaryWithRelations(

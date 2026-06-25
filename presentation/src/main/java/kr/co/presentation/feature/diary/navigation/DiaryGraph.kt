@@ -3,26 +3,26 @@ package kr.co.presentation.feature.diary.navigation
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import kr.co.presentation.feature.diary.screen.DiaryEditScreen
-import kr.co.presentation.feature.diary.screen.DiaryPreviewScreen
-import kr.co.presentation.navigation.DiaryEditRoute
-import kr.co.presentation.navigation.DiaryPreviewRoute
-import kr.co.presentation.navigation.MinaryAppState
+import kr.co.presentation.feature.diary.screen.edit.DiaryEditScreen
+import kr.co.presentation.feature.diary.screen.detail.DiaryDetailScreen
+import kr.co.presentation.app.navigation.route.DiaryEditRoute
+import kr.co.presentation.app.navigation.route.DiaryDetailRoute
+import kr.co.presentation.app.navigation.MinaryAppState
 import java.time.LocalDate
 
 
 internal fun NavGraphBuilder.diaryGraph(
     appState: MinaryAppState,
 ) {
-    composable<DiaryPreviewRoute> {
-        DiaryPreviewScreen(
+    composable<DiaryDetailRoute> {
+        DiaryDetailScreen(
             onDiaryDeleted = { appState.navigateBack() },
             onLoadFailed = { appState.navigateBack() },
             onBack = { appState.navigateBack() },
             onNavigateToEdit = { date, isNewDiary ->
                 if (isNewDiary) {
                     appState.navigateToDiaryEdit(date, isNewDiary = true) {
-                        popUpTo<DiaryPreviewRoute> { inclusive = true }
+                        popUpTo<DiaryDetailRoute> { inclusive = true }
                     }
                 } else {
                     appState.navigateToDiaryEdit(date, isNewDiary = false)
@@ -38,7 +38,7 @@ internal fun NavGraphBuilder.diaryGraph(
         DiaryEditScreen(
             onDiarySaved = {
                 if (route.isNewDiary) {
-                    appState.navigateToDiaryPreview(date) {
+                    appState.navigateToDiaryDetail(date) {
                         popUpTo<DiaryEditRoute> { inclusive = true }
                     }
                 } else {

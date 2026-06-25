@@ -4,15 +4,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import kr.co.presentation.feature.setting.screen.ProfileDetailScreen
-import kr.co.presentation.feature.setting.screen.ProfileEditScreen
-import kr.co.presentation.feature.setting.screen.SettingsScreen
-import kr.co.presentation.navigation.MinaryAppState
-import kr.co.presentation.navigation.ProfileDetailRoute
-import kr.co.presentation.navigation.ProfileEditRoute
-import kr.co.presentation.navigation.SettingsRoute
-import kr.co.presentation.navigation.SettingsTabRoute
-
+import kr.co.presentation.feature.setting.screen.profiledetail.ProfileDetailScreen
+import kr.co.presentation.feature.setting.screen.profileedit.ProfileEditScreen
+import kr.co.presentation.feature.setting.screen.settings.SettingsScreen
+import kr.co.presentation.app.navigation.MinaryAppState
+import kr.co.presentation.app.navigation.route.ProfileDetailRoute
+import kr.co.presentation.app.navigation.route.ProfileEditRoute
+import kr.co.presentation.app.navigation.route.SettingsRoute
+import kr.co.presentation.app.navigation.route.SettingsTabRoute
 
 internal fun NavGraphBuilder.settingsGraph(
     appState: MinaryAppState,

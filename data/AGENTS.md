@@ -1,27 +1,51 @@
 # data/AGENTS.md
 
 > **BLUF**
-> Room(관계형/일기)과 Proto DataStore(설정)를 SSOT로 관리하며, Firebase 연동 및 WorkManager 백그라운드 동기화를 수행하는 데이터 구현 계층이다.
+> `:data`는 domain contract의 구현 계층이다. Local SSOT, Firebase 연동, sync orchestration을 담당하되 infra provider는 `core` 모듈을 사용한다.
 
-## 1. SSOT (Offline-first) 및 구현 규칙
-- **SSOT**: 모든 데이터는 Local DB(Room/DataStore)를 경유한다. UI는 오직 로컬의 `Flow`만 구독한다.
-- **Provider & Paths**: Firebase 인스턴스에 직접 접근하지 않고 `FirebaseFirestoreProvider` 등 Provider 클래스를 통해 캡슐화한다. 경로 수정 시 서버 측 `rules` 및 `functions`와의 동기화가 필수적이다.
-- **DataStore**: `MinaryPrefsDataStore` 등 Protobuf 기반 설정을 관리하며, 스키마 변경 시 세심한 주의를 요한다.
-- **모델 명명**: 로컬 DB 테이블은 **`Entity`**, 서버 통신 모델은 **`Dto`** 접미사를 엄격히 구분하여 사용한다.
-- **Room 규칙**: DAO는 Flow 반환을 우선한다 (`observe(): Flow<List<Entity>>`). Transaction이 필요한 경우 `@Transaction`을 사용하며, UI에서 DAO 직접 접근을 금지한다.
+## 역할
+- RepositoryImpl, DataSource, Mapper, SyncManager/Worker, domain contract binding을 소유한다.
+- Room/DataStore 기반 local source를 SSOT로 사용하고 Firebase와 동기화한다.
+- 외부 예외를 `DomainError` 또는 `Result<Value, DomainError>` 흐름으로 변환해 domain/presentation 경계를 안정화한다.
+- Firebase read/write 비용과 offline 동작을 동시에 보호한다.
 
-## 2. 동기화 및 비용 최적화 (LWW & Chunked)
-- **SyncManager**: 동기화 로직은 RepositoryImpl 내부에 직접 작성하지 않고 `Repository -> SyncManager -> DataSource` 구조를 유지한다. Sync 과정은 Upload, Download, Conflict Resolution 3단계로 분리한다.
-- **LWW**: `lastModifiedAt`을 비교하여 최신 데이터를 덮어쓴다. 로컬이 최신이면 로컬 데이터로, 원격이 최신이면 원격 데이터로 업데이트 한다.
-- **Cost**: Realtime Listener는 최소화하고, 필요한 시점에만 `get()`을 통해 Fetch 한다. `CHUNK_SIZE = 50` 정책을 준수한다.
-- **Worker**: Worker는 Domain 계약(`SyncManager`)에 작업을 위임하는 껍데기 역할만 수행한다. 주요 역할은 **1. 실행 조건 확인, 2. Domain 계약 호출, 3. 결과 반환**으로 한정하며 비즈니스 로직을 포함하지 않는다.
+## 의존성 규칙
+- `:domain`과 필요한 `:core:*`에 의존한다.
+- Room 구성요소는 `:core:database`, Proto DataStore 구성요소는 `:core:datastore`, Firebase provider는 `:core:firebase`, local storage provider는 `:core:storage`, 공통 DI는 `:core:di`를 사용한다.
+- Firebase SDK 인스턴스는 직접 주입하지 않는다. Auth/Firestore/Functions/Storage/RemoteConfig 접근은 `:core:firebase` provider를 통해 수행한다.
+- `:presentation`과 `:app`을 참조하지 않는다.
+- domain contract에 구현 기술 API가 새어 나가지 않게 한다.
 
-## 3. DI 및 Coroutine 규칙
-- **DI 모듈 분리**: Domain 계층의 계약(Interface)과 이를 수행하는 Data 계층의 구현체 간 의존성 바인딩은 반드시 `data/di/module/feature/` 내에 분리된 Hilt 모듈로 작성한다.
-- **인프라 설정**: DB, Network, RemoteConfig 등 공통 인프라 설정은 `data/di/module/infra/`에서 관리한다.
-- **Qualifier 사용**: 동일한 타입의 의존성(예: Coroutine Dispatcher) 주입 시 `data/di/qualifier/`에 정의된 한정자를 반드시 사용한다.
-- **Coroutine**: Dispatcher 직접 사용을 금지한다. 반드시 Hilt로 주입받은 `@IoDispatcher`, `@DefaultDispatcher`를 사용하여 테스트 가능성을 유지한다.
+## 패키지/코드 배치 규칙
+- feature 구현은 `feature/{name}` 하위에 둔다.
+- feature 내부는 필요에 따라 `repository`, `source`, `mapper`, `model`, `sync`로 구분한다.
+- 공통 service 구현은 `service/*`에 둔다.
+- DI는 Constructor Injection을 우선하고, `@Binds`, `@Provides`는 필요한 경우에만 사용하고, feature/service 성격에 맞춰 분리한다.
+- local model은 `Entity`, remote model은 `Dto` 접미사를 사용한다.
+- `Entity <-> Domain`, `Dto <-> Domain` 변환은 명시적 mapper로 처리한다.
+- Firebase SDK는 provider를 통해 접근하고, 경로 문자열 변경 시 `:core:firebase`와 `firebase-server`를 함께 갱신한다.
+- Firebase 예외 타입, listener registration, snapshot처럼 data 구현에 필요한 SDK value/type 사용은 허용하되, SDK singleton 인스턴스 접근은 provider로 제한한다.
+- Firebase/Room/DataStore/IO 실패는 data 내부에서 변환하고, raw exception을 domain/presentation으로 노출하지 않는다.
 
-## 4. Mapper 및 에러 매핑
-- **Mapper**: `Entity` <-> `Domain`, `Dto` <-> `Domain` 변환을 위한 명시적 Mapper(`DiaryMapper` 등)를 반드시 사용한다. 모델 수정 시 Mapper를 즉시 업데이트한다.
-- **Error Mapping**: Firebase/Room의 모든 외부 예외는 `ExceptionMapper.kt`를 통해 `DomainError`로 변환한다. (`runSuspendCatching` 사용 권장)
+## 금지사항
+- UI 상태, Compose, ViewModel, navigation을 참조하지 않는다.
+- `FirebaseAuth`, `FirebaseFirestore`, `FirebaseFunctions`, `FirebaseStorage`, `FirebaseRemoteConfig`를 생성자에 직접 주입하지 않는다.
+- RepositoryImpl에 복잡한 sync 정책을 직접 누적하지 않는다. sync 책임은 별도 sync 구성요소로 분리한다.
+- Firestore realtime listener와 remote read 범위를 비용 고려 없이 넓히지 않는다.
+- Coroutine Dispatcher를 직접 고정하지 않는다. `:core:di` qualifier로 주입받은 dispatcher/scope를 사용한다.
+- PII를 로그에 남기지 않는다.
+
+## 변경 시 체크리스트
+- local schema나 DAO 영향 변경 시 mapper, migration, query 비용을 확인한다.
+- remote 경로나 payload 변경 시 `:core:firebase`와 `firebase-server`를 함께 검증한다.
+- sync 정책 변경 시 LWW 기준 시간, Worker 실행 조건, retry/idempotency를 확인한다.
+- diary chunk sync 변경 시 `CHUNK_SIZE` 기준과 Upload/Download/Conflict Resolution 흐름을 함께 검증한다.
+- 새 binding 추가 시 domain contract와 data 구현체의 방향이 맞는지 확인한다.
+- Firebase 호출 추가 시 read/write 횟수, listener lifecycle, offline fallback을 검증한다.
+
+## 권장 검증
+- `./gradlew :data:test`
+- `./gradlew :data:compileDebugKotlin`
+- import 경계 확인: `rg "kr\\.co\\.presentation|androidx\\.compose" data/src/main/java`
+- Firebase SDK 직접 주입 확인: `rg ": Firebase(Auth|Firestore|Functions|Storage|RemoteConfig)[,)]" data/src/main/java -g "*.kt"`
+- Firebase 경로 변경 시 `firebase-server` rules/functions와 함께 smoke check한다.

@@ -1,9 +1,9 @@
 package kr.co.domain.feature.account.usecase
 
 import com.github.michaelbull.result.Result
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.account.service.AccountService
-import kr.co.domain.feature.diary.service.sync.DiarySyncScheduler
+import kr.co.domain.feature.diary.sync.DiarySyncScheduler
 import kr.co.domain.feature.diary.usecase.sync.StopRealtimeDiarySyncUseCase
 import kr.co.domain.feature.profile.usecase.sync.StopRealtimeUserProfileSyncUseCase
 import kr.co.domain.feature.setting.usecase.sync.StopRealtimeUserSettingsSyncUseCase

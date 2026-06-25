@@ -2,7 +2,7 @@ package kr.co.domain.feature.setting.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kr.co.domain.feature.setting.model.AppTheme
+import kr.co.core.common.model.AppTheme
 import kr.co.domain.feature.setting.repository.UserSettingsRepository
 import javax.inject.Inject
 

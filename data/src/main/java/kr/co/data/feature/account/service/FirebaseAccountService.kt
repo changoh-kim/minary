@@ -6,11 +6,11 @@ import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
-import kr.co.data.extension.TAG
+import kr.co.core.common.error.DomainError
+import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.account.mapper.AccountMapper.toAccount
 import kr.co.data.feature.account.source.remote.AccountRemoteDataSource
-import kr.co.domain.error.DomainError
 import kr.co.domain.feature.account.model.Account
 import kr.co.domain.feature.account.model.SignUpInfo
 import kr.co.domain.feature.account.service.AccountService

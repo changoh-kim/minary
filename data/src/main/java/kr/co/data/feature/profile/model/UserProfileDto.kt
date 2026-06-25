@@ -4,7 +4,7 @@ import androidx.annotation.Keep
 import com.google.firebase.firestore.PropertyName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kr.co.data.proto.GenderProto
+import kr.co.core.datastore.proto.GenderProto
 
 @Keep
 @Serializable

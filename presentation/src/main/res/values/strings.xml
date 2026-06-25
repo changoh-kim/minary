@@ -100,7 +100,7 @@
     <string name="diary_entry_date_label">ENTRY DATE</string>
     <string name="diary_your_story_label">Your Story</string>
     <string name="diary_emotion_label">EMOTION</string>
-    <string name="diary_preview_title">Diary Entry</string>
+    <string name="diary_detail_title">Diary Entry</string>
     <string name="diary_edit_title">Edit Diary</string>
     <string name="diary_max_char_limit_reached">Maximum character limit reached.</string>
 
@@ -168,7 +168,7 @@
     <string name="profile_placeholder_email">alex.johnson@example.com</string>
 
     <!-- Profile Detail -->
-    <string name="profile_preview_title">Profile Preview</string>
+    <string name="profile_detail_title">Detail Profile</string>
     <string name="profile_edit_button">Edit Profile</string>
     <string name="profile_empty_dash">-</string>
 

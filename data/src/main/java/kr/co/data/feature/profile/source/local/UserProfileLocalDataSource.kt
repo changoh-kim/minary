@@ -6,11 +6,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import kr.co.data.extension.TAG
+import kr.co.core.common.extension.TAG
+import kr.co.core.datastore.profile.UserProfileDataStoreProvider
+import kr.co.core.datastore.proto.UserProfileProto
+import kr.co.core.datastore.proto.copy
 import kr.co.data.feature.user.source.local.UserStorageLocalDataSource
-import kr.co.data.local.provider.UserProfileDataStoreProvider
-import kr.co.data.proto.UserProfileProto
-import kr.co.data.proto.copy
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,10 +47,6 @@ class UserProfileLocalDataSource @Inject constructor(
 
     fun getProfilePhotoFilePath(uid: String): String {
         return userStorageLocalDataSource.getUserProfilePhotoFilePath(uid)
-    }
-
-    fun getTemporaryProfilePhotoFilePath(uid: String): String {
-        return userStorageLocalDataSource.getTemporaryProfilePhotoFilePath(uid)
     }
 
     /**

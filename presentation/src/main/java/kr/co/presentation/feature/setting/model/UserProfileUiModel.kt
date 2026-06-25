@@ -4,10 +4,9 @@ import android.os.Parcelable
 import androidx.compose.runtime.Immutable
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
-import kr.co.domain.feature.profile.model.Gender
-import kr.co.presentation.common.parceler.LocalDateParceler
+import kr.co.core.common.model.Gender
+import kr.co.core.ui.common.parceler.LocalDateParceler
 import java.time.LocalDate
-
 
 @Immutable
 @Parcelize

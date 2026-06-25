@@ -1,7 +1,7 @@
 package kr.co.domain.feature.dashboard.model
 
 import kr.co.domain.feature.diary.model.Diary
-import kr.co.domain.feature.emotion.model.Emotion
+import kr.co.core.common.model.Emotion
 
 /**
  * 대시보드 통계 데이터를 담는 도메인 모델

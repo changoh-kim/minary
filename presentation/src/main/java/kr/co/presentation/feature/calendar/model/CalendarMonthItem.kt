@@ -3,7 +3,7 @@ package kr.co.presentation.feature.calendar.model
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
-import kr.co.domain.feature.diary.model.SyncStatus
+import kr.co.core.common.state.SyncStatus
 import java.time.YearMonth
 
 @Immutable

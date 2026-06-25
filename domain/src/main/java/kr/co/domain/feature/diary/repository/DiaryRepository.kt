@@ -2,9 +2,9 @@ package kr.co.domain.feature.diary.repository
 
 import com.github.michaelbull.result.Result
 import kotlinx.coroutines.flow.Flow
-import kr.co.domain.error.DomainError
+import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.diary.model.Diary
-import kr.co.domain.feature.diary.model.SyncStatus
+import kr.co.core.common.state.SyncStatus
 import java.time.LocalDate
 import java.time.YearMonth
 
