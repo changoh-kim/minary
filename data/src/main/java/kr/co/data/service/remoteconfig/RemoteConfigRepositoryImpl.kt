@@ -1,16 +1,16 @@
 package kr.co.data.service.remoteconfig
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import kr.co.core.common.extension.TAG
 import kr.co.core.firebase.provider.FirebaseRemoteConfigProvider
 import kr.co.data.BuildConfig
 import kr.co.domain.service.remoteconfig.repository.RemoteConfigRepository
 import javax.inject.Inject
 
 class RemoteConfigRepositoryImpl @Inject constructor(
+    private val logger: AppLogger,
     private val firebaseRemoteConfigProvider: FirebaseRemoteConfigProvider
 ) : RemoteConfigRepository {
 
@@ -37,7 +37,7 @@ class RemoteConfigRepositoryImpl @Inject constructor(
                 result = firebaseRemoteConfigProvider.fetchAndActivate().await()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to fetchAndActivate", e)
+            logger.e(e, "Failed to fetchAndActivate")
             result = false
         }
 

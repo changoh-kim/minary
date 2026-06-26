@@ -1,7 +1,7 @@
 package kr.co.presentation.feature.setting.screen.profileedit
 
+import kr.co.core.common.logging.AppLogger
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -10,7 +10,6 @@ import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
-import kr.co.core.common.extension.TAG
 import kr.co.core.common.model.Gender
 import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
@@ -64,6 +63,7 @@ sealed interface ProfileEditAction {
 @OptIn(OrbitExperimental::class)
 @HiltViewModel
 class ProfileEditViewModel @Inject constructor(
+    private val logger: AppLogger,
     private val savedStateHandle: SavedStateHandle,
     private val getUserProfile: GetUserProfileUseCase,
     private val updateUserProfilePhoto: UpdateUserProfilePhotoUseCase,
@@ -122,7 +122,7 @@ class ProfileEditViewModel @Inject constructor(
             DomainError.Auth.WeakPassword -> R.string.weak_password
             DomainError.Auth.TooManyRequests -> R.string.too_many_requests
             else -> {
-                Log.e(TAG, "Failed to update user profile image: $error")
+                logger.e("Failed to update user profile image: %s", error)
                 R.string.unexpected_error
             }
         }
@@ -138,7 +138,7 @@ class ProfileEditViewModel @Inject constructor(
             DomainError.Auth.WeakPassword -> R.string.weak_password
             DomainError.Auth.TooManyRequests -> R.string.too_many_requests
             else -> {
-                Log.e(TAG, "Failed to save user profile: $error")
+                logger.e("Failed to save user profile: %s", error)
                 R.string.unexpected_error
             }
         }

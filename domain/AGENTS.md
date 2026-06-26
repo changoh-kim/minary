@@ -25,12 +25,15 @@
 - kotlin-result 조합이 필요한 경우 `coroutineBinding`, `bind`, `mapError`, `onErr` 흐름을 사용한다.
 - 계약 성격은 `repository`, `sync`, `service`로 구분한다.
 - 복잡한 순수 비즈니스 계산은 Repository가 아니라 generator/service 성격의 domain logic으로 분리한다.
+- domain 내부에서는 로그를 기본적으로 직접 기록하지 않는다. 진단이 필요한 실패 문맥은 `AppResult<T>`와 `DomainError`로 표현하고 호출 계층에서 `AppLogger`로 기록한다.
+- domain에서 로그가 꼭 필요한 경우에도 Timber나 Android Log가 아니라 `:core:common`의 `AppLogger` interface만 의존한다.
 
 ## 금지사항
 - data/presentation 모델로 변환하는 mapper를 domain에 두지 않는다.
 - Firebase, Room, WorkManager 같은 구현 기술명을 domain contract에 노출하지 않는다.
 - 동기화 기준 시간에 기기 시간을 직접 사용하지 않는다. 시간은 domain service 계약을 통해 다룬다.
 - UI 문자열, Android resource id, `Context`를 domain에 넣지 않는다.
+- Timber, Android `Log`, `printStackTrace`, `println`을 앱 로그 용도로 사용하지 않는다.
 - raw exception을 domain API로 노출하지 않는다. 실패는 `AppResult<Value>`로 표현한다.
 - domain 전용 exception class를 공개 실패 계약으로 만들지 않는다.
 
@@ -43,4 +46,5 @@
 ## 권장 검증
 - `./gradlew :domain:test`
 - import 경계 확인: `rg "android\\.|androidx\\.compose|Firebase|Room|WorkManager|DataStore" domain/src/main/java`
+- 로그 경계 확인: `rg "Timber|android\\.util\\.Log|\\bLog\\.|printStackTrace\\(|println\\(" domain/src/main/java -g "*.kt"`
 - contract 변경 시 `./gradlew :data:compileDebugKotlin :presentation:compileDebugKotlin`

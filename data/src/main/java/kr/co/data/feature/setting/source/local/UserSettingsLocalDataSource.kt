@@ -1,24 +1,24 @@
 package kr.co.data.feature.setting.source.local
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kr.co.core.common.extension.TAG
 import kr.co.core.datastore.settings.UserSettingsDataStoreProvider
 import kr.co.core.datastore.proto.ThemeProto
 import kr.co.core.datastore.proto.UserSettingsProto
 import javax.inject.Inject
 
 class UserSettingsLocalDataSource @Inject constructor(
+    private val logger: AppLogger,
     private val provider: UserSettingsDataStoreProvider,
 ) {
     private val dataStore get() = provider.getDataStore()
 
     fun getUserSettingsFlow(): Flow<UserSettingsProto> {
         return dataStore.data.catch {
-            Log.e(TAG, "Failed to read user settings from DataStore", it)
+            logger.e(it, "Failed to read user settings from DataStore")
             emit(UserSettingsProto.getDefaultInstance())
         }
     }

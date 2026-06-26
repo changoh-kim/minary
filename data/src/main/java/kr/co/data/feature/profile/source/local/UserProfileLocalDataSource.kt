@@ -1,12 +1,11 @@
 package kr.co.data.feature.profile.source.local
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import kr.co.core.common.extension.TAG
 import kr.co.core.datastore.profile.UserProfileDataStoreProvider
 import kr.co.core.datastore.proto.UserProfileProto
 import kr.co.core.datastore.proto.copy
@@ -16,6 +15,7 @@ import javax.inject.Singleton
 
 @Singleton
 class UserProfileLocalDataSource @Inject constructor(
+    private val logger: AppLogger,
     private val userProfileDataStoreProvider: UserProfileDataStoreProvider,
     private val userStorageLocalDataSource: UserStorageLocalDataSource,
 ) {
@@ -23,7 +23,7 @@ class UserProfileLocalDataSource @Inject constructor(
 
     fun getUserProfileFlow(): Flow<UserProfileProto> {
         return dataStore.data.catch {
-            Log.e(TAG, "Failed to read user profile from DataStore", it)
+            logger.e(it, "Failed to read user profile from DataStore")
             emit(UserProfileProto.getDefaultInstance())
         }
     }

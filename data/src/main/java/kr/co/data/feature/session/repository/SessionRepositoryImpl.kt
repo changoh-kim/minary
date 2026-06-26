@@ -1,6 +1,6 @@
 package kr.co.data.feature.session.repository
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.map
@@ -8,7 +8,6 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.session.mapper.UserSessionMapper.toUserSession
 import kr.co.data.feature.session.source.local.SessionLocalDataSource
@@ -20,6 +19,7 @@ import javax.inject.Singleton
 
 @Singleton
 class SessionRepositoryImpl @Inject constructor(
+    private val logger: AppLogger,
     private val localDataSource: SessionLocalDataSource,
     private val remoteDataSource: SessionRemoteDataSource,
 ) : SessionRepository {
@@ -34,7 +34,7 @@ class SessionRepositoryImpl @Inject constructor(
         runSuspendCatching {
             remoteDataSource.getCurrentUser()
         }
-        .onErr { Log.e(TAG, "Failed to get current user", it) }
+        .onErr { logger.e(it, "Failed to get current user") }
         .map { it.toUserSession() }
         .mapError { it.toDomainError() }
 
@@ -42,7 +42,7 @@ class SessionRepositoryImpl @Inject constructor(
         runSuspendCatching {
             remoteDataSource.reload()
         }
-        .onErr { Log.e(TAG, "Failed to reload current user", it) }
+        .onErr { logger.e(it, "Failed to reload current user") }
         .map { it.toUserSession() }
         .mapError { it.toDomainError() }
 

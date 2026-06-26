@@ -27,6 +27,9 @@
 - `Screen(viewModel = ...)`과 state 기반 `Content`를 분리해 preview/testability를 유지한다.
 - 화면 로딩 상태를 나타낼때 `:core:ui:common` load의 파일과, `:core:ui:design`의 skeleton/loading component를 우선 사용한다.
 - 에러 메시지는 화면별 side effect에서 `UiText.StringResource`를 우선 사용한다.
+- ViewModel에서 예상 밖 실패를 기록할 때는 `AppLogger`를 생성자로 주입받아 사용한다.
+- 사용자가 재시도할 수 있거나 UI fallback으로 복구되는 실패는 `w`, 화면 전환/저장/계정 흐름 실패는 `e`를 사용한다.
+- 로그 메시지는 사용자에게 보여줄 문구가 아니라 개발자 진단용 영어 고정 문구로 작성한다. 사용자 입력값, 이메일, 일기 본문, UI 텍스트 원문은 포함하지 않는다.
 
 ## 금지사항
 - ViewModel에서 RepositoryImpl, DAO, DataSource, Firebase SDK를 직접 호출하지 않는다.
@@ -34,6 +37,7 @@
 - feature 화면이 다른 feature의 내부 화면/component를 직접 참조하지 않는다.
 - 문자열, 사용자 메시지, 에러 문구를 하드코딩하지 않는다.
 - PII를 로그, snackbar, 에러 메시지에 노출하지 않는다.
+- `android.util.Log`, 직접 `Timber`, `printStackTrace`, `println`을 앱 로그 용도로 사용하지 않는다.
 - `DomainError.Unexpected` 처리 시 raw cause나 `Throwable`을 로그, 상태, side effect로 노출하지 않는다.
 - State를 `reduce` 밖에서 직접 변경하지 않는다. Navigation, snackbar, toast는 SideEffect로 처리한다.
 
@@ -48,5 +52,7 @@
 ## 권장 검증
 - `./gradlew :presentation:compileDebugKotlin`
 - import 경계 확인: `rg "kr\\.co\\.data|com\\.google\\.firebase|kr\\.co\\.minary" presentation/src/main/java`
+- 로그 규칙 확인: `rg "android\\.util\\.Log|\\bLog\\.|printStackTrace\\(|println\\(" presentation/src/main/java -g "*.kt"`
+- Timber 직접 사용 확인: `rg "Timber\\." presentation/src/main/java -g "*.kt"`
 - 화면 구조 확인: `find presentation/src/main/java/kr/co/presentation/feature -maxdepth 4 -type d | sort`
 - UI root 변경 시 `./gradlew :app:assembleDebug`

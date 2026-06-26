@@ -1,11 +1,10 @@
 package kr.co.data.feature.dashboard.repository
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
-import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.dashboard.mapper.DashboardMapper.toDashboard
 import kr.co.data.feature.dashboard.model.DashboardModel
@@ -19,6 +18,7 @@ import javax.inject.Singleton
 
 @Singleton
 class DashboardRepositoryImpl @Inject constructor(
+    private val logger: AppLogger,
     private val databaseProvider: UserDatabaseProvider,
 ) : DashboardRepository {
     companion object {
@@ -59,7 +59,7 @@ class DashboardRepositoryImpl @Inject constructor(
                 emotionCounts = emotionCounts,
             ).toDashboard()
         }
-        .onErr { Log.e(TAG, "Failed to get dashboard", it) }
+        .onErr { logger.e(it, "Failed to get dashboard") }
         .mapError { it.toDomainError() }
 
     private fun calculateLongestStreak(dates: List<LocalDate>): Int {

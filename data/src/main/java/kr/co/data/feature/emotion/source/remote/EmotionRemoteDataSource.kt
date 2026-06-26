@@ -1,8 +1,7 @@
 package kr.co.data.feature.emotion.source.remote
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import com.google.ai.client.generativeai.GenerativeModel
-import kr.co.core.common.extension.TAG
 import kr.co.core.common.extension.toEmotion
 import kr.co.domain.feature.diary.model.Diary
 import kr.co.core.common.model.Emotion
@@ -11,6 +10,7 @@ import javax.inject.Singleton
 
 @Singleton
 class EmotionRemoteDataSource @Inject constructor(
+    private val logger: AppLogger,
     private val generativeModel: GenerativeModel
 ) {
     suspend fun analysis(diary: Diary): List<Emotion> {
@@ -39,7 +39,7 @@ class EmotionRemoteDataSource @Inject constructor(
 
             return selectedEmotions.ifEmpty { listOf(Emotion.UNKNOWN) }
         } catch (e: Exception){
-            Log.e(TAG, "emotionAnalysisAi: ${e.message}")
+            logger.e(e, "Failed to analyze emotion")
             return listOf(Emotion.UNKNOWN)
         }
     }

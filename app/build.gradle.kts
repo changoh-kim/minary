@@ -55,6 +55,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":core:common"))
     implementation(project(":core:di"))
     implementation(project(":data"))
     implementation(project(":presentation"))
@@ -64,6 +65,9 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.work)
+
+    // timber
+    implementation(libs.timber)
 
     // firebase
     implementation(platform(libs.firebase.bom))
@@ -75,4 +79,6 @@ dependencies {
     implementation(libs.firebase.config)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
+
+    testImplementation(libs.junit)
 }

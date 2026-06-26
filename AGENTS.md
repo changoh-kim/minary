@@ -41,10 +41,22 @@
     - `:core:ui:design`: Compose design system
 - 기존 패키지 원칙으로 설명 가능한 변경은 새 구조를 만들기보다 현재 구조를 확장한다.
 
+## 로그 규칙
+- Timber는 `:app`의 `AppLogger` 구현체에서만 사용하고, 실제 로그 호출시 `:core:common`의 `AppLogger` interface를 주입받아 사용한다.
+- `domain`은 Timber/Android Log에 의존하지 않는다. domain에서 로그가 꼭 필요하면 `AppLogger` interface만 의존하고, 기본 실패 문맥은 `AppResult<T>`와 `DomainError`로 전달해 `data` 또는 `presentation` 경계에서 기록한다.
+- 로그 메시지는 영어 고정 문구로 작성하고, 실패 로그는 `Failed to {동작}` 또는 `Failed to {동작}: %s` 형식을 우선한다.
+- `Throwable`이 있는 경우 `logger.e(throwable, "Failed to ...")`처럼 throwable을 첫 번째 인자로 전달해 stacktrace를 보존한다.
+- 로그 레벨은 목적별로 구분한다. `v/d`는 임시 진단과 debug 상태 추적, `i`는 드문 lifecycle/초기화 상태, `w`는 복구 가능한 비정상 상태, `e`는 실패하거나 사용자 흐름에 영향을 준 오류에 사용한다.
+- `v/d/i`는 반복 경로나 민감 데이터가 섞일 수 있는 경로에 남기지 않는다.
+- 로그 메시지에 함수명, 파일명, 라인 번호를 수동으로 넣지 않는다. debug 빌드의 Timber Tree가 호출 함수명과 소스 라인 번호를 자동으로 포함한다.
+- secret, credential, PII, 일기 본문, 이메일 주소, 원문 사용자 입력은 로그에 남기지 않는다. 필요한 경우 식별 불가능한 상태값이나 enum만 기록한다.
+- 단순 성공 흐름이나 반복 호출 경로에는 로그를 추가하지 않는다.
+
 ## 금지사항
 - 동기화 기준 시간에 기기 시간(`System.currentTimeMillis()`)을 직접 사용하지 않는다. `ServerTimeProvider` 계약을 사용한다.
 - 라이브러리 버전을 `build.gradle.kts`나 소스에 하드코딩하지 않는다. 새 의존성은 `gradle/libs.versions.toml`에 등록하고 `libs.*` alias로 참조한다.
 - 모듈 고유 책임을 다른 모듈에 편의상 추가하지 않는다. 경계가 애매하면 하위 `AGENTS.md`의 역할 정의를 먼저 확인한다.
+- `android.util.Log`, 호출부의 직접 `Timber`, `printStackTrace`, `println`을 앱 로그 용도로 사용하지 않는다.
 - raw exception이나 `Throwable`을 `domain`/`presentation` 공개 API로 노출하지 않는다. 예상 가능한 실패는 `DomainError` 값으로 표현한다.
 - 코드만 보면 알 수 있는 클래스/파일 목록을 AGENTS 문서에 장황하게 추가하지 않는다.
 
@@ -59,4 +71,6 @@
 ## 권장 검증
 - 문서 배치 확인: `find . -name AGENTS.md -print | sort`
 - 오래된 패키지/모듈 경로가 문서에 남지 않았는지 리팩토링 이력에 맞춰 검색한다. 검색어 자체를 `AGENTS.md`에 남겨 false positive를 만들지 않는다.
+- 로그 규칙 확인: `rg "android\\.util\\.Log|\\bLog\\.|printStackTrace\\(|println\\(" app data presentation domain core -g "*.kt"`
+- Timber 직접 사용 확인: `rg "Timber\\." data presentation domain core -g "*.kt"`
 - Gradle 모듈 변경 시: `./gradlew :app:assembleDebug`

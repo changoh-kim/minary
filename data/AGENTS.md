@@ -27,6 +27,9 @@
 - Firebase 예외 타입, listener registration, snapshot처럼 data 구현에 필요한 SDK value/type 사용은 허용하되, SDK singleton 인스턴스 접근은 provider로 제한한다.
 - Firebase/Room/DataStore/IO 실패는 data 내부 mapper에서 `DomainError`로 변환하고, raw exception을 domain/presentation으로 노출하지 않는다.
 - 이미 의미를 아는 내부 실패는 예외를 던지지 말고 `Err(DomainError.*)`로 반환한다.
+- 외부 연동, persistence, sync 경계에서 예외를 기록할 때는 `AppLogger`를 생성자로 주입받아 사용한다.
+- fallback이 성공해 사용자 흐름이 계속될 수 있는 data 경계 실패는 `w`, 최종 작업 실패나 sync/repository 결과 실패는 `e`를 사용한다.
+- 로그 메시지는 실패한 data 동작을 설명하는 영어 고정 문구로 작성하고, 사용자 입력값, 이메일, 일기 본문, remote payload 원문은 포함하지 않는다.
 
 ## 금지사항
 - UI 상태, Compose, ViewModel, navigation을 참조하지 않는다.
@@ -36,6 +39,7 @@
 - Coroutine Dispatcher를 직접 고정하지 않는다. `:core:di` qualifier로 주입받은 dispatcher/scope를 사용한다.
 - 외부 예외 매핑 코드를 `:core:common`으로 올리지 않는다. 구현 기술 예외 변환은 data 책임으로 유지한다.
 - PII를 로그에 남기지 않는다.
+- `android.util.Log`, 직접 `Timber`, `printStackTrace`, `println`을 앱 로그 용도로 사용하지 않는다.
 
 ## 변경 시 체크리스트
 - local schema나 DAO 영향 변경 시 mapper, migration, query 비용을 확인한다.
@@ -50,4 +54,6 @@
 - `./gradlew :data:compileDebugKotlin`
 - import 경계 확인: `rg "kr\\.co\\.presentation|androidx\\.compose" data/src/main/java`
 - Firebase SDK 직접 주입 확인: `rg ": Firebase(Auth|Firestore|Functions|Storage|RemoteConfig)[,)]" data/src/main/java -g "*.kt"`
+- 로그 규칙 확인: `rg "android\\.util\\.Log|\\bLog\\.|printStackTrace\\(|println\\(" data/src/main/java -g "*.kt"`
+- Timber 직접 사용 확인: `rg "Timber\\." data/src/main/java -g "*.kt"`
 - Firebase 경로 변경 시 `firebase-server` rules/functions와 함께 smoke check한다.

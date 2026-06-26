@@ -1,13 +1,12 @@
 package kr.co.presentation.feature.setting.screen.settings
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import com.github.michaelbull.result.get
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.combine
 import kr.co.core.common.error.DomainError
-import kr.co.core.common.extension.TAG
 import kr.co.core.common.model.AppTheme
 import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
@@ -53,6 +52,7 @@ sealed interface SettingsAction {
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    private val logger: AppLogger,
     private val signOut: SignOutUseCase,
     private val getUserProfileStream: GetUserProfileStreamUseCase,
     private val getUserSettingsStream: GetUserSettingsStreamUseCase,
@@ -102,7 +102,7 @@ class SettingsViewModel @Inject constructor(
             DomainError.NetworkUnavailable,
             DomainError.Timeout -> Unit
             else -> {
-                Log.e(TAG, "Failed to prepare sign out dialog: $error")
+                logger.e("Failed to prepare sign out dialog: %s", error)
                 postSideEffect(SettingsSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
             }
         }
@@ -113,19 +113,19 @@ class SettingsViewModel @Inject constructor(
             DomainError.NetworkUnavailable,
             DomainError.Timeout -> Unit
             else -> {
-                Log.e(TAG, "Failed to sign out: $error")
+                logger.e("Failed to sign out: %s", error)
                 postSideEffect(SettingsSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
             }
         }
     }
 
     private fun handleThemeError(error: DomainError) = intent {
-        Log.e(TAG, "Failed to set up theme: $error")
+        logger.e("Failed to set up theme: %s", error)
         postSideEffect(SettingsSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 
     private fun handleDiarySyncEnabledError(error: DomainError) = intent {
-        Log.e(TAG, "Failed to set up diary synchronization: $error")
+        logger.e("Failed to set up diary synchronization: %s", error)
         postSideEffect(SettingsSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 

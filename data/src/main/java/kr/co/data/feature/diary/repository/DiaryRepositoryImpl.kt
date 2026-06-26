@@ -1,6 +1,6 @@
 package kr.co.data.feature.diary.repository
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.fold
@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kr.co.core.common.error.DomainError
-import kr.co.core.common.extension.TAG
 import kr.co.core.common.result.AppResult
 import kr.co.core.common.state.DiarySyncStatus
 import kr.co.core.common.state.SyncStatus
@@ -34,6 +33,7 @@ import javax.inject.Singleton
 
 @Singleton
 class DiaryRepositoryImpl @Inject constructor(
+    private val logger: AppLogger,
     private val diarySyncManager: DiarySyncManager,
     private val diarySyncScheduler: DiarySyncScheduler,
     private val localDataSource: DiaryLocalDataSource,
@@ -99,7 +99,7 @@ class DiaryRepositoryImpl @Inject constructor(
 
                     updatedDiary
                 }
-                .onErr { Log.e(TAG, "Failed to update diary", it) }
+                .onErr { logger.e(it, "Failed to update diary") }
                 .mapError { it.toDomainError() }
             },
             failure = { Err(it) }
@@ -133,7 +133,7 @@ class DiaryRepositoryImpl @Inject constructor(
         runSuspendCatching {
             localDataSource.getDiaryWithRelations(date)
         }
-        .onErr { Log.e(TAG, "Failed to get diary", it) }
+        .onErr { logger.e(it, "Failed to get diary") }
         .map { it?.toDiary() }
         .mapError { it.toDomainError() }
 

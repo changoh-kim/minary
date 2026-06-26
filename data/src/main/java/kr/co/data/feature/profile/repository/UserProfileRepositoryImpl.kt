@@ -1,7 +1,7 @@
 package kr.co.data.feature.profile.repository
 
+import kr.co.core.common.logging.AppLogger
 import android.net.Uri
-import android.util.Log
 import com.github.michaelbull.result.Ok
 import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.andThen
@@ -10,7 +10,6 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.profile.mapper.UserProfileMapper.toUserProfile
 import kr.co.data.feature.profile.mapper.UserProfileMapper.toUserProfileProto
@@ -23,6 +22,7 @@ import java.io.File
 import javax.inject.Inject
 
 class UserProfileRepositoryImpl @Inject constructor(
+    private val logger: AppLogger,
     private val localDataSource: UserProfileLocalDataSource,
     private val profileScheduler: UserProfileSyncScheduler,
     private val imageProcessor: ImageProcessor,
@@ -38,7 +38,7 @@ class UserProfileRepositoryImpl @Inject constructor(
             localDataSource.updateUserProfile(profile.toUserProfileProto())
             profileScheduler.scheduleProfilePush()
         }
-        .onErr { Log.e(TAG, "Failed to save user profile", it) }
+        .onErr { logger.e(it, "Failed to save user profile") }
         .mapError { it.toDomainError() }
 
     override suspend fun updateUserProfilePhoto(
@@ -61,7 +61,7 @@ class UserProfileRepositoryImpl @Inject constructor(
                 profileScheduler.scheduleProfilePhotoPush()
 
                 newProfilePhotoUrl
-            }.onErr { Log.e(TAG, "Failed to upload profile photo", it) }
+            }.onErr { logger.e(it, "Failed to upload profile photo") }
             .mapError { it.toDomainError() }
         }
     }
