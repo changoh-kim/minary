@@ -1,11 +1,10 @@
 package kr.co.presentation.feature.account.screen.signup
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
-import kr.co.core.common.extension.TAG
 import kr.co.core.common.extension.toLocalDate
 import kr.co.core.common.model.Gender
 import kr.co.core.ui.common.load.load
@@ -69,6 +68,7 @@ sealed interface SignUpAction {
 @OptIn(OrbitExperimental::class)
 @HiltViewModel
 class SignUpViewModel @Inject constructor(
+    private val logger: AppLogger,
     private val savedStateHandle: SavedStateHandle,
     private val createAccount: CreateAccountUseCase,
     private val checkEmailAvailabilityUseCase: CheckEmailAvailabilityUseCase,
@@ -146,11 +146,11 @@ class SignUpViewModel @Inject constructor(
             DomainError.Auth.WeakPassword -> R.string.weak_password
             DomainError.Auth.TooManyRequests -> R.string.too_many_requests
             DomainError.Store.PermissionDenied -> {
-                Log.e(TAG, "Failed to signup: Permission denied")
+                logger.e("Failed to signup: Permission denied")
                 R.string.unexpected_error
             }
             else -> {
-                Log.e(TAG, "Failed to signup: $error")
+                logger.e("Failed to signup: %s", error)
                 R.string.unexpected_error
             }
         }

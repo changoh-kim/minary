@@ -1,6 +1,6 @@
 package kr.co.data.feature.setting.repository
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import com.github.michaelbull.result.Ok
 import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.runSuspendCatching
@@ -8,7 +8,6 @@ import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.setting.mapper.UserSettingsMapper.toAppTheme
 import kr.co.data.feature.setting.mapper.UserSettingsMapper.toThemeProto
@@ -22,6 +21,7 @@ import kr.co.domain.feature.setting.sync.UserSettingsSyncScheduler
 import javax.inject.Inject
 
 class UserSettingsRepositoryImpl @Inject constructor(
+    private val logger: AppLogger,
     private val localDataSource: UserSettingsLocalDataSource,
     private val settingsSyncScheduler: UserSettingsSyncScheduler,
 ) : UserSettingsRepository {
@@ -48,7 +48,7 @@ class UserSettingsRepositoryImpl @Inject constructor(
 
             settingsSyncScheduler.scheduleSettingsPush()
         }
-        .onErr { Log.e(TAG, "Failed to update theme preferences", it) }
+        .onErr { logger.e(it, "Failed to update theme preferences") }
         .mapError { it.toDomainError() }
 
     override fun getDiarySyncEnabledStream(): Flow<Boolean> =
@@ -69,6 +69,6 @@ class UserSettingsRepositoryImpl @Inject constructor(
             )
 
             settingsSyncScheduler.scheduleSettingsPush()
-        }.onErr { Log.e(TAG, "Failed to update diary sync enabled preferences", it) }
+        }.onErr { logger.e(it, "Failed to update diary sync enabled preferences") }
         .mapError { it.toDomainError() }
 }

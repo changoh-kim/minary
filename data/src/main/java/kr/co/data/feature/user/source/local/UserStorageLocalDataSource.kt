@@ -11,12 +11,14 @@ import kr.co.core.datastore.sync.UserSyncDataStoreProvider
 import kr.co.core.firebase.provider.FirebaseStorageProvider
 import kr.co.core.storage.config.LocalStoragePathProvider
 import kr.co.core.storage.provider.UserInternalStorageProvider
+import kr.co.core.common.logging.AppLogger
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class UserStorageLocalDataSource @Inject constructor(
+    private val logger: AppLogger,
     @param:ApplicationContext private val context: Context,
     private val userDatabaseProvider: UserDatabaseProvider,
     private val userProfileDataStoreProvider: UserProfileDataStoreProvider,
@@ -56,7 +58,7 @@ class UserStorageLocalDataSource @Inject constructor(
 
             Uri.fromFile(destinationFile)
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.e(e, "Failed to download user profile photo")
             null
         }
     }

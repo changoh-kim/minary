@@ -15,7 +15,6 @@ fun String?.toLocalDate(): LocalDate? {
     return try {
         LocalDate.parse(this)
     } catch (e: DateTimeParseException) {
-        e.printStackTrace()
         null
     }
 }
@@ -29,7 +28,6 @@ fun Long?.toLocalDate(): LocalDate? {
     return try {
         LocalDate.ofEpochDay(this)
     } catch (e: Exception) {
-        e.printStackTrace()
         // LocalDate.ofEpochDay는 지원 범위를 벗어나는 Long 값에 대해 DateTimeException을 발생시킬 수 있습니다.
         null
     }

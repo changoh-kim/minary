@@ -39,6 +39,7 @@ kotlin-result = "2.3.1"
 truetime = "3.5"
 exifinterface = "1.4.2"
 lottie = "6.7.1"
+timber = "5.0.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -126,6 +127,9 @@ androidx-exifinterface = { group = "androidx.exifinterface", name = "exifinterfa
 
 #lottie
 lottie-compose = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie" }
+
+#timber
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

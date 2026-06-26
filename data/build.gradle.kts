@@ -43,7 +43,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":core:common"))
+    api(project(":core:common"))
     implementation(project(":core:di"))
     implementation(project(":core:storage"))
     implementation(project(":core:database"))

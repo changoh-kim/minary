@@ -1,12 +1,11 @@
 package kr.co.presentation.feature.account.screen.deletion
 
-import android.util.Log
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
-import kr.co.core.common.extension.TAG
+import kr.co.core.common.logging.AppLogger
 import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
 import kr.co.domain.feature.account.usecase.DeleteAccountUseCase
@@ -42,6 +41,7 @@ sealed interface AccountDeletionAction {
 @OptIn(OrbitExperimental::class)
 @HiltViewModel
 class AccountDeletionViewModel @Inject constructor(
+    private val logger: AppLogger,
     private val savedStateHandle: SavedStateHandle,
     private val deleteAccount: DeleteAccountUseCase,
 ) : ViewModel(), ContainerHost<AccountDeletionScreenState, AccountDeletionSideEffect> {
@@ -100,7 +100,7 @@ class AccountDeletionViewModel @Inject constructor(
             DomainError.Auth.TooManyRequests -> R.string.too_many_requests
             DomainError.Auth.RequiresRecentLogin -> R.string.requires_recent_sign_in
             else -> {
-                Log.e(TAG, "Failed to delete account: $error")
+                logger.e("Failed to delete account: %s", error)
                 R.string.unexpected_error
             }
         }

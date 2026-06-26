@@ -7,8 +7,10 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kr.co.core.common.logging.AppLogger
 import kr.co.core.di.qualifier.GeminiApiKey
 import kr.co.minary.BuildConfig
+import kr.co.minary.logging.TimberAppLogger
 import javax.inject.Singleton
 
 @Module
@@ -18,6 +20,10 @@ abstract class MinaryAppModule {
     @Singleton
     @Binds
     abstract fun bindContext(application: Application): Context
+
+    @Singleton
+    @Binds
+    abstract fun bindAppLogger(logger: TimberAppLogger): AppLogger
 
     companion object {
 

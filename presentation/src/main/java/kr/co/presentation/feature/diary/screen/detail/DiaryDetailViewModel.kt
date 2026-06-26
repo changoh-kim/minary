@@ -1,13 +1,12 @@
 package kr.co.presentation.feature.diary.screen.detail
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
-import kr.co.core.common.extension.TAG
 import kr.co.core.ui.common.load.LoadState
 import kr.co.core.ui.common.load.data
 import kr.co.core.ui.common.load.load
@@ -51,6 +50,7 @@ sealed interface DiaryDetailAction {
 
 @HiltViewModel
 class DiaryDetailViewModel @Inject constructor(
+    private val logger: AppLogger,
     private val savedStateHandle: SavedStateHandle,
     private val getDiaryStream: GetDiaryStreamUseCase,
     private val deleteDiary: DeleteDiaryUseCase,
@@ -110,7 +110,7 @@ class DiaryDetailViewModel @Inject constructor(
     }
 
     private fun handleDeleteDiaryError(error: DomainError) = intent {
-        Log.e(TAG, "Failed to delete diary: $error")
+        logger.e("Failed to delete diary: %s", error)
         postSideEffect(DiaryDetailSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 }

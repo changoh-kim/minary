@@ -1,11 +1,11 @@
 package kr.co.data.service.image
 
+import kr.co.core.common.logging.AppLogger
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
-import android.util.Log
 import androidx.core.graphics.scale
 import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
@@ -16,7 +16,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kr.co.core.common.error.DomainError
-import kr.co.core.common.extension.TAG
 import kr.co.domain.service.image.ImageProcessor
 import java.io.File
 import java.io.FileOutputStream
@@ -25,6 +24,7 @@ import javax.inject.Singleton
 
 @Singleton
 class ImageProcessorImpl @Inject constructor(
+    private val logger: AppLogger,
     @param:ApplicationContext private val context: Context,
 ) : ImageProcessor {
 
@@ -75,7 +75,7 @@ class ImageProcessorImpl @Inject constructor(
 
             Ok(targetFile.absolutePath)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to resize image", e)
+            logger.e(e, "Failed to resize image")
             Err(DomainError.Unexpected)
         }
     }

@@ -59,7 +59,7 @@ composeCompiler {
 }
 
 dependencies {
-    implementation(project(":core:common"))
+    api(project(":core:common"))
     implementation(project(":core:ui:common"))
     implementation(project(":core:ui:design"))
     implementation(project(":domain"))

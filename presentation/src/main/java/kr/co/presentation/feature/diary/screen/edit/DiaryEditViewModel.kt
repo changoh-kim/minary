@@ -1,13 +1,12 @@
 package kr.co.presentation.feature.diary.screen.edit
 
-import android.util.Log
+import kr.co.core.common.logging.AppLogger
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
-import kr.co.core.common.extension.TAG
 import kr.co.core.ui.common.load.LoadState
 import kr.co.core.ui.common.load.data
 import kr.co.core.ui.common.load.load
@@ -57,6 +56,7 @@ sealed interface DiaryEditAction {
 @OptIn(OrbitExperimental::class)
 @HiltViewModel
 class DiaryEditViewModel @Inject constructor(
+    private val logger: AppLogger,
     private val savedStateHandle: SavedStateHandle,
     private val getDiary: GetDiaryUseCase,
     private val createDiary: CreateDiaryUseCase,
@@ -158,13 +158,13 @@ class DiaryEditViewModel @Inject constructor(
     }
 
     private fun handleGetDiaryError(error: DomainError) = intent {
-        Log.e(TAG, "Failed to get diary: $error")
+        logger.e("Failed to get diary: %s", error)
         postSideEffect(DiaryEditSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
         postSideEffect(DiaryEditSideEffect.LoadFailed)
     }
 
     private fun handleSaveDiaryError(error: DomainError) = intent {
-        Log.e(TAG, "Failed to save diary: $error")
+        logger.e("Failed to save diary: %s", error)
         postSideEffect(DiaryEditSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 
