@@ -9,8 +9,7 @@ import kotlinx.coroutines.flow.combine
 import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
 import kr.co.core.common.model.AppTheme
-import kr.co.core.ui.common.error.handleDomainError
-import kr.co.core.ui.common.load.safeCall
+import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
 import kr.co.domain.feature.account.usecase.SignOutUseCase
 import kr.co.domain.feature.diary.usecase.setting.UpdateDiarySyncEnabledUseCase
@@ -99,57 +98,35 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun handleSignOutDialogError(error: DomainError) = intent {
-        handleDomainError(error) {
-            networkUnavailable = {}
-            timeout = {}
-
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to sign out: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(SettingsSideEffect.ShowMessage(
-                        UiText.StringResource(R.string.unexpected_error)))
-                }
+        when (error) {
+            DomainError.NetworkUnavailable,
+            DomainError.Timeout -> Unit
+            else -> {
+                Log.e(TAG, "Failed to prepare sign out dialog: $error")
+                postSideEffect(SettingsSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
             }
         }
     }
 
     private fun handleSignOutError(error: DomainError) = intent {
-        handleDomainError(error) {
-            networkUnavailable = {}
-            timeout = {}
-
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to sign out: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(SettingsSideEffect.ShowMessage(
-                        UiText.StringResource(R.string.unexpected_error)))
-                }
+        when (error) {
+            DomainError.NetworkUnavailable,
+            DomainError.Timeout -> Unit
+            else -> {
+                Log.e(TAG, "Failed to sign out: $error")
+                postSideEffect(SettingsSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
             }
         }
     }
 
     private fun handleThemeError(error: DomainError) = intent {
-        handleDomainError(error) {
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to set up theme: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(SettingsSideEffect.ShowMessage(
-                        UiText.StringResource(R.string.unexpected_error)))
-                }
-            }
-        }
+        Log.e(TAG, "Failed to set up theme: $error")
+        postSideEffect(SettingsSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 
     private fun handleDiarySyncEnabledError(error: DomainError) = intent {
-        handleDomainError(error) {
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to set up diary synchronization: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(SettingsSideEffect.ShowMessage(
-                        UiText.StringResource(R.string.unexpected_error)))
-                }
-            }
-        }
+        Log.e(TAG, "Failed to set up diary synchronization: $error")
+        postSideEffect(SettingsSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 
     private fun userProfileClicked() = intent {
@@ -157,26 +134,26 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun showSignOutDialog() = intent {
-        safeCall<Boolean, DomainError> { checkDiarySyncState() }
+        load { checkDiarySyncState() }
             .onError { handleSignOutDialogError(it) }
-            .launchOnSuccess { postSideEffect(SettingsSideEffect.ShowSignOutDialog()) }
+            .startOnSuccess { postSideEffect(SettingsSideEffect.ShowSignOutDialog()) }
     }
 
     private fun requestSignOut() = intent {
-        safeCall<Unit, DomainError> { signOut() }
+        load { signOut() }
             .onError { handleSignOutError(it) }
-            .launchOnSuccess { postSideEffect(SettingsSideEffect.SignOutSucceeded) }
+            .startOnSuccess { postSideEffect(SettingsSideEffect.SignOutSucceeded) }
     }
 
     private fun requestUpdateTheme(newAppTheme: AppTheme) = intent {
-        safeCall<Unit, DomainError> { updateAppTheme(newAppTheme) }
+        load { updateAppTheme(newAppTheme) }
             .onError { handleThemeError(it) }
-            .launch()
+            .start()
     }
 
     private fun requestUpdateDiarySyncEnabled(enabled: Boolean) = intent {
-        safeCall<Unit, DomainError> { updateDiarySyncEnabled(enabled) }
+        load { updateDiarySyncEnabled(enabled) }
             .onError { handleDiarySyncEnabledError(it) }
-            .launch()
+            .start()
     }
 }

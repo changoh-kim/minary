@@ -11,7 +11,7 @@ import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -33,7 +33,7 @@ class ImageProcessorImpl @Inject constructor(
         targetUrl: String,
         maxWidth: Int,
         maxHeight: Int,
-    ): Result<String, DomainError> = withContext(Dispatchers.IO) {
+    ): AppResult<String> = withContext(Dispatchers.IO) {
         try {
             val androidUri = sourceUrl.toUri()
             // 1. 이미지 크기 및 회전 정보 측정
@@ -43,7 +43,7 @@ class ImageProcessorImpl @Inject constructor(
             }
 
             if (options.outWidth <= 0 || options.outHeight <= 0) {
-                return@withContext Err(DomainError.Unexpected(Exception("Invalid image dimensions")))
+                return@withContext Err(DomainError.Unexpected)
             }
             // 회전 각도 계산
             val rotation = getRotation(androidUri)
@@ -54,7 +54,7 @@ class ImageProcessorImpl @Inject constructor(
             val decodedBitmap = context.contentResolver.openInputStream(androidUri)?.use {
                 BitmapFactory.decodeStream(it, null, options)
             }
-                ?: return@withContext Err(DomainError.Unexpected(Exception("Failed to decode bitmap")))
+                ?: return@withContext Err(DomainError.Unexpected)
             // 4. 회전 처리 및 정밀 리사이징
             val rotatedBitmap = rotateBitmapIfRequired(decodedBitmap, rotation)
             val finalBitmap = scaleBitmapToFit(rotatedBitmap, maxWidth, maxHeight)
@@ -76,7 +76,7 @@ class ImageProcessorImpl @Inject constructor(
             Ok(targetFile.absolutePath)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to resize image", e)
-            Err(DomainError.Unexpected(e))
+            Err(DomainError.Unexpected)
         }
     }
 

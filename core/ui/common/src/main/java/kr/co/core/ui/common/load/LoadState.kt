@@ -11,12 +11,7 @@ sealed interface LoadState<out T> {
     data class Error(
         val error: DomainError? = null,
         val message: String? = null
-    ) : LoadState<Nothing> {
-        constructor(throwable: Throwable?, message: String? = null) : this(
-            error = throwable?.let { DomainError.Unexpected(it) },
-            message = message ?: throwable?.message
-        )
-    }
+    ) : LoadState<Nothing>
 
     val isUninitialized: Boolean get() = this is Uninitialized
     val isLoading: Boolean get() = this is Loading

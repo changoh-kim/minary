@@ -1,7 +1,7 @@
 package kr.co.data.feature.diary.sync
 
 import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.map
@@ -21,7 +21,6 @@ import kr.co.core.database.model.DiaryWithRelations
 import kr.co.core.database.entity.DiarySyncMetadataEntity
 import kr.co.core.datastore.sync.UserSyncDataStoreProvider
 import kr.co.core.firebase.provider.FirebaseFirestoreProvider
-import kr.co.core.common.error.DomainError
 import kr.co.core.common.state.DiarySyncStatus
 import kr.co.core.common.state.SyncStatus
 import kr.co.domain.feature.diary.sync.DiarySyncManager
@@ -46,7 +45,7 @@ class FirestoreDiarySyncManager @Inject constructor(
 
     private val dataStore get() = userDataStoreProvider.getDataStore()
 
-    override suspend fun performChunkedSync(userId: String): Result<Boolean, DomainError> =
+    override suspend fun performChunkedSync(userId: String): AppResult<Boolean> =
         coroutineBinding {
             pushChunk(userId).bind()
 
@@ -58,14 +57,14 @@ class FirestoreDiarySyncManager @Inject constructor(
             hasMore
         }
 
-    override suspend fun performImmediatePush(userId: String): Result<Unit, DomainError> {
+    override suspend fun performImmediatePush(userId: String): AppResult<Unit> {
         return pushChunk(userId)
     }
 
     override suspend fun performMonthSync(
         userId: String,
         yearMonth: YearMonth
-    ): Result<Unit, DomainError> = runSuspendCatching {
+    ): AppResult<Unit> = runSuspendCatching {
         // 1. Metadata 상태를 LOADING으로 변경
         diaryLocalDataSource.updateSyncMetadata(
             DiarySyncMetadataEntity(yearMonth, SyncStatus.LOADING)
@@ -113,7 +112,7 @@ class FirestoreDiarySyncManager @Inject constructor(
         it.toDomainError()
     }
 
-    private suspend fun pushChunk(userId: String): Result<Unit, DomainError> {
+    private suspend fun pushChunk(userId: String): AppResult<Unit> {
         val pendingItems = diaryLocalDataSource.getPendingDiariesWithRelations(limit = CHUNK_SIZE)
         if (pendingItems.isEmpty()) return Ok(Unit)
 
@@ -123,7 +122,7 @@ class FirestoreDiarySyncManager @Inject constructor(
     private suspend fun processFirestoreBatch(
         userId: String,
         items: List<DiaryWithRelations>
-    ): Result<Unit, DomainError> = coroutineScope {
+    ): AppResult<Unit> = coroutineScope {
         if (items.isEmpty()) return@coroutineScope Ok(Unit)
 
         val batch = firebaseFirestoreProvider.batch()
@@ -185,7 +184,7 @@ class FirestoreDiarySyncManager @Inject constructor(
         }.mapError { it.toDomainError() }
     }
 
-    private suspend fun pullChunk(userId: String): Result<Boolean, DomainError> {
+    private suspend fun pullChunk(userId: String): AppResult<Boolean> {
         val lastPullUpdatedAt = dataStore.getLastPullDiaryModifiedAt()
         val oneYearAgo = serverTime.now() - TimeUnit.DAYS.toMillis(365)
 
@@ -245,7 +244,7 @@ class FirestoreDiarySyncManager @Inject constructor(
     override suspend fun performInitialPull(
         userId: String,
         onProgress: (Float) -> Unit
-    ): Result<Unit, DomainError> = runSuspendCatching {
+    ): AppResult<Unit> = runSuspendCatching {
         val oneYearAgo = serverTime.now() - TimeUnit.DAYS.toMillis(365)
         val diariesRef = firebaseFirestoreProvider.getDiariesRef(userId)
         

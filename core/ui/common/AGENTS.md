@@ -16,6 +16,7 @@
 
 ## 패키지/코드 배치 규칙
 - 상태 처리, 텍스트, 에러, 리소스, parceler, 표시 mapping 책임을 구분한다.
+- `DomainError` 공통 helper는 UI support 범위로 제한하고, 화면 문맥별 `DomainError` 처리는 presentation ViewModel에 둔다.
 - public API는 feature 화면에서 안정적으로 재사용할 수 있게 유지한다.
 - UI 지원 성격과 design system 성격을 혼합하지 않는다.
 - resource helper 변경 시 locale 리소스와 호출부를 함께 갱신한다.
@@ -25,6 +26,7 @@
 - 특정 feature 화면 전용 component를 두지 않는다.
 - ViewModel, UseCase, Repository, DataSource를 참조하지 않는다.
 - domain/data 구현 로직을 포함하지 않는다.
+- raw exception 또는 `Throwable`을 presentation state나 side effect로 전달하는 helper를 추가하지 않는다.
 
 ## 변경 시 체크리스트
 - public API 변경 시 presentation feature import 영향을 확인한다.

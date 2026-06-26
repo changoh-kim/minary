@@ -1,8 +1,7 @@
 package kr.co.domain.feature.user.repository
 
-import com.github.michaelbull.result.Result
-import kr.co.core.common.error.DomainError
+import kr.co.core.common.result.AppResult
 
 interface UserStorageRepository {
-    suspend fun deleteUserStorage(uid: String): Result<Unit, DomainError>
+    suspend fun deleteUserStorage(uid: String): AppResult<Unit>
 }

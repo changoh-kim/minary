@@ -1,6 +1,6 @@
 package kr.co.data.feature.setting.sync
 
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.map
@@ -14,7 +14,6 @@ import kr.co.data.feature.setting.mapper.UserSettingsMapper.toUserSettingsProto
 import kr.co.data.feature.setting.model.UserSettingsDto
 import kr.co.data.feature.setting.source.local.UserSettingsLocalDataSource
 import kr.co.core.firebase.provider.FirebaseFirestoreProvider
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.setting.sync.UserSettingsSyncManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,7 +24,7 @@ class FirestoreUserSettingsSyncManager @Inject constructor(
     private val localDataSource: UserSettingsLocalDataSource,
 ) : UserSettingsSyncManager {
 
-    override suspend fun syncSettings(userId: String): Result<Unit, DomainError> {
+    override suspend fun syncSettings(userId: String): AppResult<Unit> {
         return runSuspendCatching {
             val localSettings = localDataSource.getUserSettings()
 
@@ -53,7 +52,7 @@ class FirestoreUserSettingsSyncManager @Inject constructor(
         .mapError { it.toDomainError() }
     }
 
-    override suspend fun pushSettings(userId: String): Result<Unit, DomainError> {
+    override suspend fun pushSettings(userId: String): AppResult<Unit> {
         return runSuspendCatching {
             val localSettings = localDataSource.getUserSettings()
 
@@ -72,7 +71,7 @@ class FirestoreUserSettingsSyncManager @Inject constructor(
         .mapError { it.toDomainError() }
     }
 
-    override suspend fun pullSettings(userId: String): Result<Unit, DomainError> {
+    override suspend fun pullSettings(userId: String): AppResult<Unit> {
         val result = runSuspendCatching {
             val ref = firebaseFirestoreProvider.getUserSettingsRef(userId)
             ref.get().await()
@@ -84,7 +83,7 @@ class FirestoreUserSettingsSyncManager @Inject constructor(
     }
 
     // 실제 Pull 로직 처리 함수
-    internal suspend fun pullSettings(snapshot: DocumentSnapshot): Result<Unit, DomainError> {
+    internal suspend fun pullSettings(snapshot: DocumentSnapshot): AppResult<Unit> {
         return runSuspendCatching {
             if (snapshot.exists()) {
                 val remoteSettings = snapshot.toObject(UserSettingsDto::class.java)

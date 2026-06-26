@@ -1,7 +1,6 @@
 package kr.co.domain.feature.diary.usecase
 
-import com.github.michaelbull.result.Result
-import kr.co.core.common.error.DomainError
+import kr.co.core.common.result.AppResult
 import kr.co.domain.feature.diary.model.Diary
 import kr.co.domain.feature.diary.repository.DiaryRepository
 import java.time.LocalDate
@@ -16,7 +15,7 @@ class GetPagedDiariesUseCase @Inject constructor(
         endDate: LocalDate? = null,
         limit: Int,
         offset: Int
-    ): Result<List<Diary>, DomainError> {
+    ): AppResult<List<Diary>> {
         return diaryRepository.getPagedDiaries(query, startDate, endDate, limit, offset)
     }
 }

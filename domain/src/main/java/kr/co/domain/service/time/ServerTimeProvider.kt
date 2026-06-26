@@ -1,7 +1,6 @@
 package kr.co.domain.service.time
 
-import com.github.michaelbull.result.Result
-import kr.co.core.common.error.DomainError
+import kr.co.core.common.result.AppResult
 
 /**
  * 서버 시간을 제공하는 인터페이스입니다.
@@ -15,7 +14,7 @@ interface ServerTimeProvider {
     /**
      * NTP 서버와 통신하여 현재 기기 시간과 동기화합니다.
      */
-    suspend fun sync(): Result<Unit, DomainError>
+    suspend fun sync(): AppResult<Unit>
 
     /**
      * 동기화된 서버의 현재 시간을 반환합니다.

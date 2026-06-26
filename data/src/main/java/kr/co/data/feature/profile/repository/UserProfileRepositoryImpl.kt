@@ -3,7 +3,7 @@ package kr.co.data.feature.profile.repository
 import android.net.Uri
 import android.util.Log
 import com.github.michaelbull.result.Ok
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.mapError
@@ -15,7 +15,6 @@ import kr.co.data.extension.toDomainError
 import kr.co.data.feature.profile.mapper.UserProfileMapper.toUserProfile
 import kr.co.data.feature.profile.mapper.UserProfileMapper.toUserProfileProto
 import kr.co.data.feature.profile.source.local.UserProfileLocalDataSource
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.profile.model.UserProfile
 import kr.co.domain.feature.profile.repository.UserProfileRepository
 import kr.co.domain.service.image.ImageProcessor
@@ -29,12 +28,12 @@ class UserProfileRepositoryImpl @Inject constructor(
     private val imageProcessor: ImageProcessor,
 ) : UserProfileRepository {
 
-    override suspend fun getUserProfileStream(): Flow<Result<UserProfile, DomainError>> =
+    override suspend fun getUserProfileStream(): Flow<AppResult<UserProfile>> =
         localDataSource.getUserProfileFlow().map { Ok(it.toUserProfile()) }
 
     override suspend fun updateUserProfile(
         profile: UserProfile
-    ): Result<Unit, DomainError> =
+    ): AppResult<Unit> =
         runSuspendCatching {
             localDataSource.updateUserProfile(profile.toUserProfileProto())
             profileScheduler.scheduleProfilePush()
@@ -46,7 +45,7 @@ class UserProfileRepositoryImpl @Inject constructor(
         uid: String,
         photoUrl: String,
         lastModifiedAt: Long,
-    ): Result<String, DomainError> {
+    ): AppResult<String> {
         val targetUrl = localDataSource.getProfilePhotoFilePath(uid)
 
         // 1. 이미지 리사이즈

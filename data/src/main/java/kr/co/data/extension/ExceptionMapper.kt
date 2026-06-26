@@ -12,11 +12,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.FirebaseFirestoreException.Code
 import com.google.firebase.functions.FirebaseFunctionsException
 import com.google.firebase.storage.StorageException
-import kr.co.data.feature.account.exception.AccountException
-import kr.co.data.feature.diary.exception.DiaryException
-import kr.co.data.feature.time.exception.TimeException
 import kr.co.core.common.error.DomainError
-
+import kr.co.data.feature.account.exception.AccountException
 
 fun Throwable.toDomainError(): DomainError = when (this) {
     /**
@@ -87,10 +84,10 @@ fun Throwable.toDomainError(): DomainError = when (this) {
             "ERROR_USER_DISABLED" -> DomainError.Auth.UserDisabled
             // 인증 토큰이 만료되어 세션이 끊긴 경우 (다시 로그인 필요)
             "ERROR_USER_TOKEN_EXPIRED" -> DomainError.Auth.TokenExpired
-            else -> DomainError.Unexpected(this)
+            else -> DomainError.Unexpected
         }
 
-        else -> DomainError.Unexpected(this)
+        else -> DomainError.Unexpected
     }
 
     /**
@@ -147,7 +144,7 @@ fun Throwable.toDomainError(): DomainError = when (this) {
          */
         FirebaseFunctionsException.Code.DEADLINE_EXCEEDED -> DomainError.Timeout
 
-        else -> DomainError.Unexpected(this)
+        else -> DomainError.Unexpected
     }
 
     is FirebaseFirestoreException -> when (code) {
@@ -199,7 +196,7 @@ fun Throwable.toDomainError(): DomainError = when (this) {
          */
         Code.RESOURCE_EXHAUSTED -> DomainError.Store.QuotaExceeded
 
-        else -> DomainError.Unexpected(this)
+        else -> DomainError.Unexpected
     }
 
     is StorageException -> when (errorCode) {
@@ -227,23 +224,8 @@ fun Throwable.toDomainError(): DomainError = when (this) {
          */
         StorageException.ERROR_RETRY_LIMIT_EXCEEDED -> DomainError.NetworkUnavailable
 
-        else -> DomainError.Unexpected(this)
+        else -> DomainError.Unexpected
     }
 
-    /**
-     * [DiaryException] (커스텀 예외)
-     * DiaryLocalDataSource에서 발생하는 일기 관련 예외를 도메인 에러로 매핑합니다.
-     */
-    is DiaryException -> when (this) {
-        is DiaryException.NotFoundException -> DomainError.Diary.NotFound
-    }
-
-    /**
-     * [TimeException] (커스텀 예외)
-     */
-    is TimeException -> when (this) {
-        is TimeException.NotInitializedException -> DomainError.Time.NotInitialized
-    }
-
-    else -> DomainError.Unexpected(this)
+    else -> DomainError.Unexpected
 }

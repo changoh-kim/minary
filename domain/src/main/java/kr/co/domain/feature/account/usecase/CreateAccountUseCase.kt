@@ -1,7 +1,6 @@
 package kr.co.domain.feature.account.usecase
 
-import com.github.michaelbull.result.Result
-import kr.co.core.common.error.DomainError
+import kr.co.core.common.result.AppResult
 import kr.co.domain.feature.account.model.SignUpInfo
 import kr.co.domain.feature.account.service.AccountService
 import kr.co.domain.service.time.ServerTimeProvider
@@ -13,7 +12,7 @@ class CreateAccountUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(
         signUpInfo: SignUpInfo
-    ): Result<Unit, DomainError> {
+    ): AppResult<Unit> {
         val joinedAt = serverTimeProvider.now()
         return accountService.createAccount(signUpInfo, joinedAt)
     }

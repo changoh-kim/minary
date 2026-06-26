@@ -1,9 +1,8 @@
 package kr.co.domain.feature.account.usecase
 
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.onErr
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.account.model.Account
 import kr.co.domain.feature.account.service.AccountService
 import kr.co.domain.feature.user.usecase.StartUserDataSyncUseCase
@@ -16,7 +15,7 @@ class SignInUseCase @Inject constructor(
     suspend operator fun invoke(
         email: String,
         password: String
-    ): Result<Account, DomainError> = coroutineBinding {
+    ): AppResult<Account> = coroutineBinding {
         val account = accountService.signIn(email, password).bind()
 
         startUserDataSync(account.uid).onErr {

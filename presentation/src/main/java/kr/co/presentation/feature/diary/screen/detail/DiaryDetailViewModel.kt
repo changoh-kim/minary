@@ -8,10 +8,9 @@ import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
-import kr.co.core.ui.common.error.handleDomainError
 import kr.co.core.ui.common.load.LoadState
 import kr.co.core.ui.common.load.data
-import kr.co.core.ui.common.load.safeCall
+import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
 import kr.co.domain.feature.diary.usecase.DeleteDiaryUseCase
 import kr.co.domain.feature.diary.usecase.GetDiaryStreamUseCase
@@ -104,21 +103,14 @@ class DiaryDetailViewModel @Inject constructor(
     private fun requestDeleteDiary() = intent {
         val diary = state.diaryLoadState.data ?: return@intent
 
-        safeCall<Unit, DomainError> { deleteDiary(diary.toDiary()) }
+        load { deleteDiary(diary.toDiary()) }
             .onLoading { reduce { state.copy(isDeleting = it) } }
             .onError { handleDeleteDiaryError(it) }
-            .launchOnSuccess { postSideEffect(DiaryDetailSideEffect.DiaryDeleted) }
+            .startOnSuccess { postSideEffect(DiaryDetailSideEffect.DiaryDeleted) }
     }
 
     private fun handleDeleteDiaryError(error: DomainError) = intent {
-        handleDomainError(error) {
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to delete diary: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(DiaryDetailSideEffect.ShowMessage(
-                        UiText.StringResource(R.string.unexpected_error)))
-                }
-            }
-        }
+        Log.e(TAG, "Failed to delete diary: $error")
+        postSideEffect(DiaryDetailSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 }

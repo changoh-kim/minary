@@ -1,13 +1,12 @@
 package kr.co.domain.feature.user.usecase
 
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kr.co.core.common.state.SyncProcessState
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.profile.sync.UserProfileSyncManager
 import kr.co.domain.feature.setting.sync.UserSettingsSyncManager
 import kr.co.domain.service.time.ServerTimeProvider
@@ -24,7 +23,7 @@ class StartUserDataSyncUseCase @Inject constructor(
         const val SYNC_INTERVAL = 1000 * 60 * 60L // 1시간
     }
 
-    suspend operator fun invoke(currentUid: String): Result<Unit, DomainError> = coroutineBinding {
+    suspend operator fun invoke(currentUid: String): AppResult<Unit> = coroutineBinding {
         val lastSyncTimestamp = userDataSyncStateRepository.getLastSyncTimestamp()
         val currentTimestamp = serverTime.now()
         // 1시간 이내 사용자 데이터 동기화를 했었다면 중지

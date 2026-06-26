@@ -7,10 +7,8 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
-import kr.co.core.ui.common.error.handleDomainError
-import kr.co.core.ui.common.load.safeCall
+import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
-import kr.co.domain.feature.account.model.Account
 import kr.co.domain.feature.account.usecase.SignInUseCase
 import kr.co.presentation.R
 import org.orbitmvi.orbit.ContainerHost
@@ -79,19 +77,18 @@ class SignInViewModel @Inject constructor(
     }
 
     private fun handleError(error: DomainError) = intent {
-        handleDomainError(error) {
-            networkUnavailable = { postSideEffect(SignInSideEffect.ShowMessage(UiText.StringResource(R.string.network_unavailable))) }
-            timeout = { postSideEffect(SignInSideEffect.ShowMessage(UiText.StringResource(R.string.timeout))) }
-            invalidCredentials = { postSideEffect(SignInSideEffect.ShowMessage(UiText.StringResource(R.string.invalid_credentials))) }
-            authUserNotFound = { postSideEffect(SignInSideEffect.ShowMessage(UiText.StringResource(R.string.user_not_found))) }
-            tooManyRequests = { postSideEffect(SignInSideEffect.ShowMessage(UiText.StringResource(R.string.too_many_requests))) }
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to sign in: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(SignInSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
-                }
+        val message = when (error) {
+            DomainError.NetworkUnavailable -> R.string.network_unavailable
+            DomainError.Timeout -> R.string.timeout
+            DomainError.Auth.InvalidCredentials -> R.string.invalid_credentials
+            DomainError.Auth.UserNotFound -> R.string.user_not_found
+            DomainError.Auth.TooManyRequests -> R.string.too_many_requests
+            else -> {
+                Log.e(TAG, "Failed to sign in: $error")
+                R.string.unexpected_error
             }
         }
+        postSideEffect(SignInSideEffect.ShowMessage(UiText.StringResource(message)))
     }
 
     private fun updateEmail(newEmail: String) = blockingIntent {
@@ -107,10 +104,10 @@ class SignInViewModel @Inject constructor(
     private fun requestSignIn() = intent {
         if (!validateInput()) return@intent
 
-        safeCall<Account, DomainError> { signIn(state.email, state.password) }
+        load { signIn(state.email, state.password) }
             .onLoading { isLoading -> reduce { state.copy(isSigningIn = isLoading) } }
             .onError { handleError(it) }
-            .launchOnSuccess {
+            .startOnSuccess {
                 postSideEffect(SignInSideEffect.SignInSucceeded)
             }
     }

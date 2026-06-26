@@ -7,8 +7,7 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
-import kr.co.core.ui.common.error.handleDomainError
-import kr.co.core.ui.common.load.safeCall
+import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
 import kr.co.domain.feature.account.usecase.DeleteAccountUseCase
 import kr.co.presentation.R
@@ -85,24 +84,26 @@ class AccountDeletionViewModel @Inject constructor(
             return@intent
         }
 
-        safeCall<Unit, DomainError> { deleteAccount(state.password) }
+        load { deleteAccount(state.password) }
             .onLoading { reduce { state.copy(isProcessing = it) } }
             .onError { handleError(it) }
-            .launchOnSuccess {
+            .startOnSuccess {
                 postSideEffect(AccountDeletionSideEffect.DeletionSucceeded)
             }
     }
 
     private fun handleError(error: DomainError) = intent {
-        handleDomainError(error) {
-            networkUnavailable = { postSideEffect(AccountDeletionSideEffect.ShowMessage(UiText.StringResource(R.string.network_unavailable))) }
-            timeout = { postSideEffect(AccountDeletionSideEffect.ShowMessage(UiText.StringResource(R.string.timeout))) }
-            invalidCredentials = { postSideEffect(AccountDeletionSideEffect.ShowMessage(UiText.StringResource(R.string.invalid_credentials))) }
-            tooManyRequests = { postSideEffect(AccountDeletionSideEffect.ShowMessage(UiText.StringResource(R.string.too_many_requests))) }
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to delete account", systemError)
-                postSideEffect(AccountDeletionSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
+        val message = when (error) {
+            DomainError.NetworkUnavailable -> R.string.network_unavailable
+            DomainError.Timeout -> R.string.timeout
+            DomainError.Auth.InvalidCredentials -> R.string.invalid_credentials
+            DomainError.Auth.TooManyRequests -> R.string.too_many_requests
+            DomainError.Auth.RequiresRecentLogin -> R.string.requires_recent_sign_in
+            else -> {
+                Log.e(TAG, "Failed to delete account: $error")
+                R.string.unexpected_error
             }
         }
+        postSideEffect(AccountDeletionSideEffect.ShowMessage(UiText.StringResource(message)))
     }
 }

@@ -8,10 +8,9 @@ import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
-import kr.co.core.ui.common.error.handleDomainError
 import kr.co.core.ui.common.load.LoadState
 import kr.co.core.ui.common.load.data
-import kr.co.core.ui.common.load.safeCall
+import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
 import kr.co.domain.feature.diary.model.Diary
 import kr.co.domain.feature.diary.usecase.CreateDiaryUseCase
@@ -85,9 +84,9 @@ class DiaryEditViewModel @Inject constructor(
                 )
             }
         } else {
-            safeCall<Diary?, DomainError> { getDiary(targetDate) }
+            load<Diary?> { getDiary(targetDate) }
                 .map { it?.toDiaryUiModel() }
-                .launchAsLoadState { loadState ->
+                .startAsLoadState { loadState ->
                     when (loadState) {
                         is LoadState.Success -> {
                             if (loadState.data == null) {
@@ -144,43 +143,29 @@ class DiaryEditViewModel @Inject constructor(
         if (!validateInput(diary)) return@intent
 
         val resultFlow = if (state.isNewDiary) {
-            safeCall<Unit, DomainError> { createDiary(diary.toDiary()) }.map { diary.toDiary() }
+            load { createDiary(diary.toDiary()) }.map { diary.toDiary() }
         } else {
-            safeCall<Diary, DomainError> { updateDiary(diary.toDiary()) }
+            load { updateDiary(diary.toDiary()) }
         }
 
         resultFlow
             .onLoading { reduce { state.copy(isSaving = it, isAnalyzing = it) } }
             .onError { handleSaveDiaryError(it) }
-            .launchOnSuccess {
+            .startOnSuccess {
                 postSideEffect(DiaryEditSideEffect.ShowMessage(UiText.StringResource(R.string.diary_saved)))
                 postSideEffect(DiaryEditSideEffect.DiarySaved)
             }
     }
 
     private fun handleGetDiaryError(error: DomainError) = intent {
-        handleDomainError(error) {
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to get diary: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(DiaryEditSideEffect.ShowMessage(
-                        UiText.StringResource(R.string.unexpected_error)))
-                    postSideEffect(DiaryEditSideEffect.LoadFailed)
-                }
-            }
-        }
+        Log.e(TAG, "Failed to get diary: $error")
+        postSideEffect(DiaryEditSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
+        postSideEffect(DiaryEditSideEffect.LoadFailed)
     }
 
     private fun handleSaveDiaryError(error: DomainError) = intent {
-        handleDomainError(error) {
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to save diary: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(DiaryEditSideEffect.ShowMessage(
-                        UiText.StringResource(R.string.unexpected_error)))
-                }
-            }
-        }
+        Log.e(TAG, "Failed to save diary: $error")
+        postSideEffect(DiaryEditSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 
     private suspend fun SimpleSyntax<DiaryEditState, DiaryEditSideEffect>.validateInput(diary: DiaryUiModel): Boolean {

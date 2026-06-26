@@ -6,7 +6,7 @@
 ## 역할
 - RepositoryImpl, DataSource, Mapper, SyncManager/Worker, domain contract binding을 소유한다.
 - Room/DataStore 기반 local source를 SSOT로 사용하고 Firebase와 동기화한다.
-- 외부 예외를 `DomainError` 또는 `Result<Value, DomainError>` 흐름으로 변환해 domain/presentation 경계를 안정화한다.
+- 외부 예외를 `DomainError` 또는 `AppResult<Value>` 흐름으로 변환해 domain/presentation 경계를 안정화한다.
 - Firebase read/write 비용과 offline 동작을 동시에 보호한다.
 
 ## 의존성 규칙
@@ -25,7 +25,8 @@
 - `Entity <-> Domain`, `Dto <-> Domain` 변환은 명시적 mapper로 처리한다.
 - Firebase SDK는 provider를 통해 접근하고, 경로 문자열 변경 시 `:core:firebase`와 `firebase-server`를 함께 갱신한다.
 - Firebase 예외 타입, listener registration, snapshot처럼 data 구현에 필요한 SDK value/type 사용은 허용하되, SDK singleton 인스턴스 접근은 provider로 제한한다.
-- Firebase/Room/DataStore/IO 실패는 data 내부에서 변환하고, raw exception을 domain/presentation으로 노출하지 않는다.
+- Firebase/Room/DataStore/IO 실패는 data 내부 mapper에서 `DomainError`로 변환하고, raw exception을 domain/presentation으로 노출하지 않는다.
+- 이미 의미를 아는 내부 실패는 예외를 던지지 말고 `Err(DomainError.*)`로 반환한다.
 
 ## 금지사항
 - UI 상태, Compose, ViewModel, navigation을 참조하지 않는다.
@@ -33,6 +34,7 @@
 - RepositoryImpl에 복잡한 sync 정책을 직접 누적하지 않는다. sync 책임은 별도 sync 구성요소로 분리한다.
 - Firestore realtime listener와 remote read 범위를 비용 고려 없이 넓히지 않는다.
 - Coroutine Dispatcher를 직접 고정하지 않는다. `:core:di` qualifier로 주입받은 dispatcher/scope를 사용한다.
+- 외부 예외 매핑 코드를 `:core:common`으로 올리지 않는다. 구현 기술 예외 변환은 data 책임으로 유지한다.
 - PII를 로그에 남기지 않는다.
 
 ## 변경 시 체크리스트
