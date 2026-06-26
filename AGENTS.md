@@ -21,6 +21,7 @@
     - `:domain` -> `:core:common`
 - 역방향 의존성을 만들지 않는다. 특히 `domain`은 `data`, `presentation`, Android 구현을 몰라야 한다.
 - `presentation`은 `data`와 `app`을 참조하지 않는다.
+- 공개 실패 계약은 `:core:common`의 `AppResult<T>`와 `DomainError`를 사용한다.
 - Firebase 경로, rules, functions 계약 변경 시 Android client와 `firebase-server`를 함께 검증한다.
 
 ## 패키지/코드 배치 규칙
@@ -44,11 +45,13 @@
 - 동기화 기준 시간에 기기 시간(`System.currentTimeMillis()`)을 직접 사용하지 않는다. `ServerTimeProvider` 계약을 사용한다.
 - 라이브러리 버전을 `build.gradle.kts`나 소스에 하드코딩하지 않는다. 새 의존성은 `gradle/libs.versions.toml`에 등록하고 `libs.*` alias로 참조한다.
 - 모듈 고유 책임을 다른 모듈에 편의상 추가하지 않는다. 경계가 애매하면 하위 `AGENTS.md`의 역할 정의를 먼저 확인한다.
+- raw exception이나 `Throwable`을 `domain`/`presentation` 공개 API로 노출하지 않는다. 예상 가능한 실패는 `DomainError` 값으로 표현한다.
 - 코드만 보면 알 수 있는 클래스/파일 목록을 AGENTS 문서에 장황하게 추가하지 않는다.
 
 ## 변경 시 체크리스트
 - Gradle 모듈이 추가/삭제/분리/병합되면 루트 의존성 설명과 하위 `AGENTS.md` 배치를 갱신한다.
 - 의존성 방향, 패키지 구조 원칙, MVI/sync/DI/model naming 규칙이 바뀌면 관련 `AGENTS.md`를 함께 갱신한다.
+- 에러 계약이 바뀌면 `:core:common`, `:domain`, `:data`, `:presentation` 영향과 검증을 함께 확인한다.
 - 같은 원칙 안에서 화면, UseCase, Mapper, ViewModel이 단순 추가되는 경우 문서 갱신은 필수가 아니다.
 - Firestore/Storage 경로, sync 정책, App Check, budget 방어 로직 변경 시 Android와 `firebase-server`를 함께 검증한다.
 - 로컬 커밋은 `.gitmessage.txt` 템플릿을 따르고, GitHub Issue/PR 작성 시 `.github/` 하위 템플릿을 우선 참조한다.

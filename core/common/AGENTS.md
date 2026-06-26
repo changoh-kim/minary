@@ -5,11 +5,12 @@
 
 ## 역할
 - 전 계층에서 의미가 동일한 공통 타입과 상태를 제공한다.
+- 전 계층에서 공유하는 실패 계약인 `AppResult<T>`와 `DomainError`를 제공한다.
 - Android 비의존 순수 Kotlin extension을 제공한다.
 - domain/data/presentation이 공유해도 계층 오염이 없는 코드를 소유한다.
 
 ## 의존성 규칙
-- Kotlin 표준 라이브러리 중심의 pure Kotlin 의존성만 허용한다.
+- Kotlin 표준 라이브러리 중심의 pure Kotlin 의존성만 허용한다. kotlin-result처럼 Android 비의존 결과 타입 라이브러리는 허용할 수 있다.
 - Android SDK, Compose, Room, Firebase, DataStore, WorkManager, Hilt Android API에 의존하지 않는다.
 - 다른 project module에 대한 의존성을 추가하지 않는 것을 기본값으로 한다.
 
@@ -23,6 +24,7 @@
 - resource id, color, parceler, Context 의존 코드를 두지 않는다.
 - Entity, Dto, UiModel처럼 특정 계층 모델을 두지 않는다.
 - Firebase path, Room schema, DataStore schema를 두지 않는다.
+- Firebase/Room/DataStore/IO 예외 타입 매핑처럼 구현 기술을 아는 에러 변환 로직을 두지 않는다.
 - logging 외에 Android runtime이 필요한 helper를 추가하지 않는다.
 
 ## 변경 시 체크리스트

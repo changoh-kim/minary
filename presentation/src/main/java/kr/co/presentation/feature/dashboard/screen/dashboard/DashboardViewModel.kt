@@ -8,16 +8,14 @@ import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
-import kr.co.core.ui.common.error.handleDomainError
 import kr.co.core.ui.common.load.LoadState
-import kr.co.core.ui.common.load.safeCall
+import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
-import kr.co.domain.feature.dashboard.model.Dashboard
 import kr.co.domain.feature.dashboard.usecase.GetDashboardUseCase
 import kr.co.presentation.R
+import kr.co.presentation.app.navigation.route.DashboardRoute
 import kr.co.presentation.feature.dashboard.mapper.DashboardUiModelMapper.toDashboardUiModel
 import kr.co.presentation.feature.dashboard.model.DashboardUiModel
-import kr.co.presentation.app.navigation.route.DashboardRoute
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
 import org.orbitmvi.orbit.syntax.simple.postSideEffect
@@ -61,9 +59,9 @@ class DashboardViewModel @Inject constructor(
         if (savedDashboard != null) {
             reduce { state.copy(dashboardLoadState = LoadState.Success(savedDashboard)) }
         } else {
-            safeCall<Dashboard, DomainError> { getDashboardUseCase() }
+            load { getDashboardUseCase() }
                 .map { it.toDashboardUiModel() }
-                .launchAsLoadState { loadState ->
+                .startAsLoadState { loadState ->
                     reduce { state.copy(dashboardLoadState = loadState) }
 
                     when (loadState) {
@@ -78,13 +76,7 @@ class DashboardViewModel @Inject constructor(
     fun handleAction(action: DashboardAction) {}
 
     private fun handleDashboardError(error: DomainError) = intent {
-        handleDomainError(error) {
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to get dashboard: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(DashboardSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
-                }
-            }
-        }
+        Log.e(TAG, "Failed to get dashboard: $error")
+        postSideEffect(DashboardSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
     }
 }

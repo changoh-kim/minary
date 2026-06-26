@@ -1,8 +1,9 @@
 package kr.co.data.feature.diary.repository
 
 import android.util.Log
-import com.github.michaelbull.result.Result
+import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.coroutines.runSuspendCatching
+import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
@@ -10,16 +11,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
+import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
+import kr.co.core.common.result.AppResult
+import kr.co.core.common.state.DiarySyncStatus
+import kr.co.core.common.state.SyncStatus
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.diary.mapper.DiaryMapper.toDiary
 import kr.co.data.feature.diary.mapper.DiaryMapper.toDiaryWithRelations
 import kr.co.data.feature.diary.source.local.DiaryLocalDataSource
 import kr.co.data.feature.emotion.source.remote.EmotionRemoteDataSource
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.diary.model.Diary
-import kr.co.core.common.state.DiarySyncStatus
-import kr.co.core.common.state.SyncStatus
 import kr.co.domain.feature.diary.repository.DiaryRepository
 import kr.co.domain.feature.diary.sync.DiarySyncManager
 import kr.co.domain.feature.diary.sync.DiarySyncScheduler
@@ -48,13 +50,13 @@ class DiaryRepositoryImpl @Inject constructor(
     override fun getSyncStatusStream(yearMonth: YearMonth): Flow<SyncStatus> =
         localDataSource.getSyncMetadataStream(yearMonth).map { it?.status ?: SyncStatus.IDLE }
 
-    override suspend fun requestMonthSync(userId: String, yearMonth: YearMonth): Result<Unit, DomainError> =
+    override suspend fun requestMonthSync(userId: String, yearMonth: YearMonth): AppResult<Unit> =
         runSuspendCatching {
             diarySyncManager.performMonthSync(userId, yearMonth)
         }.map { Unit }
         .mapError { it.toDomainError() }
 
-    override suspend fun createDiary(diary: Diary): Result<Unit, DomainError> =
+    override suspend fun createDiary(diary: Diary): AppResult<Unit> =
         runSuspendCatching {
             val emotions = emotionRemoteDataSource.analysis(diary)
             val diaryWithEmotions = diary.copy(emotions = emotions)
@@ -65,35 +67,46 @@ class DiaryRepositoryImpl @Inject constructor(
         }.map { Unit }
         .mapError { it.toDomainError() }
 
-    override suspend fun updateDiary(diary: Diary): Result<Diary, DomainError> =
-        runSuspendCatching {
-            val emotions = emotionRemoteDataSource.analysis(diary)
+    override suspend fun updateDiary(diary: Diary): AppResult<Diary> {
+        // S4: PENDING_CREATE 상태 보호 및 데이터 존재 여부 확인
+        val syncStatusResult = runSuspendCatching {
+            localDataSource.getSyncStatus(diary.id)
+        }.mapError { it.toDomainError() }
 
-            // S4: PENDING_CREATE 상태 보호 및 데이터 존재 여부 확인
-            val currentSyncStatus = localDataSource.getSyncStatus(diary.id)
-                ?: throw IllegalStateException("Diary not found: ${diary.id}")
+        return syncStatusResult.fold(
+            success = { currentSyncStatus ->
+                if (currentSyncStatus == null) {
+                    return@fold Err(DomainError.Diary.NotFound)
+                }
 
-            val syncStatus = if (currentSyncStatus == DiarySyncStatus.PENDING_CREATE) {
-                DiarySyncStatus.PENDING_CREATE
-            } else {
-                DiarySyncStatus.PENDING_UPDATE
-            }
+                runSuspendCatching {
+                    val emotions = emotionRemoteDataSource.analysis(diary)
 
-            val updatedDiary = diary.copy(
-                emotions = emotions,
-                syncStatus = syncStatus
-            )
+                    val syncStatus = if (currentSyncStatus == DiarySyncStatus.PENDING_CREATE) {
+                        DiarySyncStatus.PENDING_CREATE
+                    } else {
+                        DiarySyncStatus.PENDING_UPDATE
+                    }
 
-            localDataSource.update(updatedDiary.toDiaryWithRelations())
-            diarySyncScheduler.scheduleImmediateSync()
-            _diaryChangeEvent.tryEmit(Unit)
+                    val updatedDiary = diary.copy(
+                        emotions = emotions,
+                        syncStatus = syncStatus
+                    )
 
-            updatedDiary
-        }
-        .onErr { Log.e(TAG, "Failed to update diary", it) }
-        .mapError { it.toDomainError() }
+                    localDataSource.update(updatedDiary.toDiaryWithRelations())
+                    diarySyncScheduler.scheduleImmediateSync()
+                    _diaryChangeEvent.tryEmit(Unit)
 
-    override suspend fun deleteDiary(diary: Diary): Result<Unit, DomainError> =
+                    updatedDiary
+                }
+                .onErr { Log.e(TAG, "Failed to update diary", it) }
+                .mapError { it.toDomainError() }
+            },
+            failure = { Err(it) }
+        )
+    }
+
+    override suspend fun deleteDiary(diary: Diary): AppResult<Unit> =
         runSuspendCatching {
             val currentSyncStatus = localDataSource.getSyncStatus(diary.id)
             if (currentSyncStatus == DiarySyncStatus.PENDING_CREATE) {
@@ -108,7 +121,7 @@ class DiaryRepositoryImpl @Inject constructor(
             Unit
         }.mapError { it.toDomainError() }
 
-    override suspend fun deleteOldDiaries(): Result<Unit, DomainError> =
+    override suspend fun deleteOldDiaries(): AppResult<Unit> =
         runSuspendCatching {
             // 1년 전까지의 데이터 삭제
             val currentTime = serverTime.now()
@@ -116,7 +129,7 @@ class DiaryRepositoryImpl @Inject constructor(
             localDataSource.deleteOldDiaries(cutoff)
         }.mapError { it.toDomainError() }
 
-    override suspend fun getDiary(date: LocalDate): Result<Diary?, DomainError> =
+    override suspend fun getDiary(date: LocalDate): AppResult<Diary?> =
         runSuspendCatching {
             localDataSource.getDiaryWithRelations(date)
         }
@@ -133,7 +146,7 @@ class DiaryRepositoryImpl @Inject constructor(
     override suspend fun getDiariesByDateRange(
         startDate: LocalDate,
         endDate: LocalDate
-    ): Result<List<Diary>, DomainError> = runSuspendCatching {
+    ): AppResult<List<Diary>> = runSuspendCatching {
         localDataSource.getDiariesByDateRange(startDate, endDate)
     }.mapError { it.toDomainError() }
 
@@ -143,7 +156,7 @@ class DiaryRepositoryImpl @Inject constructor(
         endDate: LocalDate?,
         limit: Int,
         offset: Int
-    ): Result<List<Diary>, DomainError> = runSuspendCatching {
+    ): AppResult<List<Diary>> = runSuspendCatching {
         localDataSource.getPagedDiaries(query, startDate, endDate, limit, offset)
     }.mapError { it.toDomainError() }
 }

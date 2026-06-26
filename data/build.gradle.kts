@@ -76,6 +76,7 @@ dependencies {
 
     // coroutines
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlin.result.coroutines)
 
     // generative ai
     implementation(libs.generative.ai)

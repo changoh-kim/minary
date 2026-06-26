@@ -1,7 +1,7 @@
 package kr.co.data.feature.session.repository
 
 import android.util.Log
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
@@ -13,7 +13,6 @@ import kr.co.data.extension.toDomainError
 import kr.co.data.feature.session.mapper.UserSessionMapper.toUserSession
 import kr.co.data.feature.session.source.local.SessionLocalDataSource
 import kr.co.data.feature.session.source.remote.SessionRemoteDataSource
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.session.model.UserSession
 import kr.co.domain.feature.session.repository.SessionRepository
 import javax.inject.Inject
@@ -31,7 +30,7 @@ class SessionRepositoryImpl @Inject constructor(
     override suspend fun setLastSignInUid(uid: String) =
         localDataSource.setLastSignInUid(uid)
 
-    override suspend fun getCurrentUser(): Result<UserSession, DomainError> =
+    override suspend fun getCurrentUser(): AppResult<UserSession> =
         runSuspendCatching {
             remoteDataSource.getCurrentUser()
         }
@@ -39,7 +38,7 @@ class SessionRepositoryImpl @Inject constructor(
         .map { it.toUserSession() }
         .mapError { it.toDomainError() }
 
-    override suspend fun reload(): Result<UserSession, DomainError> =
+    override suspend fun reload(): AppResult<UserSession> =
         runSuspendCatching {
             remoteDataSource.reload()
         }

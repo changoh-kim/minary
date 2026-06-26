@@ -1,13 +1,12 @@
 package kr.co.data.service.time
 
 import android.content.Context
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.mapError
 import com.instacart.library.truetime.TrueTime
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kr.co.data.extension.toDomainError
-import kr.co.core.common.error.DomainError
 import kr.co.domain.service.time.ServerTimeProvider
 import kr.co.domain.service.time.ServerTimeSyncScheduler
 import javax.inject.Inject
@@ -24,7 +23,7 @@ class TrueTimeProvider @Inject constructor(
         private const val CONNECTION_TIMEOUT = 10_000 // 10초
     }
 
-    override suspend fun sync(): Result<Unit, DomainError> =
+    override suspend fun sync(): AppResult<Unit> =
         runSuspendCatching {
             TrueTime.build()
                 .withNtpHost(NTP_HOST)

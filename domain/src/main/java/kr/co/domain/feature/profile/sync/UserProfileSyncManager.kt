@@ -1,12 +1,11 @@
 package kr.co.domain.feature.profile.sync
 
-import com.github.michaelbull.result.Result
-import kr.co.core.common.error.DomainError
+import kr.co.core.common.result.AppResult
 
 interface UserProfileSyncManager {
-    suspend fun syncProfile(userId: String): Result<Unit, DomainError>
-    suspend fun pushProfile(userId: String): Result<Unit, DomainError>
-    suspend fun pullProfile(userId: String): Result<Unit, DomainError>
+    suspend fun syncProfile(userId: String): AppResult<Unit>
+    suspend fun pushProfile(userId: String): AppResult<Unit>
+    suspend fun pullProfile(userId: String): AppResult<Unit>
 
-    suspend fun pushProfilePhoto(userId: String): Result<Unit, DomainError>
+    suspend fun pushProfilePhoto(userId: String): AppResult<Unit>
 }

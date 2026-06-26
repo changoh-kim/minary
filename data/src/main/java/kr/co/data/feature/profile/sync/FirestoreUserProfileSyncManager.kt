@@ -1,7 +1,7 @@
 package kr.co.data.feature.profile.sync
 
 import androidx.core.net.toUri
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.map
@@ -17,7 +17,6 @@ import kr.co.data.feature.profile.model.UserProfileDto
 import kr.co.data.feature.profile.source.local.UserProfileLocalDataSource
 import kr.co.core.firebase.provider.FirebaseFirestoreProvider
 import kr.co.core.firebase.provider.FirebaseStorageProvider
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.profile.sync.UserProfileSyncManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,7 +33,7 @@ class FirestoreUserProfileSyncManager @Inject constructor(
      *
      * @param userId
      */
-    override suspend fun syncProfile(userId: String): Result<Unit, DomainError> {
+    override suspend fun syncProfile(userId: String): AppResult<Unit> {
         return runSuspendCatching {
             val localProfile = userProfileLocalDataSource.getUserProfile()
 
@@ -89,7 +88,7 @@ class FirestoreUserProfileSyncManager @Inject constructor(
      *
      * @param userId
      */
-    override suspend fun pushProfile(userId: String): Result<Unit, DomainError> {
+    override suspend fun pushProfile(userId: String): AppResult<Unit> {
         return runSuspendCatching {
             val localProfile = userProfileLocalDataSource.getUserProfile()
 
@@ -127,7 +126,7 @@ class FirestoreUserProfileSyncManager @Inject constructor(
      *
      * @param userId
      */
-    override suspend fun pullProfile(userId: String): Result<Unit, DomainError> {
+    override suspend fun pullProfile(userId: String): AppResult<Unit> {
         val result = runSuspendCatching {
             val ref = firebaseFirestoreProvider.getUserProfileRef(userId)
             ref.get().await()
@@ -144,7 +143,7 @@ class FirestoreUserProfileSyncManager @Inject constructor(
      * @param userId
      * @param snapshot
      */
-    internal suspend fun pullProfile(userId: String, snapshot: DocumentSnapshot): Result<Unit, DomainError> {
+    internal suspend fun pullProfile(userId: String, snapshot: DocumentSnapshot): AppResult<Unit> {
         return runSuspendCatching {
             if (snapshot.exists()) {
                 val remoteProfile = snapshot.toObject(UserProfileDto::class.java)
@@ -173,7 +172,7 @@ class FirestoreUserProfileSyncManager @Inject constructor(
      *
      * @param userId
      */
-    override suspend fun pushProfilePhoto(userId: String): Result<Unit, DomainError> {
+    override suspend fun pushProfilePhoto(userId: String): AppResult<Unit> {
         return runSuspendCatching {
             val localProfile = userProfileLocalDataSource.getUserProfile()
 

@@ -13,3 +13,7 @@ kotlin {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
 }
+
+dependencies {
+    api(libs.kotlin.result)
+}

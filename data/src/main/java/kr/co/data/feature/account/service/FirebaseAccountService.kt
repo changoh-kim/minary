@@ -1,12 +1,11 @@
 package kr.co.data.feature.account.service
 
 import android.util.Log
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.map
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
-import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
 import kr.co.data.extension.toDomainError
 import kr.co.data.feature.account.mapper.AccountMapper.toAccount
@@ -21,7 +20,7 @@ import javax.inject.Singleton
 class FirebaseAccountService @Inject constructor(
     private val remoteDataSource: AccountRemoteDataSource,
 ) : AccountService {
-    override suspend fun createAccount(signUpInfo: SignUpInfo, joinedAt: Long): Result<Unit, DomainError> =
+    override suspend fun createAccount(signUpInfo: SignUpInfo, joinedAt: Long): AppResult<Unit> =
         runSuspendCatching {
             remoteDataSource.createAccount(
                 email = signUpInfo.email,
@@ -37,7 +36,7 @@ class FirebaseAccountService @Inject constructor(
         .onErr { Log.e(TAG, "Failed to create account with profile", it) }
         .mapError { it.toDomainError() }
 
-    override suspend fun deleteAccount(password: String): Result<String, DomainError> =
+    override suspend fun deleteAccount(password: String): AppResult<String> =
         runSuspendCatching {
             remoteDataSource.deleteAccount(password)
         }
@@ -47,7 +46,7 @@ class FirebaseAccountService @Inject constructor(
     override suspend fun signIn(
         email: String,
         password: String
-    ): Result<Account, DomainError> =
+    ): AppResult<Account> =
         runSuspendCatching {
             remoteDataSource.signIn(email, password)
         }
@@ -55,14 +54,14 @@ class FirebaseAccountService @Inject constructor(
         .map { it.toAccount() }
         .mapError { it.toDomainError() }
 
-    override suspend fun signOut(): Result<Unit, DomainError> =
+    override suspend fun signOut(): AppResult<Unit> =
         runSuspendCatching {
             remoteDataSource.signOut()
         }
         .onErr { Log.e(TAG, "Failed to sign out", it) }
         .mapError { it.toDomainError() }
 
-    override suspend fun checkEmailAvailability(email: String): Result<Boolean, DomainError> =
+    override suspend fun checkEmailAvailability(email: String): AppResult<Boolean> =
         runSuspendCatching {
             remoteDataSource.checkEmailAvailability(email)
         }

@@ -1,11 +1,10 @@
 package kr.co.domain.feature.diary.usecase.sync
 
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.coroutineBinding
 import com.github.michaelbull.result.onErr
 import com.github.michaelbull.result.onOk
 import kr.co.core.common.state.SyncProcessState
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.diary.sync.DiarySyncStateRepository
 import kr.co.domain.feature.diary.sync.DiarySyncManager
 import kr.co.domain.feature.session.repository.SessionRepository
@@ -16,7 +15,7 @@ class InitialDiarySyncUseCase @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val diarySyncManager: DiarySyncManager
 ) {
-    suspend operator fun invoke(): Result<Unit, DomainError> =
+    suspend operator fun invoke(): AppResult<Unit> =
         coroutineBinding {
             syncStateRepository.updateInitDiarySyncState(
                 SyncProcessState.InProgress.Determinate(0f)

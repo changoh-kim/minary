@@ -21,7 +21,5 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.paging.common)
 
-    //kotlin-result
-    api(libs.kotlin.result)
-    api(libs.kotlin.result.coroutines)
+    implementation(libs.kotlin.result.coroutines)
 }

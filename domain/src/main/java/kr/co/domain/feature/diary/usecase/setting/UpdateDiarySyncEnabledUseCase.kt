@@ -1,8 +1,7 @@
 package kr.co.domain.feature.diary.usecase.setting
 
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.coroutineBinding
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.session.repository.SessionRepository
 import kr.co.domain.feature.setting.repository.UserSettingsRepository
 import kr.co.domain.service.time.ServerTimeProvider
@@ -13,7 +12,7 @@ class UpdateDiarySyncEnabledUseCase @Inject constructor(
     private val serverTimeProvider: ServerTimeProvider,
     private val settingsRepository: UserSettingsRepository,
 ) {
-    suspend operator fun invoke(enabled: Boolean): Result<Unit, DomainError> = coroutineBinding {
+    suspend operator fun invoke(enabled: Boolean): AppResult<Unit> = coroutineBinding {
         val user = sessionRepository.getCurrentUser().bind()
         val lastModifiedAt = serverTimeProvider.now()
         settingsRepository.updateDiarySyncEnabled(user.uid, enabled, lastModifiedAt).bind()

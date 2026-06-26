@@ -6,7 +6,7 @@
 ## 역할
 - domain model, repository contract, usecase, sync/service contract를 정의한다.
 - Offline-first와 LWW 동기화에 필요한 비즈니스 규칙의 경계를 제공한다.
-- data와 presentation이 공유하는 의미를 순수 Kotlin 계약으로 표현한다.
+- data와 presentation이 공유하는 의미를 순수 Kotlin 계약과 `AppResult<T>` 실패 계약으로 표현한다.
 
 ## 의존성 규칙
 - `:core:common`과 순수 Kotlin 의존성만 허용한다.
@@ -21,15 +21,18 @@
 - 외부 시스템이나 앱 전역 서비스 성격의 계약은 `service/*`에 둔다.
 - domain model은 순수 명칭을 사용하고 `UiModel`, `Entity`, `Dto` 접미사를 붙이지 않는다.
 - UseCase는 단일 의도를 표현하고 상태를 저장하지 않는 호출형 API를 우선한다.
-- 계약 성격은 `repository`, `sync`, `service`로 구분하고 `port` 패키지는 사용하지 않는다.
-- 복잡한 순수 비즈니스 계산은 Repository가 아니라 feature 내부 generator/service 성격의 domain logic으로 분리한다.
+- Repository, UseCase, sync/service 계약의 예상 가능한 실패는 `AppResult<T>`로 반환한다.
+- kotlin-result 조합이 필요한 경우 `coroutineBinding`, `bind`, `mapError`, `onErr` 흐름을 사용한다.
+- 계약 성격은 `repository`, `sync`, `service`로 구분한다.
+- 복잡한 순수 비즈니스 계산은 Repository가 아니라 generator/service 성격의 domain logic으로 분리한다.
 
 ## 금지사항
 - data/presentation 모델로 변환하는 mapper를 domain에 두지 않는다.
 - Firebase, Room, WorkManager 같은 구현 기술명을 domain contract에 노출하지 않는다.
 - 동기화 기준 시간에 기기 시간을 직접 사용하지 않는다. 시간은 domain service 계약을 통해 다룬다.
 - UI 문자열, Android resource id, `Context`를 domain에 넣지 않는다.
-- raw exception을 domain API로 노출하지 않는다. 실패는 `Result<Value, DomainError>`로 표현한다.
+- raw exception을 domain API로 노출하지 않는다. 실패는 `AppResult<Value>`로 표현한다.
+- domain 전용 exception class를 공개 실패 계약으로 만들지 않는다.
 
 ## 변경 시 체크리스트
 - domain model이 바뀌면 data mapper와 presentation mapper 영향을 함께 검증한다.

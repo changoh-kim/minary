@@ -1,7 +1,6 @@
 package kr.co.domain.feature.account.usecase
 
-import com.github.michaelbull.result.Result
-import kr.co.core.common.error.DomainError
+import kr.co.core.common.result.AppResult
 import kr.co.domain.feature.account.service.AccountService
 import kr.co.domain.feature.diary.sync.DiarySyncScheduler
 import kr.co.domain.feature.diary.usecase.sync.StopRealtimeDiarySyncUseCase
@@ -16,7 +15,7 @@ class SignOutUseCase @Inject constructor(
     private val stopRealtimeUserSettingsSync: StopRealtimeUserSettingsSyncUseCase,
     private val accountService: AccountService,
 ) {
-    suspend operator fun invoke(): Result<Unit, DomainError> {
+    suspend operator fun invoke(): AppResult<Unit> {
         // Immediate 동기화를 제외한 나머지 취소
         diarySyncScheduler.cancelFullSync()
         diarySyncScheduler.cancelPeriodicSync()

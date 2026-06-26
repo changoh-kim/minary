@@ -8,8 +8,7 @@ import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
 import kr.co.core.common.extension.toLocalDate
 import kr.co.core.common.model.Gender
-import kr.co.core.ui.common.error.handleDomainError
-import kr.co.core.ui.common.load.safeCall
+import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
 import kr.co.domain.feature.account.model.SignUpInfo
 import kr.co.domain.feature.account.usecase.CheckEmailAvailabilityUseCase
@@ -139,24 +138,23 @@ class SignUpViewModel @Inject constructor(
     }
 
     private fun handleSingUpError(error: DomainError) = intent {
-        handleDomainError(error) {
-            networkUnavailable = { postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(R.string.network_unavailable))) }
-            timeout = { postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(R.string.timeout))) }
-            invalidCredentials = { postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(R.string.invalid_credentials))) }
-            emailAlreadyInUse = { postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(R.string.email_already_in_use))) }
-            weakPassword = { postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(R.string.weak_password))) }
-            tooManyRequests = { postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(R.string.too_many_requests))) }
-            storePermissionDenied = {
+        val message = when (error) {
+            DomainError.NetworkUnavailable -> R.string.network_unavailable
+            DomainError.Timeout -> R.string.timeout
+            DomainError.Auth.InvalidCredentials -> R.string.invalid_credentials
+            DomainError.Auth.EmailAlreadyInUse -> R.string.email_already_in_use
+            DomainError.Auth.WeakPassword -> R.string.weak_password
+            DomainError.Auth.TooManyRequests -> R.string.too_many_requests
+            DomainError.Store.PermissionDenied -> {
                 Log.e(TAG, "Failed to signup: Permission denied")
-                postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
+                R.string.unexpected_error
             }
-            unexpected = { systemError ->
-                Log.e(TAG, "Failed to signup: An unexpected error has occurred", systemError)
-                if (systemError != null) {
-                    postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
-                }
+            else -> {
+                Log.e(TAG, "Failed to signup: $error")
+                R.string.unexpected_error
             }
         }
+        postSideEffect(SignUpSideEffect.ShowMessage(UiText.StringResource(message)))
     }
 
     private fun updateEmail(newEmail: String) = blockingIntent {
@@ -210,10 +208,10 @@ class SignUpViewModel @Inject constructor(
             return@intent
         }
 
-        safeCall<Boolean, DomainError> { checkEmailAvailabilityUseCase(state.email) }
+        load { checkEmailAvailabilityUseCase(state.email) }
             .onLoading { isLoading -> reduce { state.copy(isCheckingEmail = isLoading) } }
             .onError { handleSingUpError(it) }
-            .launchOnSuccess { isAvailable ->
+            .startOnSuccess { isAvailable ->
                 reduce { state.copy(isEmailAvailable = isAvailable) }
             }
     }
@@ -231,10 +229,10 @@ class SignUpViewModel @Inject constructor(
             phoneNumber = state.phoneNumber
         )
 
-        safeCall<Unit, DomainError> { createAccount(signUpInfo) }
+        load { createAccount(signUpInfo) }
             .onLoading { isLoading -> reduce { state.copy(isSigningUp = isLoading) } }
             .onError { handleSingUpError(it) }
-            .launchOnSuccess {
+            .startOnSuccess {
                 postSideEffect(SignUpSideEffect.SignUpSucceeded)
             }
     }

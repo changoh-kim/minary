@@ -8,7 +8,6 @@ import com.github.michaelbull.result.onErr
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
 import kr.co.core.common.state.SyncProcessState
-import kr.co.core.ui.common.error.handleDomainError
 import kr.co.core.ui.common.text.UiText
 import kr.co.domain.feature.diary.usecase.setting.GetDiarySettingsStreamUseCase
 import kr.co.domain.feature.diary.usecase.sync.GetInitDiarySyncStateStreamUseCase
@@ -132,17 +131,7 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun handleHomeError(error: DomainError) = intent {
-        val intentContext = this
-        handleDomainError(error) {
-            unexpected = { systemError ->
-                intentContext.postSideEffect(
-                    HomeSideEffect.ShowMessage(
-                        systemError?.message?.let { UiText.DynamicString(it) }
-                            ?: UiText.StringResource(R.string.unknown_error)
-                    )
-                )
-            }
-        }
+        postSideEffect(HomeSideEffect.ShowMessage(UiText.StringResource(R.string.unknown_error)))
     }
 
     private fun retryInitDiarySync() = intent {

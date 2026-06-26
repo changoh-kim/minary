@@ -12,18 +12,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kr.co.core.common.error.DomainError
 import kr.co.core.common.extension.TAG
 import kr.co.core.common.model.Gender
-import kr.co.core.ui.common.error.handleDomainError
-import kr.co.core.ui.common.load.safeCall
+import kr.co.core.ui.common.load.load
 import kr.co.core.ui.common.text.UiText
 import kr.co.domain.feature.profile.usecase.GetUserProfileUseCase
 import kr.co.domain.feature.profile.usecase.UpdateUserProfilePhotoUseCase
 import kr.co.domain.feature.profile.usecase.UpdateUserProfileUseCase
 import kr.co.presentation.R
+import kr.co.presentation.app.navigation.route.ProfileEditRoute
 import kr.co.presentation.feature.setting.mapper.UserProfileUiModelMapper.toUserProfile
 import kr.co.presentation.feature.setting.mapper.UserProfileUiModelMapper.toUserProfileUiModel
 import kr.co.presentation.feature.setting.model.UserProfileUiModel
 import kr.co.presentation.feature.setting.screen.profileedit.formatter.ProfilePhotoUriFormatter
-import kr.co.presentation.app.navigation.route.ProfileEditRoute
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.annotation.OrbitExperimental
 import org.orbitmvi.orbit.syntax.simple.blockingIntent
@@ -115,57 +114,35 @@ class ProfileEditViewModel @Inject constructor(
     }
 
     private fun handleUpdateProfileImageError(error: DomainError) = intent {
-        handleDomainError(error) {
-            networkUnavailable =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.network_unavailable))) }
-            timeout =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.timeout))) }
-            invalidCredentials =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.invalid_credentials))) }
-            emailAlreadyInUse =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.email_already_in_use))) }
-            weakPassword =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.weak_password))) }
-            tooManyRequests =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.too_many_requests))) }
-            unexpected = { systemError ->
-                Log.e(
-                    TAG,
-                    "Failed to save user profile: An unexpected error has occurred",
-                    systemError
-                )
-                if (systemError != null) {
-                    postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
-                }
+        val message = when (error) {
+            DomainError.NetworkUnavailable -> R.string.network_unavailable
+            DomainError.Timeout -> R.string.timeout
+            DomainError.Auth.InvalidCredentials -> R.string.invalid_credentials
+            DomainError.Auth.EmailAlreadyInUse -> R.string.email_already_in_use
+            DomainError.Auth.WeakPassword -> R.string.weak_password
+            DomainError.Auth.TooManyRequests -> R.string.too_many_requests
+            else -> {
+                Log.e(TAG, "Failed to update user profile image: $error")
+                R.string.unexpected_error
             }
         }
+        postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(message)))
     }
 
     private fun handleSaveUserProfileError(error: DomainError) = intent {
-        handleDomainError(error) {
-            networkUnavailable =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.network_unavailable))) }
-            timeout =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.timeout))) }
-            invalidCredentials =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.invalid_credentials))) }
-            emailAlreadyInUse =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.email_already_in_use))) }
-            weakPassword =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.weak_password))) }
-            tooManyRequests =
-                { postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.too_many_requests))) }
-            unexpected = { systemError ->
-                Log.e(
-                    TAG,
-                    "Failed to save user profile: An unexpected error has occurred",
-                    systemError
-                )
-                if (systemError != null) {
-                    postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(R.string.unexpected_error)))
-                }
+        val message = when (error) {
+            DomainError.NetworkUnavailable -> R.string.network_unavailable
+            DomainError.Timeout -> R.string.timeout
+            DomainError.Auth.InvalidCredentials -> R.string.invalid_credentials
+            DomainError.Auth.EmailAlreadyInUse -> R.string.email_already_in_use
+            DomainError.Auth.WeakPassword -> R.string.weak_password
+            DomainError.Auth.TooManyRequests -> R.string.too_many_requests
+            else -> {
+                Log.e(TAG, "Failed to save user profile: $error")
+                R.string.unexpected_error
             }
         }
+        postSideEffect(ProfileEditSideEffect.ShowMessage(UiText.StringResource(message)))
     }
 
     private fun updateEmail(newEmail: String) = blockingIntent {
@@ -197,10 +174,10 @@ class ProfileEditViewModel @Inject constructor(
     }
 
     private fun profilePhotoPicked(newProfilePhotoUri: Uri) = intent {
-        safeCall<String, DomainError> { updateUserProfilePhoto(newProfilePhotoUri.toString()) }
+        load { updateUserProfilePhoto(newProfilePhotoUri.toString()) }
             .onLoading { reduce { state.copy(isPhotoLoading = it) } }
             .onError { handleUpdateProfileImageError(it) }
-            .launchOnSuccess { updatedProfilePhotoUrl ->
+            .startOnSuccess { updatedProfilePhotoUrl ->
                 updateProfile(
                     state.userProfile.copy(
                         profilePhotoUrl = ProfilePhotoUriFormatter.toDisplayUrl(updatedProfilePhotoUrl)

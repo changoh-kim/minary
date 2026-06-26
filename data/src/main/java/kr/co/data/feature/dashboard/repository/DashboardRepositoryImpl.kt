@@ -1,7 +1,7 @@
 package kr.co.data.feature.dashboard.repository
 
 import android.util.Log
-import com.github.michaelbull.result.Result
+import kr.co.core.common.result.AppResult
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.mapError
 import com.github.michaelbull.result.onErr
@@ -11,7 +11,6 @@ import kr.co.data.feature.dashboard.mapper.DashboardMapper.toDashboard
 import kr.co.data.feature.dashboard.model.DashboardModel
 import kr.co.core.database.model.DiaryWithRelations
 import kr.co.core.database.provider.UserDatabaseProvider
-import kr.co.core.common.error.DomainError
 import kr.co.domain.feature.dashboard.model.Dashboard
 import kr.co.domain.feature.dashboard.repository.DashboardRepository
 import java.time.LocalDate
@@ -28,7 +27,7 @@ class DashboardRepositoryImpl @Inject constructor(
 
     private val diaryDao get() = databaseProvider.getDatabase().diaryDao()
 
-    override suspend fun getDashboard(): Result<Dashboard, DomainError> =
+    override suspend fun getDashboard(): AppResult<Dashboard> =
         runSuspendCatching {
             val today = LocalDate.now()
             val startDate = today.minusDays(HEATMAP_SIZE)

@@ -1,15 +1,14 @@
 package kr.co.core.common.error
 
-
 sealed interface DomainError {
 
     // 1. 공통 에러
     data object NetworkUnavailable : DomainError  // 네트워크 문제(연결 끈김, 불안정, 방화벽등)
     data object Timeout : DomainError             // 네트워크 불안정으로 인한 시간 초과
-    data class Unexpected(val cause: Throwable) : DomainError // 예기치 않은 에러
+    data object Unexpected : DomainError           // 예기치 않은 에러
 
     // 2. 도메인 특화 에러
-    // firebase auth
+    // auth
     sealed interface Auth : DomainError {
         data object InvalidCredentials : Auth   // 인증 정보 잘못 또는 형식 불일치(이메일, 비밀번호, 인증코드)
         data object UserNotFound : Auth         // 해당 이메일로 가입된 사용자를 찾을 수 없음
@@ -21,7 +20,7 @@ sealed interface DomainError {
         data object TokenExpired : Auth         // ID Token 만료
     }
 
-    // firebase firestore
+    // store
     sealed interface Store : DomainError {
         data object PermissionDenied : Store  // 권한 없음 (Security Rules)
         data object NotFound : Store          // 문서 없음
@@ -30,7 +29,7 @@ sealed interface DomainError {
         data object Unauthenticated : Store   // 인증 토큰 없음/만료
     }
 
-    // firebase storage
+    // storage
     sealed interface Storage : DomainError {
         data object PermissionDenied : Storage // 권한 없음 (Security Rules)
         data object QuotaExceeded : Storage    // 할당량 초과
@@ -39,7 +38,7 @@ sealed interface DomainError {
 
     // diary
     sealed interface Diary : DomainError {
-        data object NotFound : Diary            // Room에 저장된 해일기 데이터를 찾을 수 없음
+        data object NotFound : Diary            // 저장된 일기 데이터를 찾을 수 없음
     }
 
     // time

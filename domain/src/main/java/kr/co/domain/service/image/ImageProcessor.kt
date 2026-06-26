@@ -1,7 +1,6 @@
 package kr.co.domain.service.image
 
-import com.github.michaelbull.result.Result
-import kr.co.core.common.error.DomainError
+import kr.co.core.common.result.AppResult
 
 interface ImageProcessor {
 
@@ -10,5 +9,5 @@ interface ImageProcessor {
         targetUrl: String,
         maxWidth: Int = 512,
         maxHeight: Int = 512
-    ): Result<String, DomainError>
+    ): AppResult<String>
 }
