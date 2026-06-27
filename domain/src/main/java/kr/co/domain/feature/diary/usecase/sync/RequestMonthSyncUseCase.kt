@@ -13,6 +13,6 @@ class RequestMonthSyncUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(yearMonth: YearMonth): AppResult<Unit> = coroutineBinding {
         val userSession = sessionRepository.getCurrentUser().bind()
-        diaryRepository.requestMonthSync(userSession.uid, yearMonth)
+        diaryRepository.requestMonthSync(userSession.uid, yearMonth).bind()
     }
 }
