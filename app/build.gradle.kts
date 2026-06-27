@@ -1,27 +1,16 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("minary.android.application")
+    id("minary.android.testing")
+    id("minary.android.hilt")
     alias(libs.plugins.firebase)
     alias(libs.plugins.secrets)
 }
 
 android {
     namespace = "kr.co.minary"
-    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "kr.co.minary"
-        minSdk = libs.versions.minSdk.get().toInt()
-        targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = libs.versions.appVersionCode.get().toInt()
-        versionName = libs.versions.appVersionName.get()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildFeatures {
-        buildConfig = true
     }
 
     buildTypes {
@@ -41,17 +30,6 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
-    
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
 }
 
 dependencies {
@@ -61,9 +39,6 @@ dependencies {
     implementation(project(":presentation"))
     implementation(project(":domain"))
 
-    // hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.work)
 
     // timber
@@ -79,6 +54,4 @@ dependencies {
     implementation(libs.firebase.config)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
-
-    testImplementation(libs.junit)
 }

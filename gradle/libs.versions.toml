@@ -45,6 +45,13 @@ lottie = "6.7.1"
 timber = "5.0.1"
 
 [libraries]
+android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
+hilt-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
+kotlin-compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+ksp-gradle-plugin = { module = "com.google.devtools.ksp:symbol-processing-gradle-plugin", version.ref = "ksp" }
+room-gradle-plugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
+
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
@@ -149,6 +156,7 @@ serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref 
 firebase = { id = "com.google.gms.google-services", version.ref = "firebase" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobufPlugin" }
+room = { id = "androidx.room", version.ref = "room" }
 
 #kotlin
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

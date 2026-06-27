@@ -1,27 +1,11 @@
 plugins {
-    alias(libs.plugins.android.library)
+    id("minary.android.library")
+    id("minary.android.testing")
     alias(libs.plugins.protobuf)
 }
 
 android {
     namespace = "kr.co.core.datastore"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
 }
 
 protobuf {
