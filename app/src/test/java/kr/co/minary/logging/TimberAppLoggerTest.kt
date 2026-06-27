@@ -1,12 +1,12 @@
 package kr.co.minary.logging
 
 import android.util.Log
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import timber.log.Timber
 
 class TimberAppLoggerTest {
@@ -14,13 +14,13 @@ class TimberAppLoggerTest {
     private val logger = TimberAppLogger()
     private val tree = CapturingTree()
 
-    @Before
+    @BeforeEach
     fun setUp() {
         Timber.uprootAll()
         Timber.plant(tree)
     }
 
-    @After
+    @AfterEach
     fun tearDown() {
         Timber.uprootAll()
     }

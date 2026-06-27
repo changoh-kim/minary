@@ -23,6 +23,8 @@
 - `presentation`은 `data`와 `app`을 참조하지 않는다.
 - 공개 실패 계약은 `:core:common`의 `AppResult<T>`와 `DomainError`를 사용한다.
 - Firebase 경로, rules, functions 계약 변경 시 Android client와 `firebase-server`를 함께 검증한다.
+- 공통 Gradle 설정은 루트 `subprojects` 블록이 아니라 `build-logic` convention plugin에 둔다.
+- AGP 9 built-in Kotlin 환경에서 Android/Kotlin/Compose Gradle plugin classpath는 루트 `apply false`로 공급하고, 실제 공통 설정은 `build-logic`에 둔다.
 
 ## 패키지/코드 배치 규칙
 - 모델 접미사는 계층별로 구분한다.

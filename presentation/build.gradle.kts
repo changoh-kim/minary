@@ -1,23 +1,17 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("minary.android.library")
+    id("minary.android.compose")
+    id("minary.android.hilt")
+    id("minary.android.testing")
     alias(libs.plugins.serialization)
     alias(libs.plugins.kotlin.parcelize)
 }
 
 android {
     namespace = "kr.co.presentation"
-    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
         buildConfigField("String", "VERSION_NAME", "\"${libs.versions.appVersionName.get()}\"")
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -30,32 +24,9 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-
     buildFeatures {
-        compose = true
         buildConfig = true
     }
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-    }
-}
-
-composeCompiler {
-    // 안정성 보고서가 작성될 디렉토리 설정
-    reportsDestination = layout.buildDirectory.dir("compose_compiler")
-    metricsDestination = layout.buildDirectory.dir("compose_compiler")
-
-    // 안정성 구성 파일 등록
-    stabilityConfigurationFiles.add(
-        rootProject.layout.projectDirectory.file("stability_config.conf")
-    )
 }
 
 dependencies {
@@ -63,10 +34,6 @@ dependencies {
     implementation(project(":core:ui:common"))
     implementation(project(":core:ui:design"))
     implementation(project(":domain"))
-    // hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
-
     // hilt & navigation
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
@@ -81,13 +48,6 @@ dependencies {
     implementation(libs.orbit.viewmodel)
     implementation(libs.orbit.compose)
 
-    // compose(bom)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.foundation)
     implementation(libs.androidx.material.icons.extended)
 
     implementation(libs.androidx.core.ktx)
@@ -110,7 +70,6 @@ dependencies {
     // lottie
     implementation(libs.lottie.compose)
 
-    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

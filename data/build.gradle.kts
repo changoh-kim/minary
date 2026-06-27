@@ -1,20 +1,12 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
+    id("minary.android.library")
+    id("minary.android.testing")
+    id("minary.android.hilt")
     alias(libs.plugins.serialization)
 }
 
 android {
     namespace = "kr.co.data"
-    compileSdk = libs.versions.compileSdk.get().toInt()
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
 
     buildTypes {
         release {
@@ -26,19 +18,8 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
     buildFeatures {
         buildConfig = true
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -53,9 +34,6 @@ dependencies {
 
     implementation(libs.androidx.core.ktx)
 
-    // hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
     implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
 
@@ -90,7 +68,6 @@ dependencies {
     // exifinterface (image processor)
     implementation(libs.androidx.exifinterface)
 
-    testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }
