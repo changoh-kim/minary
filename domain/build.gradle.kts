@@ -14,6 +14,10 @@ kotlin {
     }
 }
 
+tasks.test {
+    useJUnitPlatform()
+}
+
 dependencies {
     implementation(project(":core:common"))
 
@@ -22,4 +26,10 @@ dependencies {
     implementation(libs.androidx.paging.common)
 
     implementation(libs.kotlin.result.coroutines)
+
+    // unit test
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }

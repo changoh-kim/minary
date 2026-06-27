@@ -23,6 +23,6 @@ class DeleteAccountUseCase @Inject constructor(
         stopAllUserProfileSync()
         stopAllUserSettingsSync()
 
-        deleteUserStorage(uid)
+        deleteUserStorage(uid).bind()
     }
 }
