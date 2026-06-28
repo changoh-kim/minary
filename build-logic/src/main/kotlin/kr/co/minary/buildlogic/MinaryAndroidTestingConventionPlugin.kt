@@ -8,7 +8,7 @@ import org.gradle.kotlin.dsl.withType
 
 class MinaryAndroidTestingConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) = with(target) {
-        configureUnitTestDependenciesOnce()
+        configureTestingDependenciesWhenPluginsAreReady()
 
         tasks.withType<Test>().configureEach {
             useJUnitPlatform()
@@ -20,20 +20,41 @@ class MinaryAndroidTestingConventionPlugin : Plugin<Project> {
     }
 }
 
-private fun Project.configureUnitTestDependenciesOnce() {
-    var configured = false
-
-    fun configure() {
-        if (configured) return
-        configured = true
-        dependencies {
-            testImplementation(libs.findLibrary("junit-jupiter").get())
-            testRuntimeOnly(libs.findLibrary("junit-platform-launcher").get())
-        }
+private fun Project.configureTestingDependenciesWhenPluginsAreReady() {
+    pluginManager.withPlugin("java") { configureUnitTestDependenciesOnce() }
+    pluginManager.withPlugin("java-library") { configureUnitTestDependenciesOnce() }
+    pluginManager.withPlugin("com.android.library") {
+        configureUnitTestDependenciesOnce()
+        configureAndroidTestingDependenciesOnce()
     }
+    pluginManager.withPlugin("com.android.application") {
+        configureUnitTestDependenciesOnce()
+        configureAndroidTestingDependenciesOnce()
+    }
+}
 
-    pluginManager.withPlugin("java") { configure() }
-    pluginManager.withPlugin("java-library") { configure() }
-    pluginManager.withPlugin("com.android.library") { configure() }
-    pluginManager.withPlugin("com.android.application") { configure() }
+private fun Project.configureUnitTestDependenciesOnce() {
+    if (extensions.extraProperties.has("minary.unitTestDependenciesConfigured")) return
+
+    extensions.extraProperties.set("minary.unitTestDependenciesConfigured", true)
+    dependencies {
+        testImplementation(libs.findLibrary("junit-jupiter").get())
+        testImplementation(libs.findLibrary("kotlinx-coroutines-test").get())
+        testImplementation(libs.findLibrary("mockk").get())
+        testRuntimeOnly(libs.findLibrary("junit-platform-launcher").get())
+    }
+}
+
+private fun Project.configureAndroidTestingDependenciesOnce() {
+    if (extensions.extraProperties.has("minary.androidTestDependenciesConfigured")) return
+
+    extensions.extraProperties.set("minary.androidTestDependenciesConfigured", true)
+    configureAndroidTestDependencies()
+}
+
+private fun Project.configureAndroidTestDependencies() {
+    dependencies {
+        "androidTestImplementation"(libs.findLibrary("kotlinx-coroutines-test").get())
+        "androidTestImplementation"(libs.findLibrary("mockk-android").get())
+    }
 }
