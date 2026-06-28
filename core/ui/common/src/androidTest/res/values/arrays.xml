@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="test_values">
+        <item>first-test</item>
+        <item>second-test</item>
+    </string-array>
+</resources>
