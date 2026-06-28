@@ -5,7 +5,4 @@ plugins {
 
 dependencies {
     api(libs.kotlin.result)
-
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.mockk)
 }
