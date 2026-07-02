@@ -1,7 +1,7 @@
 package kr.co.data.feature.diary.repository
 
-import kr.co.core.common.logging.AppLogger
 import com.github.michaelbull.result.Err
+import com.github.michaelbull.result.andThen
 import com.github.michaelbull.result.coroutines.runSuspendCatching
 import com.github.michaelbull.result.fold
 import com.github.michaelbull.result.map
@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.map
 import kr.co.core.common.error.DomainError
+import kr.co.core.common.logging.AppLogger
 import kr.co.core.common.result.AppResult
 import kr.co.core.common.state.DiarySyncStatus
 import kr.co.core.common.state.SyncStatus
@@ -53,8 +54,9 @@ class DiaryRepositoryImpl @Inject constructor(
     override suspend fun requestMonthSync(userId: String, yearMonth: YearMonth): AppResult<Unit> =
         runSuspendCatching {
             diarySyncManager.performMonthSync(userId, yearMonth)
-        }.map { Unit }
-        .mapError { it.toDomainError() }
+        }
+            .mapError { it.toDomainError() }
+            .andThen { it }
 
     override suspend fun createDiary(diary: Diary): AppResult<Unit> =
         runSuspendCatching {

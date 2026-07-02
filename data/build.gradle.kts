@@ -8,6 +8,10 @@ plugins {
 android {
     namespace = "kr.co.data"
 
+    defaultConfig {
+        testInstrumentationRunner = "kr.co.data.testing.HiltTestRunner"
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -20,6 +24,15 @@ android {
 
     buildFeatures {
         buildConfig = true
+    }
+
+    packaging {
+        resources {
+            excludes += setOf(
+                "META-INF/LICENSE.md",
+                "META-INF/LICENSE-notice.md",
+            )
+        }
     }
 }
 
@@ -69,5 +82,12 @@ dependencies {
     implementation(libs.androidx.exifinterface)
 
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
     androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.work.testing)
+    androidTestImplementation(libs.hilt.android.testing)
+    kspAndroidTest(libs.hilt.android.compiler)
 }
