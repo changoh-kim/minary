@@ -55,7 +55,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kr.co.core.common.model.AppTheme
 import kr.co.core.ui.common.text.UiText
 import kr.co.core.ui.common.text.getString
@@ -85,9 +87,13 @@ fun SettingsScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is SettingsSideEffect.UserProfileClicked -> onUserProfileClicked()
-            is SettingsSideEffect.SignOutSucceeded -> onSignOutSucceeded()
-            is SettingsSideEffect.ShowSignOutDialog -> {
+            is SettingsSideEffect.UserProfileClicked -> withContext(Dispatchers.Main.immediate) {
+                onUserProfileClicked()
+            }
+            is SettingsSideEffect.SignOutSucceeded -> withContext(Dispatchers.Main.immediate) {
+                onSignOutSucceeded()
+            }
+            is SettingsSideEffect.ShowSignOutDialog -> withContext(Dispatchers.Main.immediate) {
                 signOutDialogMessage = sideEffect.uiText
                 showSignOutDialog = true
             }

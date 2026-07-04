@@ -50,10 +50,12 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kr.co.core.ui.common.text.getString
 import kr.co.core.ui.design.preview.ThemePreviews
 import kr.co.core.ui.design.theme.MinaryTheme
@@ -128,7 +130,9 @@ fun YearlyCalendarScreen(
                         gridState.scrollToItem(pagingItemCount - 1)
                     }
             }
-            is YearlyCalendarSideEffect.MonthClicked -> onMonthClicked(sideEffect.targetYearMonth)
+            is YearlyCalendarSideEffect.MonthClicked -> withContext(Dispatchers.Main.immediate) {
+                onMonthClicked(sideEffect.targetYearMonth)
+            }
             is YearlyCalendarSideEffect.ScrollToToday -> coroutineScope.launch {
                 gridState.scrollToItem(calendarItems.itemCount - 1)
             }

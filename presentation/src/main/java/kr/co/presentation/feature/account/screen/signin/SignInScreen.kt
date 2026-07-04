@@ -56,7 +56,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kr.co.core.ui.common.text.getString
 import kr.co.core.ui.design.component.LoadingButton
 import kr.co.core.ui.design.preview.ThemePreviews
@@ -79,8 +81,12 @@ fun SignInScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is SignInSideEffect.SignInSucceeded -> onSignInSucceeded()
-            is SignInSideEffect.SignUpClicked -> onSignUpClicked()
+            is SignInSideEffect.SignInSucceeded -> withContext(Dispatchers.Main.immediate) {
+                onSignInSucceeded()
+            }
+            is SignInSideEffect.SignUpClicked -> withContext(Dispatchers.Main.immediate) {
+                onSignUpClicked()
+            }
             is SignInSideEffect.ShowMessage -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }

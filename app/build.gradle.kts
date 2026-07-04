@@ -11,6 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "kr.co.minary"
+        testInstrumentationRunner = "kr.co.minary.testing.AppHiltTestRunner"
     }
 
     buildTypes {
@@ -54,4 +55,19 @@ dependencies {
     implementation(libs.firebase.config)
     implementation(libs.firebase.appcheck.playintegrity)
     implementation(libs.firebase.appcheck.debug)
+
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.rules)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(libs.hilt.android.testing)
+    androidTestImplementation(libs.androidx.navigation.testing)
+    androidTestImplementation(libs.androidx.paging.common)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    kspAndroidTest(libs.hilt.android.compiler)
+
+    debugImplementation(platform(libs.androidx.compose.bom))
+    debugImplementation(libs.androidx.ui.test.manifest)
 }

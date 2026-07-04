@@ -56,6 +56,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -68,9 +69,11 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.AsyncImage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kr.co.core.common.model.Emotion
 import kr.co.core.common.state.SyncStatus
 import kr.co.core.ui.common.emotion.color
@@ -123,8 +126,12 @@ fun MonthlyCalendarScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is MonthlyCalendarSideEffect.YearClicked -> onYearClicked(sideEffect.year)
-            is MonthlyCalendarSideEffect.DayClicked -> onDayClicked(sideEffect.date)
+            is MonthlyCalendarSideEffect.YearClicked -> withContext(Dispatchers.Main.immediate) {
+                onYearClicked(sideEffect.year)
+            }
+            is MonthlyCalendarSideEffect.DayClicked -> withContext(Dispatchers.Main.immediate) {
+                onDayClicked(sideEffect.date)
+            }
             is MonthlyCalendarSideEffect.ScrollToToday -> coroutineScope.launch {
                 pagerState.scrollToPage(0)
             }
@@ -201,6 +208,7 @@ fun MonthlyCalendarContent(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { onDayClicked(LocalDate.now()) },
+                modifier = Modifier.testTag("calendar_new_diary_button"),
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = CircleShape,

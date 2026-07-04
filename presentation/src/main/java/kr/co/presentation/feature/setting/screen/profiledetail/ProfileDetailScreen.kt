@@ -56,7 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kr.co.core.ui.common.text.getString
 import kr.co.core.ui.design.preview.ThemePreviews
 import kr.co.core.ui.design.theme.MinaryTheme
@@ -80,9 +82,15 @@ fun ProfileDetailScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is ProfileDetailSideEffect.BackClicked -> onBackClicked()
-            is ProfileDetailSideEffect.EditClicked -> onEditClicked()
-            is ProfileDetailSideEffect.NavigateToAccountDeletion -> onNavigateToAccountDeletion()
+            is ProfileDetailSideEffect.BackClicked -> withContext(Dispatchers.Main.immediate) {
+                onBackClicked()
+            }
+            is ProfileDetailSideEffect.EditClicked -> withContext(Dispatchers.Main.immediate) {
+                onEditClicked()
+            }
+            is ProfileDetailSideEffect.NavigateToAccountDeletion -> withContext(Dispatchers.Main.immediate) {
+                onNavigateToAccountDeletion()
+            }
             is ProfileDetailSideEffect.ShowMessage -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
