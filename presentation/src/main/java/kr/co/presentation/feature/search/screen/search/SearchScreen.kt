@@ -57,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -170,6 +171,7 @@ fun SearchContent(
                     modifier = Modifier.align(Alignment.TopCenter),
                     inputField = {
                         SearchBarDefaults.InputField(
+                            modifier = Modifier.testTag("search_query_field"),
                             query = state.searchQuery,
                             onQueryChange = { onAction(SearchAction.UpdateSearchQuery(it)) },
                             onSearch = {
@@ -466,6 +468,7 @@ fun DiarySearchCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("search_diary_card_${diary.date}")
             .shadow(elevation = 2.dp, shape = RoundedCornerShape(12.dp))
             .clickable { onClick() },
         colors = CardDefaults.cardColors(

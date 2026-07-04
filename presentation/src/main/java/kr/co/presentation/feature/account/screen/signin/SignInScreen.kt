@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -177,7 +178,9 @@ fun SignInContent(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("sign_in_email_field"),
                             value = email,
                             onValueChange = { value -> onAction(SignInAction.EmailChanged(value)) },
                             placeholder = {
@@ -234,7 +237,9 @@ fun SignInContent(
                         Spacer(modifier = Modifier.height(6.dp))
                         var isPasswordVisible by remember { mutableStateOf(false) }
                         OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("sign_in_password_field"),
                             value = password,
                             onValueChange = { value -> onAction(SignInAction.PasswordChanged(value)) },
                             placeholder = {
@@ -281,6 +286,7 @@ fun SignInContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
+                            .testTag("sign_in_submit_button")
                             .shadow(
                                 elevation = 8.dp,
                                 shape = RoundedCornerShape(8.dp),
@@ -368,7 +374,9 @@ fun SignInContent(
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         ),
-                        modifier = Modifier.clickable { onAction(SignInAction.SignUpClicked) }
+                        modifier = Modifier
+                            .testTag("sign_in_sign_up_link")
+                            .clickable { onAction(SignInAction.SignUpClicked) }
                     )
                 }
             }

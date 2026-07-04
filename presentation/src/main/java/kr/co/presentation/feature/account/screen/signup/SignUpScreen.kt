@@ -62,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -263,7 +264,9 @@ fun SignUpContent(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             OutlinedTextField(
-                                modifier = Modifier.weight(1f),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("sign_up_email_field"),
                                 value = email,
                                 onValueChange = { onAction(SignUpAction.EmailChanged(it)) },
                                 placeholder = {
@@ -294,7 +297,9 @@ fun SignUpContent(
                                 text = stringResource(R.string.btn_check),
                                 onClick = { onAction(SignUpAction.EmailCheckClicked) },
                                 isLoading = isCheckingEmail,
-                                modifier = Modifier.height(56.dp),
+                                modifier = Modifier
+                                    .height(56.dp)
+                                    .testTag("sign_up_email_check_button"),
                                 shape = RoundedCornerShape(8.dp)
                             )
                         }
@@ -517,6 +522,7 @@ fun SignUpContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
+                            .testTag("sign_up_submit_button")
                             .shadow(
                                 elevation = 8.dp,
                                 shape = RoundedCornerShape(8.dp),

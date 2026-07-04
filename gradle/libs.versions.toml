@@ -44,6 +44,8 @@ truetime = "3.5"
 exifinterface = "1.4.2"
 lottie = "6.7.1"
 timber = "5.0.1"
+turbine = "1.2.0"
+robolectric = "4.14.1"
 
 [libraries]
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -85,6 +87,8 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "jun
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junitPlatform" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mockk-android = { module = "io.mockk:mockk-android", version.ref = "mockk" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 #firebase-bom
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }

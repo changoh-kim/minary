@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -203,6 +204,7 @@ fun DiaryEditContent(
                 onValueChange = { onAction(DiaryEditAction.TitleChanged(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .testTag("diary_edit_title_field")
                     .background(
                         color = MaterialTheme.colorScheme.surface,
                         RoundedCornerShape(12.dp)
@@ -256,6 +258,7 @@ fun DiaryEditContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
+                    .testTag("diary_edit_content_field")
                     .background(
                         color = MaterialTheme.colorScheme.surface,
                         RoundedCornerShape(12.dp)
@@ -313,7 +316,9 @@ fun EditTopBar(
         LoadingIconButton(
             isLoading = isSaving,
             onClick = { onAction(DiaryEditAction.SaveClicked) },
-            modifier = Modifier.padding(end = 4.dp),
+            modifier = Modifier
+                .padding(end = 4.dp)
+                .testTag("diary_edit_save_button"),
             colors = IconButtonDefaults.filledIconButtonColors(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary

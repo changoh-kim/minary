@@ -1,9 +1,12 @@
 package kr.co.minary.buildlogic
 
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.withType
 
 class MinaryAndroidTestingConventionPlugin : Plugin<Project> {
@@ -24,10 +27,12 @@ private fun Project.configureTestingDependenciesWhenPluginsAreReady() {
     pluginManager.withPlugin("java") { configureUnitTestDependenciesOnce() }
     pluginManager.withPlugin("java-library") { configureUnitTestDependenciesOnce() }
     pluginManager.withPlugin("com.android.library") {
+        configureAndroidTestingPackagingForLibrary()
         configureUnitTestDependenciesOnce()
         configureAndroidTestingDependenciesOnce()
     }
     pluginManager.withPlugin("com.android.application") {
+        configureAndroidTestingPackagingForApplication()
         configureUnitTestDependenciesOnce()
         configureAndroidTestingDependenciesOnce()
     }
@@ -58,3 +63,28 @@ private fun Project.configureAndroidTestDependencies() {
         "androidTestImplementation"(libs.findLibrary("mockk-android").get())
     }
 }
+
+private fun Project.configureAndroidTestingPackagingForLibrary() {
+    extensions.configure<LibraryExtension> {
+        packaging {
+            resources {
+                excludes += junitResourceExcludes
+            }
+        }
+    }
+}
+
+private fun Project.configureAndroidTestingPackagingForApplication() {
+    extensions.configure<ApplicationExtension> {
+        packaging {
+            resources {
+                excludes += junitResourceExcludes
+            }
+        }
+    }
+}
+
+private val junitResourceExcludes = setOf(
+    "META-INF/LICENSE.md",
+    "META-INF/LICENSE-notice.md",
+)
