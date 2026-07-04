@@ -47,6 +47,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -173,7 +174,8 @@ fun SettingsContent(
                 onClick = { onAction(SettingsAction.SignOutClicked) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .height(56.dp)
+                    .testTag("settings_sign_out_button"),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                 border = ButtonDefaults.outlinedButtonBorder(enabled = true).copy(width = 1.dp)
@@ -213,6 +215,7 @@ private fun ProfileCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .testTag("settings_profile_card")
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surface)
             .clickable { onClick() }
@@ -389,6 +392,7 @@ private fun SyncSettingItem(
             )
         }
         Switch(
+            modifier = Modifier.testTag("settings_diary_sync_switch"),
             checked = isSyncEnabled,
             onCheckedChange = onCheckedChange
         )
