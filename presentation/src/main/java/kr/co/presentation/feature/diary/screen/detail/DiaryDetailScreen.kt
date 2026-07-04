@@ -52,7 +52,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kr.co.core.common.model.Emotion
 import kr.co.core.ui.common.emotion.color
 import kr.co.core.ui.common.emotion.resId
@@ -86,9 +88,15 @@ fun DiaryDetailScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is DiaryDetailSideEffect.DiaryDeleted -> onDiaryDeleted()
-            is DiaryDetailSideEffect.LoadFailed -> onLoadFailed()
-            is DiaryDetailSideEffect.NavigateToEdit -> onNavigateToEdit(sideEffect.date, sideEffect.isNewDiary)
+            is DiaryDetailSideEffect.DiaryDeleted -> withContext(Dispatchers.Main.immediate) {
+                onDiaryDeleted()
+            }
+            is DiaryDetailSideEffect.LoadFailed -> withContext(Dispatchers.Main.immediate) {
+                onLoadFailed()
+            }
+            is DiaryDetailSideEffect.NavigateToEdit -> withContext(Dispatchers.Main.immediate) {
+                onNavigateToEdit(sideEffect.date, sideEffect.isNewDiary)
+            }
             is DiaryDetailSideEffect.ShowMessage -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }

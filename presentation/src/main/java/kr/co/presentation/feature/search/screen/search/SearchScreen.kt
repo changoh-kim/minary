@@ -67,7 +67,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.withContext
 import kr.co.core.common.model.Emotion
 import kr.co.core.ui.common.emotion.color
 import kr.co.core.ui.common.emotion.resId
@@ -92,7 +94,9 @@ fun SearchScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is SearchSideEffect.DiaryClicked -> onDiaryClicked(sideEffect.date)
+            is SearchSideEffect.DiaryClicked -> withContext(Dispatchers.Main.immediate) {
+                onDiaryClicked(sideEffect.date)
+            }
         }
     }
 

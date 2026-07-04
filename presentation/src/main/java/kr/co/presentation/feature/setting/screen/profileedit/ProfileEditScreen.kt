@@ -69,7 +69,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kr.co.core.common.model.Gender
 import kr.co.core.ui.common.text.getString
 import kr.co.core.ui.design.preview.ThemePreviews
@@ -102,13 +104,17 @@ fun ProfileEditScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is ProfileEditSideEffect.BackClicked -> onBackClicked()
-            is ProfileEditSideEffect.PhotoEditClicked -> {
+            is ProfileEditSideEffect.BackClicked -> withContext(Dispatchers.Main.immediate) {
+                onBackClicked()
+            }
+            is ProfileEditSideEffect.PhotoEditClicked -> withContext(Dispatchers.Main.immediate) {
                 photoPickerLauncher.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
             }
-            is ProfileEditSideEffect.ProfileUpdateSucceeded -> onProfileUpdateSucceeded()
+            is ProfileEditSideEffect.ProfileUpdateSucceeded -> withContext(Dispatchers.Main.immediate) {
+                onProfileUpdateSucceeded()
+            }
             is ProfileEditSideEffect.ShowMessage -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }

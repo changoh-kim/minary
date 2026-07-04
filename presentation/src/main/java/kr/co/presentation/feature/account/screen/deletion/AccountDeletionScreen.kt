@@ -42,7 +42,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kr.co.core.ui.common.text.getString
 import kr.co.core.ui.design.preview.ThemePreviews
 import kr.co.core.ui.design.theme.MinaryTheme
@@ -63,8 +65,12 @@ fun AccountDeletionScreen(
 
     viewModel.collectSideEffect { sideEffect ->
         when (sideEffect) {
-            is AccountDeletionSideEffect.BackClicked -> onBackClicked()
-            is AccountDeletionSideEffect.DeletionSucceeded -> onDeletionSucceeded()
+            is AccountDeletionSideEffect.BackClicked -> withContext(Dispatchers.Main.immediate) {
+                onBackClicked()
+            }
+            is AccountDeletionSideEffect.DeletionSucceeded -> withContext(Dispatchers.Main.immediate) {
+                onDeletionSucceeded()
+            }
             is AccountDeletionSideEffect.ShowMessage -> coroutineScope.launch {
                 snackbarHostState.showSnackbar(context.getString(sideEffect.uiText))
             }
