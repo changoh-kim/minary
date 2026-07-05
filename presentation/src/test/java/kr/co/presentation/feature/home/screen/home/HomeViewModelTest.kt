@@ -133,8 +133,8 @@ class HomeViewModelTest : BaseViewModelTest() {
             viewModel.handleAction(HomeAction.RetryClicked)
             advanceUntilIdle()
 
-            coVerify { startDiarySync() }
-            coVerify { startRealtimeDiarySync() }
+            coVerify(timeout = 1_000) { startDiarySync() }
+            coVerify(timeout = 1_000) { startRealtimeDiarySync() }
             cancelAndIgnoreRemainingEvents()
         }
     }

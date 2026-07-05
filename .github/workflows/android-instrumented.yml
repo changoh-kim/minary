@@ -1,0 +1,97 @@
+name: Android Instrumented Tests
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-instrumented-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-instrumented:
+    name: Android emulator connected tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-36"
+
+      - name: Create CI Android local config
+        run: |
+          cat > local.properties <<'EOF'
+          GEMINI_API_KEY=ci-gemini-api-key
+          EOF
+          cat > app/google-services.json <<'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "minary-ci",
+              "storage_bucket": "minary-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+                  "android_client_info": {
+                    "package_name": "kr.co.minary"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "ci-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+
+      - name: Run connected tests on AVD
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            ./gradlew :core:database:connectedDebugAndroidTest :core:datastore:connectedDebugAndroidTest :core:firebase:connectedDebugAndroidTest :core:storage:connectedDebugAndroidTest :core:ui:common:connectedDebugAndroidTest :core:ui:design:connectedDebugAndroidTest
+            ./gradlew :data:connectedDebugAndroidTest
+            ./gradlew :presentation:connectedDebugAndroidTest
+            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.annotation=androidx.test.filters.LargeTest
+
+      - name: Upload connected test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-instrumented-reports
+          path: |
+            **/build/reports/androidTests/
+            **/build/outputs/androidTest-results/
