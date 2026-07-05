@@ -97,7 +97,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            set -euo pipefail
+            set -eu
             ./gradlew :data:connectedDebugAndroidTest \
               -Pandroid.testInstrumentationRunnerArguments.class=kr.co.data.firebase.FirebaseEmulatorIntegrationSmokeTest,kr.co.data.feature.diary.sync.FirestoreDiarySyncManagerEmulatorTest,kr.co.data.feature.profile.sync.FirestoreUserProfileSyncManagerEmulatorTest,kr.co.data.feature.setting.sync.FirestoreUserSettingsSyncManagerEmulatorTest \
               -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorEnabled=true \

@@ -87,7 +87,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            set -euo pipefail
+            set -eu
             ./gradlew :core:database:connectedDebugAndroidTest :core:datastore:connectedDebugAndroidTest :core:firebase:connectedDebugAndroidTest :core:storage:connectedDebugAndroidTest :core:ui:common:connectedDebugAndroidTest :core:ui:design:connectedDebugAndroidTest
             ./gradlew :data:connectedDebugAndroidTest
             ./gradlew :presentation:connectedDebugAndroidTest
