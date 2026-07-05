@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -31,14 +32,20 @@ abstract class BaseViewModelTest {
 
     @AfterEach
     fun tearDownCoroutine() {
-        trackedContainers.forEach { it.container.cancel() }
-        trackedContainers.clear()
+        cancelTrackedContainers()
         Dispatchers.resetMain()
         clearAllMocks()
     }
 
     protected fun runPresentationTest(block: suspend TestScope.() -> Unit) =
-        runTest(testDispatcher) { block() }
+        runTest(testDispatcher) {
+            try {
+                block()
+            } finally {
+                cancelTrackedContainers()
+                advanceUntilIdle()
+            }
+        }
 
     protected fun <STATE : Any, SIDE_EFFECT : Any> ContainerHost<STATE, SIDE_EFFECT>.stateFlow(): StateFlow<STATE> =
         container.stateFlow
@@ -83,6 +90,11 @@ abstract class BaseViewModelTest {
         val item = awaitItem()
         return item as? SIDE_EFFECT
             ?: error("Expected ${SIDE_EFFECT::class.simpleName}, but was ${item::class.simpleName}.")
+    }
+
+    private fun cancelTrackedContainers() {
+        trackedContainers.forEach { it.container.cancel() }
+        trackedContainers.clear()
     }
 
     private companion object {

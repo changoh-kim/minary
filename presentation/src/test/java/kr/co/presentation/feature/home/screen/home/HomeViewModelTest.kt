@@ -80,10 +80,15 @@ class HomeViewModelTest : BaseViewModelTest() {
         val viewModel = createViewModel()
         advanceUntilIdle()
 
-        initDiarySyncState.value = SyncProcessState.InProgress.Determinate(0.5f)
+        val expectedState = SyncProcessState.InProgress.Determinate(0.5f)
+        initDiarySyncState.value = expectedState
         advanceUntilIdle()
 
-        assertEquals(SyncProcessState.InProgress.Determinate(0.5f), viewModel.stateFlow().value.initDiarySyncProcessState)
+        assertEquals(
+            expectedState,
+            viewModel.awaitState { it.initDiarySyncProcessState == expectedState }
+                .initDiarySyncProcessState
+        )
     }
 
     @Test
