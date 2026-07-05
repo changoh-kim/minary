@@ -1,0 +1,99 @@
+name: Firebase Emulator Integration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firebase-emulator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  firebase-emulator-integration:
+    name: Firebase emulator Android integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-37"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: firebase-server/functions/package-lock.json
+
+      - name: Install function dependencies
+        run: npm --prefix firebase-server/functions ci
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Lint functions
+        run: npm --prefix firebase-server/functions run lint
+
+      - name: Build functions
+        run: npm --prefix firebase-server/functions run build
+
+      - name: Start Firebase Emulator Suite
+        working-directory: firebase-server
+        run: |
+          firebase emulators:start --only auth,firestore,functions,storage,pubsub --project minary-2c818 > "$GITHUB_WORKSPACE/firebase-emulator.log" 2>&1 &
+          echo "$!" > "$GITHUB_WORKSPACE/firebase-emulator.pid"
+
+      - name: Wait for Firebase emulators
+        run: |
+          for port in 9099 8080 5001 9199 8085; do
+            timeout 180 bash -c "until echo > /dev/tcp/127.0.0.1/${port}; do sleep 2; done" 2>/dev/null
+          done
+
+      - name: Run Firebase integration tests on AVD
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: |
+            set -euo pipefail
+            ./gradlew :data:connectedDebugAndroidTest \
+              -Pandroid.testInstrumentationRunnerArguments.class=kr.co.data.firebase.FirebaseEmulatorIntegrationSmokeTest,kr.co.data.feature.diary.sync.FirestoreDiarySyncManagerEmulatorTest,kr.co.data.feature.profile.sync.FirestoreUserProfileSyncManagerEmulatorTest,kr.co.data.feature.setting.sync.FirestoreUserSettingsSyncManagerEmulatorTest \
+              -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorEnabled=true \
+              -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorHost=10.0.2.2
+
+      - name: Stop Firebase Emulator Suite
+        if: always()
+        run: |
+          if [ -f firebase-emulator.pid ]; then
+            kill "$(cat firebase-emulator.pid)" || true
+          fi
+
+      - name: Upload Firebase emulator reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firebase-emulator-reports
+          path: |
+            firebase-emulator.log
+            data/build/reports/androidTests/
+            data/build/outputs/androidTest-results/

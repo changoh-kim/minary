@@ -1,0 +1,273 @@
+name: Android Fast Checks
+
+on:
+  pull_request:
+    paths:
+      - "app/**"
+      - "presentation/**"
+      - "domain/**"
+      - "data/**"
+      - "core/**"
+      - "build-logic/**"
+      - "gradle/**"
+      - "firebase-server/**"
+      - ".github/workflows/**"
+      - "**/AGENTS.md"
+      - "**/TESTING.md"
+      - "settings.gradle.kts"
+      - "build.gradle.kts"
+      - "gradlew"
+      - "gradlew.bat"
+  push:
+    branches:
+      - develop
+      - master
+    paths:
+      - "app/**"
+      - "presentation/**"
+      - "domain/**"
+      - "data/**"
+      - "core/**"
+      - "build-logic/**"
+      - "gradle/**"
+      - "firebase-server/**"
+      - ".github/workflows/**"
+      - "**/AGENTS.md"
+      - "**/TESTING.md"
+      - "settings.gradle.kts"
+      - "build.gradle.kts"
+      - "gradlew"
+      - "gradlew.bat"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-fast-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-logic-check:
+    name: Build logic check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Check build logic
+        run: ./gradlew -p build-logic check
+
+  android-unit-and-compile:
+    name: Android unit tests and androidTest compile
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-37"
+
+      - name: Create CI Android local config
+        run: |
+          cat > local.properties <<'EOF'
+          GEMINI_API_KEY=
+          EOF
+          cat > app/google-services.json <<'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "minary-ci",
+              "storage_bucket": "minary-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+                  "android_client_info": {
+                    "package_name": "kr.co.minary"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "ci-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+
+      - name: Run JVM unit tests
+        run: |
+          ./gradlew :core:common:test :core:di:test :domain:test
+          ./gradlew :core:database:testDebugUnitTest :core:datastore:testDebugUnitTest :core:firebase:testDebugUnitTest :core:storage:testDebugUnitTest :core:ui:common:testDebugUnitTest :core:ui:design:testDebugUnitTest
+          ./gradlew :data:testDebugUnitTest :presentation:testDebugUnitTest :app:testDebugUnitTest
+
+      - name: Compile androidTest sources
+        run: |
+          ./gradlew :core:database:compileDebugAndroidTestKotlin :core:datastore:compileDebugAndroidTestKotlin :core:firebase:compileDebugAndroidTestKotlin :core:storage:compileDebugAndroidTestKotlin :core:ui:common:compileDebugAndroidTestKotlin :core:ui:design:compileDebugAndroidTestKotlin
+          ./gradlew :data:compileDebugAndroidTestKotlin :presentation:compileDebugAndroidTestKotlin :app:compileDebugAndroidTestKotlin
+
+      - name: Upload Android unit reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-fast-unit-reports
+          path: |
+            **/build/reports/tests/
+            **/build/test-results/
+            **/build/reports/androidTests/
+
+  app-assemble:
+    name: App assemble debug
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android platform
+        run: sdkmanager "platforms;android-37"
+
+      - name: Create CI Android local config
+        run: |
+          cat > local.properties <<'EOF'
+          GEMINI_API_KEY=
+          EOF
+          cat > app/google-services.json <<'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "minary-ci",
+              "storage_bucket": "minary-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+                  "android_client_info": {
+                    "package_name": "kr.co.minary"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "ci-api-key"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+
+      - name: Assemble debug app
+        run: ./gradlew :app:assembleDebug
+
+      - name: Upload app build reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-fast-app-reports
+          path: |
+            app/build/reports/
+            app/build/outputs/logs/
+
+  firebase-server-check:
+    name: Firebase server lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: firebase-server/functions/package-lock.json
+
+      - name: Install function dependencies
+        run: npm --prefix firebase-server/functions ci
+
+      - name: Lint functions
+        run: npm --prefix firebase-server/functions run lint
+
+      - name: Build functions
+        run: npm --prefix firebase-server/functions run build
+
+  boundary-checks:
+    name: Architecture and logging boundary checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ripgrep
+        run: sudo apt-get update && sudo apt-get install -y ripgrep
+
+      - name: Check Android architecture and logging boundaries
+        run: |
+          ! rg "kr\\.co\\.data|com\\.google\\.firebase|kr\\.co\\.minary" presentation/src/main/java
+          ! rg "android\\.util\\.Log|\\bLog\\.|printStackTrace\\(|println\\(" app/src/main/java data/src/main/java presentation/src/main/java domain/src/main/java core/*/src/main/java -g "*.kt"
+          ! rg "Timber\\." data/src/main/java presentation/src/main/java domain/src/main/java core/*/src/main/java -g "*.kt"
+
+      - name: Check firebase-server secret and debug logging boundaries
+        run: |
+          ! rg "AIza[0-9A-Za-z_-]{10,}|credential|private_key|client_email" firebase-server/functions firebase-server/*.json firebase-server/*.rules -g "!**/node_modules/**"
+          ! rg "console\\.log|logger\\.log|printStackTrace|println" firebase-server/functions/src -g "*.ts"
