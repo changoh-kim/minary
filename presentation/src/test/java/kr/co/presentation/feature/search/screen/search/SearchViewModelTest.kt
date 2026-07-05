@@ -8,7 +8,6 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.advanceUntilIdle
 import kr.co.domain.feature.diary.model.Diary
 import kr.co.domain.feature.diary.usecase.GetPagedDiariesUseCase
 import kr.co.domain.feature.search.usecase.AddRecentSearchUseCase
@@ -85,9 +84,9 @@ class SearchViewModelTest : BaseViewModelTest() {
 
         viewModel.sideEffectFlow().test {
             viewModel.handleAction(SearchAction.DiaryClicked(PresentationFixtures.searchDiaryUiModel()))
-            advanceUntilIdle()
 
             assertEquals(SearchSideEffect.DiaryClicked(PresentationFixtures.DATE), awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
