@@ -89,12 +89,16 @@ class SettingsViewModelTest : BaseViewModelTest() {
         stubStreams()
         coEvery { updateAppTheme(AppTheme.DARK) } returns Ok(Unit)
         val viewModel = createViewModel()
-        advanceUntilIdle()
+        viewModel.stateFlow().test {
+            awaitItem()
+            advanceUntilIdle()
 
-        viewModel.handleAction(SettingsAction.ThemeChanged(AppTheme.DARK))
-        advanceUntilIdle()
+            viewModel.handleAction(SettingsAction.ThemeChanged(AppTheme.DARK))
+            advanceUntilIdle()
 
-        coVerify { updateAppTheme(AppTheme.DARK) }
+            coVerify(timeout = 1_000) { updateAppTheme(AppTheme.DARK) }
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
