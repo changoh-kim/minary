@@ -69,6 +69,7 @@
 - 같은 원칙 안에서 화면, UseCase, Mapper, ViewModel이 단순 추가되는 경우 문서 갱신은 필수가 아니다.
 - Firestore/Storage 경로, sync 정책, App Check, budget 방어 로직 변경 시 Android와 `firebase-server`를 함께 검증한다.
 - 로컬 커밋은 `.gitmessage.txt` 템플릿을 따르고, GitHub Issue/PR 작성 시 `.github/` 하위 템플릿을 우선 참조한다.
+- 테스트 운영 기준은 루트 `TESTING.md`를 우선 참고하고, 모듈별 세부 기준은 각 모듈의 `TESTING.md`를 따른다.
 
 ## 권장 검증
 - 문서 배치 확인: `find . -name AGENTS.md -print | sort`
