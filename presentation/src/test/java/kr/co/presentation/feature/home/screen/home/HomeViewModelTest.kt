@@ -64,12 +64,12 @@ class HomeViewModelTest : BaseViewModelTest() {
             awaitItem()
             advanceUntilIdle()
 
-            coVerify { initUserStorage(PresentationFixtures.UID) }
-            coVerify { startUserDataSync(PresentationFixtures.UID) }
-            coVerify { startRealtimeUserProfileSync() }
-            coVerify { startRealtimeUserSettingsSync() }
-            coVerify { startDiarySync() }
-            coVerify { startRealtimeDiarySync() }
+            coVerify(timeout = 1_000) { initUserStorage(PresentationFixtures.UID) }
+            coVerify(timeout = 1_000) { startUserDataSync(PresentationFixtures.UID) }
+            coVerify(timeout = 1_000) { startRealtimeUserProfileSync() }
+            coVerify(timeout = 1_000) { startRealtimeUserSettingsSync() }
+            coVerify(timeout = 1_000) { startDiarySync() }
+            coVerify(timeout = 1_000) { startRealtimeDiarySync() }
             cancelAndIgnoreRemainingEvents()
         }
     }
