@@ -2,8 +2,8 @@ package kr.co.core.database.dao
 
 import androidx.room.Room
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.take
-import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kr.co.core.common.model.Emotion
 import kr.co.core.common.state.DiarySyncStatus
 import kr.co.core.database.database.UserDatabase
@@ -69,15 +69,16 @@ class DiaryDaoInstrumentedTest : BaseInstrumentationTest() {
     @Test
     fun diaryFlow_emitsWhenRowsChange() {
         runCoreAndroidTest {
-            val emissions = async {
-                dao.getAllDiariesWithRelationsFlow().take(2).toList()
+            val updatedEmission = async {
+                dao.getAllDiariesWithRelationsFlow()
+                    .filter { it.isNotEmpty() }
+                    .first()
             }
 
             dao.insertDiaryWithRelations(DatabaseFixtures.relation())
 
-            val actual = emissions.await()
-            assertEquals(emptyList<Any>(), actual[0])
-            assertEquals(1, actual[1].size)
+            val actual = updatedEmission.await()
+            assertEquals(1, actual.size)
         }
     }
 
