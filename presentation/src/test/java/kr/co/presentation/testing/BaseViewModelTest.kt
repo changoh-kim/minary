@@ -7,6 +7,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -32,7 +33,9 @@ abstract class BaseViewModelTest {
 
     @AfterEach
     fun tearDownCoroutine() {
-        cancelTrackedContainers()
+        runBlocking {
+            cancelTrackedContainersAndJoin()
+        }
         Dispatchers.resetMain()
         clearAllMocks()
     }
@@ -42,7 +45,7 @@ abstract class BaseViewModelTest {
             try {
                 block()
             } finally {
-                cancelTrackedContainers()
+                cancelTrackedContainersAndJoin()
                 advanceUntilIdle()
             }
         }
@@ -92,9 +95,11 @@ abstract class BaseViewModelTest {
             ?: error("Expected ${SIDE_EFFECT::class.simpleName}, but was ${item::class.simpleName}.")
     }
 
-    private fun cancelTrackedContainers() {
-        trackedContainers.forEach { it.container.cancel() }
+    private suspend fun cancelTrackedContainersAndJoin() {
+        val containers = trackedContainers.toList()
         trackedContainers.clear()
+        containers.forEach { it.container.cancel() }
+        containers.forEach { it.container.joinIntents() }
     }
 
     private companion object {
