@@ -35,6 +35,12 @@ jobs:
       - name: Install Android platform
         run: sdkmanager "platforms;android-36"
 
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -54,6 +60,12 @@ jobs:
       - name: Build functions
         run: npm --prefix firebase-server/functions run build
 
+      - name: Set up JDK for Firebase emulators
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: Start Firebase Emulator Suite
         working-directory: firebase-server
         run: |
@@ -63,8 +75,18 @@ jobs:
       - name: Wait for Firebase emulators
         run: |
           for port in 9099 8080 5001 9199 8085; do
-            timeout 180 bash -c "until echo > /dev/tcp/127.0.0.1/${port}; do sleep 2; done" 2>/dev/null
+            echo "Waiting for Firebase emulator port ${port}"
+            timeout 180 bash -c "until echo > /dev/tcp/127.0.0.1/${port}; do sleep 2; done" 2>/dev/null || {
+              tail -200 "$GITHUB_WORKSPACE/firebase-emulator.log"
+              exit 1
+            }
           done
+
+      - name: Restore JDK for Android Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
 
       - name: Run Firebase integration tests on AVD
         uses: reactivecircus/android-emulator-runner@v2
@@ -75,7 +97,7 @@ jobs:
           profile: pixel_6
           disable-animations: true
           script: |
-            set -euo pipefail
+            set -eu
             ./gradlew :data:connectedDebugAndroidTest \
               -Pandroid.testInstrumentationRunnerArguments.class=kr.co.data.firebase.FirebaseEmulatorIntegrationSmokeTest,kr.co.data.feature.diary.sync.FirestoreDiarySyncManagerEmulatorTest,kr.co.data.feature.profile.sync.FirestoreUserProfileSyncManagerEmulatorTest,kr.co.data.feature.setting.sync.FirestoreUserSettingsSyncManagerEmulatorTest \
               -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorEnabled=true \
