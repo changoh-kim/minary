@@ -11,6 +11,7 @@ on:
       - "build-logic/**"
       - "gradle/**"
       - "firebase-server/**"
+      - "scripts/**"
       - ".github/workflows/**"
       - "**/AGENTS.md"
       - "**/TESTING.md"
@@ -31,6 +32,7 @@ on:
       - "build-logic/**"
       - "gradle/**"
       - "firebase-server/**"
+      - "scripts/**"
       - ".github/workflows/**"
       - "**/AGENTS.md"
       - "**/TESTING.md"
@@ -264,8 +266,8 @@ jobs:
       - name: Check Android architecture and logging boundaries
         run: |
           ! rg "kr\\.co\\.data|com\\.google\\.firebase|kr\\.co\\.minary" presentation/src/main/java
-          ! rg "android\\.util\\.Log|\\bLog\\.|printStackTrace\\(|println\\(" app/src/main/java data/src/main/java presentation/src/main/java domain/src/main/java core/*/src/main/java -g "*.kt"
-          ! rg "Timber\\." data/src/main/java presentation/src/main/java domain/src/main/java core/*/src/main/java -g "*.kt"
+          ! rg "android\\.util\\.Log|\\bLog\\.|printStackTrace\\(|println\\(" app/src/main/java data/src/main/java presentation/src/main/java domain/src/main/java core/common/src/main/java core/database/src/main/java core/datastore/src/main/java core/di/src/main/java core/firebase/src/main/java core/storage/src/main/java core/ui/common/src/main/java core/ui/design/src/main/java -g "*.kt"
+          ! rg "Timber\\." data/src/main/java presentation/src/main/java domain/src/main/java core/common/src/main/java core/database/src/main/java core/datastore/src/main/java core/di/src/main/java core/firebase/src/main/java core/storage/src/main/java core/ui/common/src/main/java core/ui/design/src/main/java -g "*.kt"
 
       - name: Check firebase-server secret and debug logging boundaries
         run: |
