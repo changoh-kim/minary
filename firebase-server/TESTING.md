@@ -49,8 +49,7 @@ npm --prefix functions run build
 Android `:data` Firebase Emulator integration test와 함께 사용할 때는 전체 관련 emulator를 실행한다.
 
 ```bash
-cd firebase-server
-firebase emulators:start --only auth,firestore,functions,storage,pubsub --project minary-2c818
+./scripts/ci/start-firebase-emulator-suite-local.sh
 ```
 
 `functions/package.json`의 `serve` 스크립트는 현재 functions emulator만 실행한다.
@@ -70,6 +69,12 @@ Android Studio AVD에서는 Android가 host machine의 emulator에 접근할 때
 
 ```bash
 ./scripts/ci/run-firebase-emulator-local.sh
+```
+
+Emulator Suite 시작, functions lint/build, Android integration test, emulator 종료까지 한 번에 실행하려면 아래 script를 사용한다.
+
+```bash
+./scripts/ci/run-firebase-emulator-integration-local.sh
 ```
 
 실제 디바이스에서는 host machine port를 `adb reverse`로 연결하고 host를 `127.0.0.1`로 고정한다.

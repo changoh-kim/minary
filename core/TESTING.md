@@ -76,6 +76,14 @@ Firebase emulator smoke를 실제 실행하려면 `firebase-server`에서 Emulat
 
 GitHub Actions의 `Android Instrumented Tests` 실패를 로컬에서 재현할 때는 Android Studio AVD 또는 실제 디바이스를 먼저 실행한 뒤 repository root에서 아래 script를 실행한다.
 
+GitHub Actions의 `Android Fast Checks`와 같은 빠른 JVM/compile/build 검증은 아래 script로 실행한다.
+
+```bash
+./scripts/ci/run-android-fast-local.sh
+```
+
+`Android Instrumented Tests`는 Android Studio AVD 또는 실제 디바이스를 먼저 실행한 뒤 repository root에서 아래 script를 실행한다.
+
 ```bash
 ./scripts/ci/run-android-instrumented-local.sh
 ```
