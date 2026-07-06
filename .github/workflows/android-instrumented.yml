@@ -12,9 +12,41 @@ concurrency:
 
 jobs:
   android-instrumented:
-    name: Android emulator connected tests
+    name: ${{ matrix.test-name }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - test-name: core-database
+            module-path: core/database
+            gradle-command: ./gradlew :core:database:connectedDebugAndroidTest
+          - test-name: core-datastore
+            module-path: core/datastore
+            gradle-command: ./gradlew :core:datastore:connectedDebugAndroidTest
+          - test-name: core-firebase
+            module-path: core/firebase
+            gradle-command: ./gradlew :core:firebase:connectedDebugAndroidTest
+          - test-name: core-storage
+            module-path: core/storage
+            gradle-command: ./gradlew :core:storage:connectedDebugAndroidTest
+          - test-name: core-ui-common
+            module-path: core/ui/common
+            gradle-command: ./gradlew :core:ui:common:connectedDebugAndroidTest
+          - test-name: core-ui-design
+            module-path: core/ui/design
+            gradle-command: ./gradlew :core:ui:design:connectedDebugAndroidTest
+          - test-name: data
+            module-path: data
+            gradle-command: ./gradlew :data:connectedDebugAndroidTest
+          - test-name: presentation
+            module-path: presentation
+            gradle-command: ./gradlew :presentation:connectedDebugAndroidTest
+          - test-name: app-large
+            module-path: app
+            gradle-command: ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.annotation=androidx.test.filters.LargeTest
 
     steps:
       - name: Checkout
@@ -88,16 +120,13 @@ jobs:
           disable-animations: true
           script: |
             set -eu
-            ./gradlew :core:database:connectedDebugAndroidTest :core:datastore:connectedDebugAndroidTest :core:firebase:connectedDebugAndroidTest :core:storage:connectedDebugAndroidTest :core:ui:common:connectedDebugAndroidTest :core:ui:design:connectedDebugAndroidTest
-            ./gradlew :data:connectedDebugAndroidTest
-            ./gradlew :presentation:connectedDebugAndroidTest
-            ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.annotation=androidx.test.filters.LargeTest
+            ${{ matrix.gradle-command }}
 
       - name: Upload connected test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: android-instrumented-reports
+          name: android-instrumented-${{ matrix.test-name }}-reports
           path: |
-            **/build/reports/androidTests/
-            **/build/outputs/androidTest-results/
+            ${{ matrix.module-path }}/build/reports/androidTests/
+            ${{ matrix.module-path }}/build/outputs/androidTest-results/

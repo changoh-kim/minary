@@ -50,7 +50,7 @@ Android `:data` Firebase Emulator integration test와 함께 사용할 때는 �
 
 ```bash
 cd firebase-server
-firebase emulators:start --only auth,firestore,functions,storage,pubsub
+firebase emulators:start --only auth,firestore,functions,storage,pubsub --project minary-2c818
 ```
 
 `functions/package.json`의 `serve` 스크립트는 현재 functions emulator만 실행한다.
@@ -69,9 +69,7 @@ Android Studio AVD에서는 Android가 host machine의 emulator에 접근할 때
 아래 Gradle 명령은 repository root에서 실행한다.
 
 ```bash
-./gradlew :data:connectedDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=kr.co.data.firebase.FirebaseEmulatorIntegrationSmokeTest,kr.co.data.feature.diary.sync.FirestoreDiarySyncManagerEmulatorTest,kr.co.data.feature.profile.sync.FirestoreUserProfileSyncManagerEmulatorTest,kr.co.data.feature.setting.sync.FirestoreUserSettingsSyncManagerEmulatorTest \
-  -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorEnabled=true
+./scripts/ci/run-firebase-emulator-local.sh
 ```
 
 실제 디바이스에서는 host machine port를 `adb reverse`로 연결하고 host를 `127.0.0.1`로 고정한다.
@@ -81,15 +79,21 @@ adb reverse tcp:9099 tcp:9099
 adb reverse tcp:8080 tcp:8080
 adb reverse tcp:5001 tcp:5001
 adb reverse tcp:9199 tcp:9199
-./gradlew :data:connectedDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=kr.co.data.firebase.FirebaseEmulatorIntegrationSmokeTest,kr.co.data.feature.diary.sync.FirestoreDiarySyncManagerEmulatorTest,kr.co.data.feature.profile.sync.FirestoreUserProfileSyncManagerEmulatorTest,kr.co.data.feature.setting.sync.FirestoreUserSettingsSyncManagerEmulatorTest \
-  -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorHost=127.0.0.1 \
-  -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorEnabled=true
+FIREBASE_EMULATOR_HOST=127.0.0.1 ./scripts/ci/run-firebase-emulator-local.sh
 ```
 
 위 명령은 Android `:data` 테스트가 실제 Firebase SDK를 통해 server rules/functions 계약을 검증하는 경로다.
 `firebaseEmulatorEnabled=true`를 넘기지 않으면 Android emulator integration test는 skip되어 일반 connected
 테스트 루프를 방해하지 않는다.
+
+script가 실제로 실행하는 Gradle 명령은 아래와 같다.
+
+```bash
+./gradlew :data:connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=kr.co.data.firebase.FirebaseEmulatorIntegrationSmokeTest,kr.co.data.feature.diary.sync.FirestoreDiarySyncManagerEmulatorTest,kr.co.data.feature.profile.sync.FirestoreUserProfileSyncManagerEmulatorTest,kr.co.data.feature.setting.sync.FirestoreUserSettingsSyncManagerEmulatorTest \
+  -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorEnabled=true \
+  -Pandroid.testInstrumentationRunnerArguments.firebaseEmulatorHost=10.0.2.2
+```
 
 ## Rules 검증 기준
 
@@ -197,7 +201,7 @@ Functions 변경:
 cd firebase-server
 npm --prefix functions run lint
 npm --prefix functions run build
-firebase emulators:start --only auth,firestore,functions,storage,pubsub
+firebase emulators:start --only auth,firestore,functions,storage,pubsub --project minary-2c818
 ```
 
 경로 계약 변경:

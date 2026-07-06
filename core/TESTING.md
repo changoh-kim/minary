@@ -71,3 +71,20 @@ core/
 ```
 
 Firebase emulator smoke를 실제 실행하려면 `firebase-server`에서 Emulator Suite를 먼저 실행한다. Android emulator에서는 host `10.0.2.2`와 `firebase-server/firebase.json`의 포트를 사용한다.
+
+## Local CI Reproduction
+
+GitHub Actions의 `Android Instrumented Tests` 실패를 로컬에서 재현할 때는 Android Studio AVD 또는 실제 디바이스를 먼저 실행한 뒤 repository root에서 아래 script를 실행한다.
+
+```bash
+./scripts/ci/run-android-instrumented-local.sh
+```
+
+특정 실패 테스트만 빠르게 확인할 때는 class filter를 사용한다.
+
+```bash
+./gradlew :core:ui:design:connectedDebugAndroidTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=kr.co.core.ui.design.theme.MinaryThemeInstrumentedTest
+```
+
+AVD는 GitHub Actions의 Android emulator와 가장 가까운 재현 환경이다. 실제 디바이스는 제조사/OS 설정 차이가 있으므로, CI 실패 재현은 가능하면 AVD에서 먼저 확인한다.

@@ -16,25 +16,27 @@ class MinaryThemeInstrumentedTest {
     val composeRule = createComposeRule()
 
     @Test
-    fun rendersContentWithLightAndDarkTheme() {
-        composeRule.setContent {
-            MinaryTheme(appTheme = AppTheme.LIGHT) {
-                Text(
-                    text = MaterialTheme.colorScheme.primary.toString(),
-                    modifier = Modifier.testTag("theme-content-test"),
-                )
-            }
-        }
-        composeRule.onNodeWithTag("theme-content-test").assertExists()
+    fun rendersContentWithLightTheme() {
+        renderTheme(AppTheme.LIGHT)
 
+        composeRule.onNodeWithTag("theme-content-test").assertExists()
+    }
+
+    @Test
+    fun rendersContentWithDarkTheme() {
+        renderTheme(AppTheme.DARK)
+
+        composeRule.onNodeWithTag("theme-content-test").assertExists()
+    }
+
+    private fun renderTheme(appTheme: AppTheme) {
         composeRule.setContent {
-            MinaryTheme(appTheme = AppTheme.DARK) {
+            MinaryTheme(appTheme = appTheme) {
                 Text(
                     text = MaterialTheme.colorScheme.primary.toString(),
                     modifier = Modifier.testTag("theme-content-test"),
                 )
             }
         }
-        composeRule.onNodeWithTag("theme-content-test").assertExists()
     }
 }
