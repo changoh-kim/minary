@@ -16,7 +16,7 @@ import javax.inject.Singleton
 interface MinaryDataModule {
 
     companion object {
-        const val GEMINI_MODEL_NAME = "gemini-2.5-flash-lite"
+        const val GEMINI_MODEL_NAME = "gemini-3.1-flash-lite"
 
         @Provides
         @Singleton
