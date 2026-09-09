@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1920" viewBox="40 0 1920 1920" role="img" aria-labelledby="title desc">
+  <title id="title">Minary 프로젝트 데이터 흐름</title>
+  <desc id="desc">사용자 요청이 Presentation과 Domain을 거쳐 Data로 전달되고, Data 내부의 사용자별 로컬 저장소와 원격 동기화 또는 기능별 외부 서비스로 분기되는 주요 데이터 흐름.</desc>
+
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow-request" markerWidth="6" markerHeight="6" refX="5.2" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 6 3 L 0 6 z" fill="#475569"/>
+    </marker>
+    <marker id="arrow-return" markerWidth="6" markerHeight="6" refX="5.2" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 6 3 L 0 6 z" fill="#15803d"/>
+    </marker>
+    <marker id="arrow-return-start" markerWidth="6" markerHeight="6" refX="0.8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 6 0 L 0 3 L 6 6 z" fill="#15803d"/>
+    </marker>
+    <marker id="arrow-sync" markerWidth="6" markerHeight="6" refX="5.2" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 6 3 L 0 6 z" fill="#b45309"/>
+    </marker>
+    <marker id="arrow-sync-start" markerWidth="6" markerHeight="6" refX="0.8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 6 0 L 0 3 L 6 6 z" fill="#b45309"/>
+    </marker>
+    <marker id="arrow-external" markerWidth="6" markerHeight="6" refX="5.2" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 0 0 L 6 3 L 0 6 z" fill="#7c3aed"/>
+    </marker>
+    <marker id="arrow-external-start" markerWidth="6" markerHeight="6" refX="0.8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M 6 0 L 0 3 L 6 6 z" fill="#7c3aed"/>
+    </marker>
+    <style>
+      .cluster { stroke-width: 2; }
+      .cluster-title {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 29px;
+        font-weight: 700;
+        fill: #0f172a;
+      }
+      .cluster-subtitle {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 19px;
+        font-weight: 500;
+        fill: #64748b;
+      }
+      .subcluster-title {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        fill: #0f172a;
+      }
+      .node {
+        fill: #ffffff;
+        stroke-width: 2.5;
+        filter: url(#shadow);
+      }
+      .storage-node {
+        fill: #f0fdf4;
+        stroke: #16a34a;
+        stroke-width: 2.5;
+        filter: url(#shadow);
+      }
+      .node-title {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 24px;
+        font-weight: 650;
+        fill: #0f172a;
+        text-anchor: middle;
+      }
+      .node-detail {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 20px;
+        font-weight: 500;
+        fill: #475569;
+        text-anchor: middle;
+      }
+      .storage-title {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 21px;
+        font-weight: 650;
+        fill: #0f172a;
+        text-anchor: middle;
+      }
+      .storage-detail {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 18px;
+        font-weight: 500;
+        fill: #475569;
+        text-anchor: middle;
+      }
+      .edge-request {
+        fill: none;
+        stroke: #475569;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        marker-end: url(#arrow-request);
+      }
+      .edge-return {
+        fill: none;
+        stroke: #15803d;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        marker-end: url(#arrow-return);
+      }
+      .edge-sync {
+        fill: none;
+        stroke: #b45309;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        marker-end: url(#arrow-sync);
+      }
+      .edge-sync-both {
+        fill: none;
+        stroke: #b45309;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        marker-start: url(#arrow-sync-start);
+        marker-end: url(#arrow-sync);
+      }
+      .edge-sync-line {
+        fill: none;
+        stroke: #b45309;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .edge-external-both {
+        fill: none;
+        stroke: #7c3aed;
+        stroke-width: 3;
+        stroke-dasharray: 9 8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        marker-start: url(#arrow-external-start);
+        marker-end: url(#arrow-external);
+      }
+      .edge-external-line {
+        fill: none;
+        stroke: #7c3aed;
+        stroke-width: 3;
+        stroke-dasharray: 9 8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .edge-local-both {
+        fill: none;
+        stroke: #15803d;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        marker-start: url(#arrow-return-start);
+        marker-end: url(#arrow-return);
+      }
+      .edge-label-bg {
+        fill: #ffffff;
+        stroke: #e2e8f0;
+        stroke-width: 1;
+      }
+      .edge-label {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 18px;
+        font-weight: 650;
+        text-anchor: middle;
+      }
+      .legend-label {
+        font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        fill: #334155;
+      }
+    </style>
+  </defs>
+
+  <rect x="40" width="1920" height="1920" fill="#ffffff"/>
+
+  <!-- Left vertical application flow -->
+  <rect class="cluster" x="100" y="170" width="900" height="340" rx="24" fill="#eff6ff" stroke="#93c5fd"/>
+  <text class="cluster-title" x="130" y="212">Presentation</text>
+  <rect class="cluster" x="100" y="550" width="900" height="350" rx="24" fill="#f5f3ff" stroke="#c4b5fd"/>
+  <text class="cluster-title" x="130" y="592">Domain</text>
+
+  <!-- External integrations aligned with the user node top -->
+  <rect class="cluster" x="1080" y="40" width="820" height="860" rx="24" fill="#faf5ff" stroke="#d8b4fe"/>
+  <text class="cluster-title" x="1110" y="85">기능별 외부 연동</text>
+  <text class="cluster-subtitle" x="1110" y="113">Data에서 필요한 서비스로 요청과 응답을 분기</text>
+  <rect class="cluster" x="1140" y="380" width="700" height="470" rx="22" fill="#fdf4ff" stroke="#c084fc"/>
+  <text class="subcluster-title" x="1170" y="420">Firebase</text>
+
+  <!-- Data contains local storage and remote synchronization -->
+  <rect class="cluster" x="100" y="940" width="1800" height="850" rx="28" fill="#ecfeff" stroke="#67e8f9"/>
+  <text class="cluster-title" x="130" y="985">Data</text>
+  <rect class="cluster" x="110" y="1190" width="880" height="520" rx="24" fill="#f0fdf4" stroke="#86efac"/>
+  <text class="cluster-title" x="130" y="1235">사용자별 Local SSOT</text>
+  <text class="cluster-subtitle" x="130" y="1263">데이터 특성에 따라 분리된 로컬 저장소</text>
+  <rect class="cluster" x="1090" y="970" width="800" height="740" rx="24" fill="#fff7ed" stroke="#fdba74"/>
+  <text class="cluster-title" x="1120" y="1015">원격 동기화</text>
+  <text class="cluster-subtitle" x="1120" y="1043">작업 예약 · 변경 수신</text>
+
+  <!-- Vertical request and return flow -->
+  <path class="edge-request" d="M 550 130 L 550 240"/>
+  <path class="edge-request" d="M 510 330 L 510 380"/>
+  <path class="edge-return" d="M 590 380 L 590 330"/>
+  <path class="edge-request" d="M 510 470 L 510 620"/>
+  <path class="edge-return" d="M 590 620 L 590 470"/>
+  <path class="edge-request" d="M 510 710 L 510 760"/>
+  <path class="edge-return" d="M 590 760 L 590 710"/>
+  <path class="edge-request" d="M 510 850 L 510 1020"/>
+  <path class="edge-return" d="M 590 1020 L 590 850"/>
+
+  <!-- Data implementation to Local SSOT -->
+  <path class="edge-request" d="M 510 1110 L 510 1300"/>
+  <path class="edge-return" d="M 590 1300 L 590 1110"/>
+
+  <!-- Data implementation to WorkManager -->
+  <path class="edge-sync" d="M 760 1085 L 1490 1085 L 1490 1125"/>
+
+  <!-- Data implementation to external services: shared orthogonal connector and service branches -->
+  <path class="edge-external-line" d="M 1040 185 L 1040 1045 L 760 1045" marker-end="url(#arrow-external)"/>
+  <path class="edge-external-line" d="M 1040 185 L 1280 185" marker-end="url(#arrow-external)"/>
+  <path class="edge-external-line" d="M 1040 305 L 1280 305" marker-end="url(#arrow-external)"/>
+  <path class="edge-external-line" d="M 1040 485 L 1160 485" marker-end="url(#arrow-external)"/>
+  <path class="edge-external-line" d="M 1040 605 L 1160 605" marker-end="url(#arrow-external)"/>
+  <path class="edge-external-line" d="M 1040 725 L 1160 725" marker-end="url(#arrow-external)"/>
+
+  <!-- Local storage relations -->
+  <path class="edge-local-both" d="M 390 1394 L 218 1480"/>
+  <path class="edge-local-both" d="M 490 1394 L 438 1480"/>
+  <path class="edge-local-both" d="M 610 1394 L 658 1480"/>
+  <path class="edge-local-both" d="M 710 1394 L 878 1480"/>
+
+  <!-- Synchronization relations -->
+  <path class="edge-sync" d="M 1490 1215 L 1490 1300"/>
+  <path class="edge-sync" d="M 1490 1475 L 1490 1390"/>
+  <path class="edge-external-line" d="M 1700 1345 L 1870 1345 L 1870 500" marker-start="url(#arrow-external-start)"/>
+  <path class="edge-external-line" d="M 1870 500 L 1830 500" marker-end="url(#arrow-external)"/>
+  <path class="edge-external-line" d="M 1870 605 L 1830 605" marker-end="url(#arrow-external)"/>
+  <path class="edge-external-line" d="M 1830 465 L 1930 465 L 1930 1520 L 1700 1520" marker-end="url(#arrow-external)"/>
+  <path class="edge-sync" d="M 1280 1345 L 760 1345"/>
+
+  <!-- Nodes: user, Presentation, Domain, Data implementation -->
+  <rect class="node" x="340" y="40" width="420" height="90" rx="18" stroke="#64748b"/>
+  <text class="node-title" x="550" y="94">사용자</text>
+  <rect class="node" x="340" y="240" width="420" height="90" rx="16" stroke="#3b82f6"/>
+  <text class="node-title" x="550" y="277">Jetpack Compose UI</text>
+  <text class="node-detail" x="550" y="307">화면 렌더링</text>
+  <rect class="node" x="340" y="380" width="420" height="90" rx="16" stroke="#3b82f6"/>
+  <text class="node-title" x="550" y="417">Orbit MVI ViewModel</text>
+  <text class="node-detail" x="550" y="447">Action · State · SideEffect</text>
+  <rect class="node" x="340" y="620" width="420" height="90" rx="16" stroke="#8b5cf6"/>
+  <text class="node-title" x="550" y="674">UseCase</text>
+  <rect class="node" x="340" y="760" width="420" height="90" rx="16" stroke="#8b5cf6"/>
+  <text class="node-title" x="550" y="797">Repository / Service</text>
+  <text class="node-title" x="550" y="823">Interface</text>
+  <rect class="node" x="340" y="1020" width="420" height="90" rx="16" stroke="#0891b2"/>
+  <text class="node-title" x="550" y="1057">Repository / Service</text>
+  <text class="node-title" x="550" y="1083">Implementation</text>
+
+  <!-- Nodes: Local SSOT -->
+  <rect class="node" x="340" y="1300" width="420" height="90" rx="16" stroke="#16a34a"/>
+  <text class="node-title" x="550" y="1337">Local DataSource</text>
+  <text class="node-detail" x="550" y="1367">read · write · observe</text>
+  <rect class="storage-node" x="115" y="1480" width="205" height="180" rx="18"/>
+  <text class="storage-title" x="218" y="1525">Room</text>
+  <text class="storage-detail" x="218" y="1570">일기 · 검색</text>
+  <text class="storage-detail" x="218" y="1597">동기화 정보</text>
+  <rect class="storage-node" x="335" y="1480" width="205" height="180" rx="18"/>
+  <text class="storage-title" x="438" y="1525">Proto DataStore</text>
+  <text class="storage-detail" x="438" y="1584">프로필 · 설정</text>
+  <rect class="storage-node" x="555" y="1480" width="205" height="180" rx="18"/>
+  <text class="storage-title" x="658" y="1516">Preferences</text>
+  <text class="storage-title" x="658" y="1542">DataStore</text>
+  <text class="storage-detail" x="658" y="1592">동기화 · 앱 상태</text>
+  <rect class="storage-node" x="775" y="1480" width="205" height="180" rx="18"/>
+  <text class="storage-title" x="878" y="1525">Internal Files</text>
+  <text class="storage-detail" x="878" y="1584">프로필 이미지</text>
+
+  <!-- Nodes: external services -->
+  <rect class="node" x="1280" y="140" width="420" height="90" rx="18" stroke="#9333ea"/>
+  <text class="node-title" x="1490" y="177">Google Generative AI</text>
+  <text class="node-detail" x="1490" y="207">감정 분석</text>
+  <rect class="node" x="1280" y="260" width="420" height="90" rx="18" stroke="#9333ea"/>
+  <text class="node-title" x="1490" y="297">TrueTime / NTP</text>
+  <text class="node-detail" x="1490" y="327">기준 시각 조회</text>
+  <rect class="node" x="1160" y="440" width="300" height="90" rx="18" stroke="#9333ea"/>
+  <text class="node-title" x="1310" y="477">Authentication</text>
+  <text class="node-detail" x="1310" y="507">사용자 인증 · 식별</text>
+  <rect class="node" x="1160" y="560" width="300" height="90" rx="18" stroke="#9333ea"/>
+  <text class="node-title" x="1310" y="597">Cloud Functions</text>
+  <text class="node-detail" x="1310" y="627">계정 관련 원격 처리</text>
+  <rect class="node" x="1160" y="680" width="300" height="90" rx="18" stroke="#9333ea"/>
+  <text class="node-title" x="1310" y="717">Remote Config</text>
+  <text class="node-detail" x="1310" y="747">점검 상태 조회</text>
+  <rect class="node" x="1530" y="440" width="300" height="90" rx="18" stroke="#9333ea"/>
+  <text class="node-title" x="1680" y="477">Firestore</text>
+  <text class="node-detail" x="1680" y="507">일기 · 프로필 · 설정</text>
+  <rect class="node" x="1530" y="560" width="300" height="90" rx="18" stroke="#9333ea"/>
+  <text class="node-title" x="1680" y="597">Storage</text>
+  <text class="node-detail" x="1680" y="627">프로필 이미지</text>
+
+  <!-- Nodes: synchronization -->
+  <rect class="node" x="1280" y="1125" width="420" height="90" rx="16" stroke="#ea580c"/>
+  <text class="node-title" x="1490" y="1162">WorkManager</text>
+  <text class="node-detail" x="1490" y="1192">background trigger</text>
+  <rect class="node" x="1280" y="1300" width="420" height="90" rx="16" stroke="#ea580c"/>
+  <text class="node-title" x="1490" y="1337">Sync Managers</text>
+  <text class="node-detail" x="1490" y="1367">sync orchestration</text>
+  <rect class="node" x="1280" y="1475" width="420" height="90" rx="16" stroke="#ea580c"/>
+  <text class="node-title" x="1490" y="1512">Realtime Sync Managers</text>
+  <text class="node-detail" x="1490" y="1542">SnapshotListener 등록 · 변경 수신</text>
+
+  <!-- Relation labels -->
+  <rect class="edge-label-bg" x="390" y="338" width="90" height="27" rx="8"/>
+  <text class="edge-label" x="435" y="357" fill="#475569">action</text>
+  <rect class="edge-label-bg" x="620" y="338" width="80" height="27" rx="8"/>
+  <text class="edge-label" x="660" y="357" fill="#15803d">state</text>
+  <rect class="edge-label-bg" x="390" y="908" width="90" height="27" rx="8"/>
+  <text class="edge-label" x="435" y="927" fill="#475569">request</text>
+  <rect class="edge-label-bg" x="620" y="908" width="170" height="27" rx="8"/>
+  <text class="edge-label" x="705" y="927" fill="#15803d">AppResult / Flow</text>
+  <rect class="edge-label-bg" x="350" y="1145" width="130" height="27" rx="8"/>
+  <text class="edge-label" x="415" y="1164" fill="#475569">read / write</text>
+  <rect class="edge-label-bg" x="620" y="1145" width="170" height="27" rx="8"/>
+  <text class="edge-label" x="705" y="1164" fill="#15803d">Flow / local result</text>
+  <rect class="edge-label-bg" x="855" y="1002" width="150" height="27" rx="8"/>
+  <text class="edge-label" x="930" y="1021" fill="#7c3aed">request / result</text>
+  <rect class="edge-label-bg" x="1095" y="1048" width="100" height="27" rx="8"/>
+  <text class="edge-label" x="1145" y="1067" fill="#b45309">enqueue</text>
+  <rect class="edge-label-bg" x="1515" y="1244" width="120" height="27" rx="8"/>
+  <text class="edge-label" x="1575" y="1263" fill="#b45309">background</text>
+  <rect class="edge-label-bg" x="1500" y="1419" width="150" height="27" rx="8"/>
+  <text class="edge-label" x="1575" y="1438" fill="#b45309">remote change</text>
+  <rect class="edge-label-bg" x="1730" y="1298" width="110" height="27" rx="8"/>
+  <text class="edge-label" x="1785" y="1317" fill="#7c3aed">push / pull</text>
+  <rect class="edge-label-bg" x="1715" y="1478" width="150" height="27" rx="8"/>
+  <text class="edge-label" x="1790" y="1497" fill="#7c3aed">remote snapshot</text>
+  <rect class="edge-label-bg" x="1095" y="1298" width="120" height="27" rx="8"/>
+  <text class="edge-label" x="1155" y="1317" fill="#b45309">로컬 반영</text>
+
+  <!-- Legend -->
+  <line x1="270" y1="1870" x2="340" y2="1870" stroke="#475569" stroke-width="3" marker-end="url(#arrow-request)"/>
+  <text class="legend-label" x="355" y="1876">요청</text>
+  <line x1="690" y1="1870" x2="760" y2="1870" stroke="#15803d" stroke-width="3" marker-end="url(#arrow-return)"/>
+  <text class="legend-label" x="775" y="1876">로컬 결과 · state</text>
+  <line x1="1110" y1="1870" x2="1180" y2="1870" stroke="#b45309" stroke-width="3" marker-end="url(#arrow-sync)"/>
+  <text class="legend-label" x="1195" y="1876">원격 동기화</text>
+  <line x1="1530" y1="1870" x2="1600" y2="1870" stroke="#7c3aed" stroke-width="3" stroke-dasharray="9 8" marker-end="url(#arrow-external)"/>
+  <text class="legend-label" x="1615" y="1876">외부 서비스</text>
+</svg>
